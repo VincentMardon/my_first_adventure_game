@@ -89,14 +89,18 @@ python -m build
 
 ## Current status
 
-The project is currently in its initial skeleton milestone. It provides:
+The project has completed its application and scene foundations. It provides:
 
-- the initial `engine` and `game` package structure;
-- a minimal Pygame window and application entry point;
-- automated entry-point and package-structure tests;
-- Ruff, pytest, and package-build configuration.
+- a reusable `engine` and game-specific `game` package structure;
+- immutable window configuration;
+- a generic Pygame application loop with delta-time calculation;
+- a decoupled scene contract and scene manager;
+- explicit, testable scene transitions;
+- a minimal title scene integrated with the application;
+- automated quality checks and package builds.
 
-Gameplay systems have not been implemented yet.
+Input handling, world simulation, collisions, and gameplay systems have not been
+implemented yet.
 
 ## License
 
