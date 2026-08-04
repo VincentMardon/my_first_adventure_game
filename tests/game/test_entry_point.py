@@ -31,15 +31,15 @@ def test_main_runs_one_frame_and_shuts_down(monkeypatch) -> None:
     game_main.main()
 
     initialize_pygame.assert_called_once_with()
-    set_mode.assert_called_once_with(game_main.WINDOW_SIZE)
-    set_caption.assert_called_once_with(game_main.WINDOW_TITLE)
+    set_mode.assert_called_once_with(game_main.WINDOW_CONFIG.size)
+    set_caption.assert_called_once_with(game_main.WINDOW_CONFIG.title)
     screen.fill.assert_called_once_with(game_main.BACKGROUND_COLOR)
     flip_display.assert_called_once_with()
     clock.tick.assert_called_once_with(game_main.FRAMES_PER_SECOND)
     quit_pygame.assert_called_once_with()
 
 
-def test_main_shuts_down_pygame_when_startup_fails(monkeypatch):
+def test_main_shuts_down_pygame_when_startup_fails(monkeypatch) -> None:
     quit_pygame = Mock()
 
     monkeypatch.setattr(pygame, "init", Mock())

@@ -1,7 +1,8 @@
 import pygame
 
-WINDOW_SIZE = (1280, 720)
-WINDOW_TITLE = "My First Adventure Game"
+from my_first_adventure_game.engine.application import WindowConfig
+
+WINDOW_CONFIG = WindowConfig(title="My First Adventure Game", size=(1280, 720))
 BACKGROUND_COLOR = (24, 28, 36)
 FRAMES_PER_SECOND = 60
 
@@ -10,8 +11,8 @@ def main() -> None:
     pygame.init()
 
     try:
-        screen = pygame.display.set_mode(WINDOW_SIZE)
-        pygame.display.set_caption(WINDOW_TITLE)
+        screen = pygame.display.set_mode(WINDOW_CONFIG.size)
+        pygame.display.set_caption(WINDOW_CONFIG.title)
         clock = pygame.time.Clock()
         running = True
 
