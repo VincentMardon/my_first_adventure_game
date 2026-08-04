@@ -1,28 +1,18 @@
-import pygame
-
-from my_first_adventure_game.engine.application import WindowConfig
+from my_first_adventure_game.engine.application import Application, WindowConfig
+from my_first_adventure_game.engine.scenes import SceneManager
+from my_first_adventure_game.game.scenes import TitleScene
 
 WINDOW_CONFIG = WindowConfig(title="My First Adventure Game", size=(1280, 720))
-BACKGROUND_COLOR = (24, 28, 36)
 FRAMES_PER_SECOND = 60
 
 
 def main() -> None:
-    pygame.init()
+    initial_scene = TitleScene()
+    scene_manager = SceneManager(initial_scene)
+    application = Application(
+        window_config=WINDOW_CONFIG,
+        scene_manager=scene_manager,
+        frames_per_second=FRAMES_PER_SECOND,
+    )
 
-    try:
-        screen = pygame.display.set_mode(WINDOW_CONFIG.size)
-        pygame.display.set_caption(WINDOW_CONFIG.title)
-        clock = pygame.time.Clock()
-        running = True
-
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-
-            screen.fill(BACKGROUND_COLOR)
-            pygame.display.flip()
-            clock.tick(FRAMES_PER_SECOND)
-    finally:
-        pygame.quit()
+    application.run()

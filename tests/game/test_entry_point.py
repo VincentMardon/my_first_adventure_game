@@ -1,56 +1,28 @@
-from types import SimpleNamespace
 from unittest.mock import Mock
-
-import pygame
-import pytest
 
 from my_first_adventure_game.game import main as game_main
 
 
-def test_main_runs_one_frame_and_shuts_down(monkeypatch) -> None:
-    screen = Mock()
-    clock = Mock()
-    quit_event = SimpleNamespace(type=pygame.QUIT)
+def test_main_builds_and_runs_application(monkeypatch) -> None:
+    initial_scene = Mock()
+    scene_manager = Mock()
+    application = Mock()
 
-    initialize_pygame = Mock()
-    quit_pygame = Mock()
-    set_mode = Mock(return_value=screen)
-    set_caption = Mock()
-    get_events = Mock(return_value=[quit_event])
-    flip_display = Mock()
-    create_clock = Mock(return_value=clock)
+    create_title_scene = Mock(return_value=initial_scene)
+    create_scene_manager = Mock(return_value=scene_manager)
+    create_application = Mock(return_value=application)
 
-    monkeypatch.setattr(pygame, "init", initialize_pygame)
-    monkeypatch.setattr(pygame, "quit", quit_pygame)
-    monkeypatch.setattr(pygame.display, "set_mode", set_mode)
-    monkeypatch.setattr(pygame.display, "set_caption", set_caption)
-    monkeypatch.setattr(pygame.event, "get", get_events)
-    monkeypatch.setattr(pygame.display, "flip", flip_display)
-    monkeypatch.setattr(pygame.time, "Clock", create_clock)
+    monkeypatch.setattr(game_main, "TitleScene", create_title_scene)
+    monkeypatch.setattr(game_main, "SceneManager", create_scene_manager)
+    monkeypatch.setattr(game_main, "Application", create_application)
 
     game_main.main()
 
-    initialize_pygame.assert_called_once_with()
-    set_mode.assert_called_once_with(game_main.WINDOW_CONFIG.size)
-    set_caption.assert_called_once_with(game_main.WINDOW_CONFIG.title)
-    screen.fill.assert_called_once_with(game_main.BACKGROUND_COLOR)
-    flip_display.assert_called_once_with()
-    clock.tick.assert_called_once_with(game_main.FRAMES_PER_SECOND)
-    quit_pygame.assert_called_once_with()
-
-
-def test_main_shuts_down_pygame_when_startup_fails(monkeypatch) -> None:
-    quit_pygame = Mock()
-
-    monkeypatch.setattr(pygame, "init", Mock())
-    monkeypatch.setattr(
-        pygame.display,
-        "set_mode",
-        Mock(side_effect=RuntimeError("Unable to create the window")),
+    create_title_scene.assert_called_once_with()
+    create_scene_manager.assert_called_once_with(initial_scene)
+    create_application.assert_called_once_with(
+        window_config=game_main.WINDOW_CONFIG,
+        scene_manager=scene_manager,
+        frames_per_second=game_main.FRAMES_PER_SECOND,
     )
-    monkeypatch.setattr(pygame, "quit", quit_pygame)
-
-    with pytest.raises(RuntimeError, match="Unable to create the window"):
-        game_main.main()
-
-    quit_pygame.assert_called_once_with()
+    application.run.assert_called_once_with()
