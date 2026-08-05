@@ -104,6 +104,10 @@ The project has completed its application and scene foundations. It provides:
 Asset management, world simulation, collisions, and gameplay systems have not
 been implemented yet.
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for notable project changes.
+
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for
