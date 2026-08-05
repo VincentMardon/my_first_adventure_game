@@ -268,10 +268,10 @@ Implemented engine domains:
 - per-frame action states;
 - normalized directional movement axes.
 - package-based image and font loading with instance-local caches;
+- minimal game-independent text rendering;
 
 Reserved but not implemented:
 
-- graphics helpers;
 - world representation;
 - collisions;
 - persistence.

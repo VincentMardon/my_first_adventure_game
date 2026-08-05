@@ -81,12 +81,19 @@ Loads and caches Pygame images and fonts stored in Python packages.
 The engine owns package-based loading and caching. Concrete resource files,
 paths, sizes, themes, and presentation decisions belong to the game.
 
+### Graphics
+
+Provides small tested drawing operations without owning game presentation
+rules.
+
+The current implementation renders centered antialiased text and returns its
+destination rectangle.
+
 ## Reserved domains
 
 The package skeleton also reserves locations for capabilities that have not yet
 been implemented:
 
-- graphics;
 - world;
 - collisions;
 - persistence;
