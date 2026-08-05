@@ -270,10 +270,10 @@ Implemented engine domains:
 - package-based image and font loading with instance-local caches;
 - minimal game-independent text rendering;
 - floating-point AABB geometry and overlap detection;
+- lightweight spatial entities with stable identifiers and AABB bounds;
 
 Reserved but not implemented:
 
-- world representation;
 - persistence.
 
 Do not infer behavior from reserved package names.

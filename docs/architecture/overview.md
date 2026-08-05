@@ -96,12 +96,18 @@ detection.
 
 The engine reports geometric overlap. The game decides its consequences.
 
+### World
+
+Provides lightweight entities with stable identity, floating-point geometry,
+active state, and immutable collision bounds.
+
+Concrete entity types and behavior belong to the game.
+
 ## Reserved domains
 
 The package skeleton also reserves locations for capabilities that have not yet
 been implemented:
 
-- world;
 - persistence;
 - game entities;
 - levels;

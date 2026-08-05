@@ -28,6 +28,7 @@ flowchart TD
     Graphics["engine.graphics"]
     Input["engine.input"]
     Scenes["engine.scenes"]
+    World["engine.world"]
     Pygame["pygame"]
     Game["game"]
 
@@ -45,6 +46,8 @@ flowchart TD
     Graphics --> Pygame
     Input --> Pygame
     Scenes --> Pygame
+    World --> Collisions
+    World --> Pygame
 ```
 
 A dependency cycle between engine domains is not allowed.
