@@ -270,7 +270,7 @@ Implemented engine domains:
 - package-based image and font loading with instance-local caches;
 - minimal game-independent text rendering;
 - floating-point AABB geometry and overlap detection;
-- lightweight spatial entities and deterministic lookup by stable identifier;
+- lightweight spatial entities, deterministic lookup and AABB movement;
 
 Reserved but not implemented:
 

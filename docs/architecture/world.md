@@ -5,10 +5,10 @@
 The world domain provides the minimal spatial state shared by entities in a
 top-down game world.
 
-It currently defines a lightweight entity representation and a deterministic
-entity container.
+It currently defines a lightweight entity representation, a deterministic
+entity container, and axis-separated movement against solid bounds.
 
-It does not yet provide movement resolution, maps, or gameplay behavior.
+It does not provide maps or gameplay behavior.
 
 ## Why this domain exists
 
@@ -55,12 +55,31 @@ It provides:
 Entity order follows registration order. Requesting an unknown identifier
 returns `None`.
 
+### `move_entity`
+
+Applies a requested floating-point movement to an entity while preventing it
+from crossing supplied solid `AABB` bounds.
+
+Horizontal movement is resolved before vertical movement. This ordering allows
+the entity to slide along an obstacle when only one axis is blocked.
+
+The function returns the movement actually applied and does not mutate the
+requested vector.
+
+Solid bounds are selected by the caller. The function accepts any iterable and
+materializes it once so both axes inspect the same obstacles.
+
+The entity is expected to start outside the supplied obstacles. Existing
+overlaps are not resolved.
+
 ## Ownership
 
 The engine owns common spatial state.
+The engine also owns generic axis-separated movement resolution.
 
 The game owns:
 
+- the selection of solid obstacles;
 - concrete player, enemy, item, and obstacle types;
 - entity behavior;
 - rendering and animation;
@@ -91,12 +110,13 @@ The collisions domain must not import the world domain.
 - Duplicate registration leaves the original entity unchanged.
 - Entity snapshots cannot mutate the world's internal registry.
 - Entity iteration follows registration order.
+- Horizontal movement is resolved before vertical movement.
+- Movement cannot cross a solid bound along either axis.
+- The returned vector describes the movement actually applied.
+- Requested movement vectors are not mutated.
+- Existing overlaps are not depenetrated.
 
 ## Extension points
-
-The accepted roadmap includes:
-
-- movement against solid obstacles.
 
 Component registries, dynamic component attachment, and general-purpose ECS
 queries are outside the current scope.
@@ -109,3 +129,8 @@ Sharing input vectors would allow external code to move or resize an entity
 without going through its owned state.
 
 Adding concrete behavior would couple the engine to the current game.
+
+Changing axis order would change corner and sliding behavior.
+
+Adding automatic depenetration would require explicit semantics for entities
+that begin inside multiple obstacles.

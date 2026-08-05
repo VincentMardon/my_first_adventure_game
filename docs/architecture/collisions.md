@@ -50,13 +50,9 @@ movement, collecting an item, taking damage, or triggering an event.
 
 The collisions domain currently depends only on the Python standard library.
 
-It must not import the world or game domains. Future world code may depend on
-collisions, preserving a single dependency direction.
+The world domain uses `AABB` values for axis-separated movement resolution.
 
 ## Extension points
-
-The accepted roadmap includes axis-separated movement resolution against solid
-obstacles.
 
 Additional shapes, realistic physics, polygonal collisions, and a general
 physics engine are outside the current scope.
