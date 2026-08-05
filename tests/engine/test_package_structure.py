@@ -15,6 +15,7 @@ PACKAGES = (
     "my_first_adventure_game.game",
     "my_first_adventure_game.game.assets",
     "my_first_adventure_game.game.entities",
+    "my_first_adventure_game.game.input",
     "my_first_adventure_game.game.levels",
     "my_first_adventure_game.game.localization",
     "my_first_adventure_game.game.profile",

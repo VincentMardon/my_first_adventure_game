@@ -5,6 +5,7 @@ import pygame
 import pytest
 
 from my_first_adventure_game.engine.application import Application, WindowConfig
+from my_first_adventure_game.engine.input import InputProcessor
 from my_first_adventure_game.engine.scenes import SceneManager
 
 
@@ -18,6 +19,7 @@ def test_run_processes_one_frame_and_delegates_to_scene_manager(
     gameplay_event = SimpleNamespace(type=pygame.KEYDOWN)
     quit_event = SimpleNamespace(type=pygame.QUIT)
     scene_manager = Mock(spec=SceneManager)
+    input_processor = Mock(spec=InputProcessor)
 
     set_mode = Mock(return_value=surface)
     set_caption = Mock()
@@ -42,6 +44,7 @@ def test_run_processes_one_frame_and_delegates_to_scene_manager(
     application = Application(
         window_config=config,
         scene_manager=scene_manager,
+        input_processor=input_processor,
         frames_per_second=60,
     )
 
@@ -53,12 +56,15 @@ def test_run_processes_one_frame_and_delegates_to_scene_manager(
     scene_manager.handle_event.assert_called_once_with(gameplay_event)
     scene_manager.update.assert_called_once_with(0.25)
     scene_manager.draw.assert_called_once_with(surface)
+    input_processor.start_frame.assert_called_once_with()
+    input_processor.handle_event.assert_called_once_with(gameplay_event)
     flip_display.assert_called_once_with()
     pygame.quit.assert_called_once_with()
 
 
 def test_run_shuts_down_pygame_when_startup_fails(monkeypatch) -> None:
     quit_pygame = Mock()
+    input_processor = Mock(spec=InputProcessor)
 
     monkeypatch.setattr(pygame, "init", Mock())
     monkeypatch.setattr(
@@ -74,6 +80,7 @@ def test_run_shuts_down_pygame_when_startup_fails(monkeypatch) -> None:
             size=(800, 600),
         ),
         scene_manager=Mock(spec=SceneManager),
+        input_processor=input_processor,
         frames_per_second=60,
     )
 
