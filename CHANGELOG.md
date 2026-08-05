@@ -10,6 +10,7 @@ and this project adheres to
 
 ### Added
 
+- Architecture documentation, decision records, and guidance for AI agents.
 - Initial Python project structure with separate `engine` and `game` packages.
 - Pygame application entry point and immutable window configuration.
 - Generic application loop with delta-time calculation.

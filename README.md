@@ -104,6 +104,11 @@ The project has completed its application and scene foundations. It provides:
 Asset management, world simulation, collisions, and gameplay systems have not
 been implemented yet.
 
+## Documentation
+
+See [docs/index.md](docs/index.md) for the architecture overview, domain
+responsibilities, project boundaries, and architectural decision records.
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for notable project changes.
