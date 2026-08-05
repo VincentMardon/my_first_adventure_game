@@ -96,11 +96,13 @@ The project has completed its application and scene foundations. It provides:
 - a generic Pygame application loop with delta-time calculation;
 - a decoupled scene contract and scene manager;
 - explicit, testable scene transitions;
+- generic action-based input with per-frame pressed, held, and released states;
+- normalized directional movement axes;
 - a minimal title scene integrated with the application;
 - automated quality checks and package builds.
 
-Input handling, world simulation, collisions, and gameplay systems have not been
-implemented yet.
+Asset management, world simulation, collisions, and gameplay systems have not
+been implemented yet.
 
 ## License
 
