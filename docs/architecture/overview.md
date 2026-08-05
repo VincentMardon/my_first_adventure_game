@@ -120,21 +120,31 @@ flowchart TD
     SceneManager["SceneManager"]
     Scene["Scene"]
     TitleScene["TitleScene"]
+    FontCache["FontCache"]
+    DrawText["draw_text"]
 
     GameMain --> Application
     GameMain --> InputState
     GameMain --> SceneManager
     GameMain --> TitleScene
+    GameMain --> FontCache
 
     Application --> WindowConfig
     Application --> InputProcessor
     Application --> SceneManager
+
+    TitleScene --> FontCache
+    TitleScene --> DrawText
 
     InputState -. "implements structurally" .-> InputProcessor
     InputState --> KeyboardBindings
     SceneManager --> Scene
     TitleScene -. "implements" .-> Scene
 ```
+`game.main` configures `FontCache` with Pygame's resource package.
+`TitleScene`
+loads the selected font lazily during drawing, after the application has
+initialized Pygame.
 
 ## Main frame flow
 

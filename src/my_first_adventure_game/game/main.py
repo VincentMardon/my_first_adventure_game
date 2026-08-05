@@ -1,4 +1,7 @@
+import pygame
+
 from my_first_adventure_game.engine.application import Application, WindowConfig
+from my_first_adventure_game.engine.assets import FontCache
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.scenes import SceneManager
 from my_first_adventure_game.game.input import DEFAULT_KEYBOARD_BINDINGS
@@ -12,7 +15,8 @@ def main() -> None:
     """Compose the game services and start the application."""
 
     input_state = InputState(DEFAULT_KEYBOARD_BINDINGS)
-    initial_scene = TitleScene()
+    font_cache = FontCache(pygame)
+    initial_scene = TitleScene(font_cache)
     scene_manager = SceneManager(initial_scene)
     application = Application(
         window_config=WINDOW_CONFIG,
