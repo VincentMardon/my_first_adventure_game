@@ -6,6 +6,8 @@ from my_first_adventure_game.engine.scenes import SceneManager
 
 
 class Application:
+    """Run the generic Pygame lifecycle and coordinate engine services."""
+
     def __init__(
         self,
         window_config: WindowConfig,
@@ -20,6 +22,7 @@ class Application:
         self._frames_per_second = frames_per_second
 
     def run(self) -> None:
+        """Run frames until a quit event occurs, then shut down Pygame."""
         pygame.init()
 
         try:

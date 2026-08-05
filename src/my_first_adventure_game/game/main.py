@@ -9,6 +9,8 @@ FRAMES_PER_SECOND = 60
 
 
 def main() -> None:
+    """Compose the game services and start the application."""
+
     input_state = InputState(DEFAULT_KEYBOARD_BINDINGS)
     initial_scene = TitleScene()
     scene_manager = SceneManager(initial_scene)

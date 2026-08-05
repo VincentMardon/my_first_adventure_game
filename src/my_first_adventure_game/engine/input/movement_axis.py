@@ -16,6 +16,7 @@ def movement_axis(
     up: ActionT,
     down: ActionT,
 ) -> pygame.Vector2:
+    """Return a normalized directional axis from held movement actions."""
     horizontal = int(input_state.is_held(right)) - int(input_state.is_held(left))
     vertical = int(input_state.is_held(down)) - int(input_state.is_held(up))
 

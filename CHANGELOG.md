@@ -10,6 +10,7 @@ and this project adheres to
 
 ### Added
 
+- Public API docstrings for the existing engine and game foundations.
 - Architecture documentation, decision records, and guidance for AI agents.
 - Initial Python project structure with separate `engine` and `game` packages.
 - Pygame application entry point and immutable window configuration.

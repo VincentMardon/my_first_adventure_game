@@ -6,6 +6,8 @@ BACKGROUND_COLOR = (24, 28, 36)
 
 
 class TitleScene(Scene):
+    """Display the initial title screen."""
+
     def handle_event(self, event: pygame.event.Event) -> None:
         return None
 
