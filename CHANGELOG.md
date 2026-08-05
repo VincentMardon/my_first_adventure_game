@@ -10,6 +10,10 @@ and this project adheres to
 
 ### Added
 
+- Package-based image and font loading through `importlib.resources`.
+- Instance-local image caching and size-aware font caching.
+- Minimal centered and antialiased text rendering.
+- Title screen rendering with a cached Pygame font.
 - Public API docstrings for the existing engine and game foundations.
 - Architecture documentation, decision records, and guidance for AI agents.
 - Initial Python project structure with separate `engine` and `game` packages.

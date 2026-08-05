@@ -89,7 +89,8 @@ python -m build
 
 ## Current status
 
-The project has completed its application and scene foundations. It provides:
+The project has completed its application, scene, input, resource, and minimal
+rendering foundations. It provides:
 
 - a reusable `engine` and game-specific `game` package structure;
 - immutable window configuration;
@@ -98,11 +99,14 @@ The project has completed its application and scene foundations. It provides:
 - explicit, testable scene transitions;
 - generic action-based input with per-frame pressed, held, and released states;
 - normalized directional movement axes;
-- a minimal title scene integrated with the application;
+- package-based image and font loading with instance-local caches;
+- size-aware font caching with safe resource stream lifetimes;
+- minimal centered, antialiased text rendering;
+- a title scene rendered with a cached Pygame font;
 - automated quality checks and package builds.
 
-Asset management, world simulation, collisions, and gameplay systems have not
-been implemented yet.
+World simulation, collisions, persistence, and gameplay systems have not been
+implemented yet.
 
 ## Documentation
 
