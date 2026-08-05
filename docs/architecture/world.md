@@ -5,8 +5,10 @@
 The world domain provides the minimal spatial state shared by entities in a
 top-down game world.
 
-It currently defines a lightweight entity representation. It does not yet
-provide a world container, movement resolution, maps, or gameplay behavior.
+It currently defines a lightweight entity representation and a deterministic
+entity container.
+
+It does not yet provide movement resolution, maps, or gameplay behavior.
 
 ## Why this domain exists
 
@@ -40,6 +42,19 @@ Creates an immutable `AABB` snapshot from the current position and size.
 
 Later changes to the entity do not mutate bounds returned previously.
 
+### `World`
+
+Owns entities indexed by stable identifier.
+
+It provides:
+
+- registration without silent replacement;
+- optional lookup by identifier;
+- an ordered tuple snapshot of registered entities.
+
+Entity order follows registration order. Requesting an unknown identifier
+returns `None`.
+
 ## Ownership
 
 The engine owns common spatial state.
@@ -72,13 +87,15 @@ The collisions domain must not import the world domain.
 - Bounds reflect the current entity geometry.
 - Bounds are immutable snapshots.
 - Entity state contains no game-specific behavior.
+- Registered entity identifiers are unique.
+- Duplicate registration leaves the original entity unchanged.
+- Entity snapshots cannot mutate the world's internal registry.
+- Entity iteration follows registration order.
 
 ## Extension points
 
 The accepted roadmap includes:
 
-- a simple world container;
-- lookup by stable identifier;
 - movement against solid obstacles.
 
 Component registries, dynamic component attachment, and general-purpose ECS
@@ -86,8 +103,7 @@ queries are outside the current scope.
 
 ## Change risks
 
-Making identifiers mutable would break stable lookup in a future world
-container.
+Making identifiers mutable would break stable lookup in `World`.
 
 Sharing input vectors would allow external code to move or resize an entity
 without going through its owned state.

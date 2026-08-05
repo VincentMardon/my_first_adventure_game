@@ -1,3 +1,4 @@
 from my_first_adventure_game.engine.world.entity import Entity
+from my_first_adventure_game.engine.world.world import World
 
-__all__ = ["Entity"]
+__all__ = ["Entity", "World"]

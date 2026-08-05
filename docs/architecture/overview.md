@@ -99,7 +99,7 @@ The engine reports geometric overlap. The game decides its consequences.
 ### World
 
 Provides lightweight entities with stable identity, floating-point geometry,
-active state, and immutable collision bounds.
+active state, immutable collision bounds, and deterministic lookup.
 
 Concrete entity types and behavior belong to the game.
 
