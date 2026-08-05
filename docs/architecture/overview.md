@@ -89,13 +89,19 @@ rules.
 The current implementation renders centered antialiased text and returns its
 destination rectangle.
 
+### Collisions
+
+Provides immutable floating-point axis-aligned bounds and positive-area overlap
+detection.
+
+The engine reports geometric overlap. The game decides its consequences.
+
 ## Reserved domains
 
 The package skeleton also reserves locations for capabilities that have not yet
 been implemented:
 
 - world;
-- collisions;
 - persistence;
 - game entities;
 - levels;

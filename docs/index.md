@@ -47,6 +47,7 @@ proposing changes.
 - [Input](architecture/input.md)
 - [Assets](architecture/assets.md)
 - [Graphics](architecture/graphics.md)
+- [Collisions](architecture/collisions.md)
 
 ### Architectural decisions
 

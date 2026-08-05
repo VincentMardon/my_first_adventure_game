@@ -269,11 +269,11 @@ Implemented engine domains:
 - normalized directional movement axes.
 - package-based image and font loading with instance-local caches;
 - minimal game-independent text rendering;
+- floating-point AABB geometry and overlap detection;
 
 Reserved but not implemented:
 
 - world representation;
-- collisions;
 - persistence.
 
 Do not infer behavior from reserved package names.

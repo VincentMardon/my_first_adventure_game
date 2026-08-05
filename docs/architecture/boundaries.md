@@ -23,12 +23,17 @@ Current engine dependencies are intentionally small:
 ```mermaid
 flowchart TD
     Application["engine.application"]
+    Assets["engine.assets"]
+    Collisions["engine.collisions"]
+    Graphics["engine.graphics"]
     Input["engine.input"]
     Scenes["engine.scenes"]
     Pygame["pygame"]
     Game["game"]
 
     Game --> Application
+    Game --> Assets
+    Game --> Graphics
     Game --> Input
     Game --> Scenes
     Game --> Pygame
@@ -36,6 +41,8 @@ flowchart TD
     Application --> Input
     Application --> Scenes
     Application --> Pygame
+    Assets --> Pygame
+    Graphics --> Pygame
     Input --> Pygame
     Scenes --> Pygame
 ```
