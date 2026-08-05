@@ -57,6 +57,10 @@ Cache key:
 Two requests for the same font resource at different sizes produce distinct
 `pygame.font.Font` instances.
 
+Font data is copied into an in-memory binary stream. The cache keeps that
+stream alive with the font because SDL_ttf may continue reading it during text
+rendering.
+
 ## Resource ownership
 
 The engine owns the loading and caching mechanisms.
@@ -91,7 +95,8 @@ The assets domain must not import from `game`.
 - Cached resources belong to a cache instance.
 - An image path identifies one cached surface.
 - A font path and size identify one cached font.
-- Resources are opened in binary mode.
+- Images are loaded from resources opened in binary mode.
+- Font streams remain alive as long as their cached fonts.
 - Missing or invalid resources propagate the underlying loading error.
 - Resource loading does not choose game presentation rules.
 
