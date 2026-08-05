@@ -267,10 +267,10 @@ Implemented engine domains:
 - action-based keyboard input;
 - per-frame action states;
 - normalized directional movement axes.
+- package-based image and font loading with instance-local caches;
 
 Reserved but not implemented:
 
-- assets and resource management;
 - graphics helpers;
 - world representation;
 - collisions;

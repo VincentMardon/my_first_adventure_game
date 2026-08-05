@@ -74,12 +74,18 @@ Converts device events into game-independent action states.
 The engine tracks whether an action was pressed, held, or released during the
 current frame. Concrete action names and default keys belong to the game.
 
+### Assets
+
+Loads and caches Pygame images and fonts stored in Python packages.
+
+The engine owns package-based loading and caching. Concrete resource files,
+paths, sizes, themes, and presentation decisions belong to the game.
+
 ## Reserved domains
 
 The package skeleton also reserves locations for capabilities that have not yet
 been implemented:
 
-- assets;
 - graphics;
 - world;
 - collisions;

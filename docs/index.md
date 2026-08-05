@@ -45,6 +45,7 @@ proposing changes.
 - [Application](architecture/application.md)
 - [Scenes](architecture/scenes.md)
 - [Input](architecture/input.md)
+- [Assets](architecture/assets.md)
 
 ### Architectural decisions
 
