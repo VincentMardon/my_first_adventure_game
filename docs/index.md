@@ -33,7 +33,7 @@ documentation must be corrected.
 
 ## Agent guidance
 
-AI agents must read the repository-level [AGENTS.md](../AGENTS.md) before
+AI agents must read the repository-level [AGENTS.md](https://github.com/VincentMardon/my_first_adventure_game/blob/main/AGENTS.md) before
 proposing changes.
 
 ## Current documentation
@@ -59,5 +59,9 @@ proposing changes.
 
 ### API reference
 
-Automatic API reference generation is planned for a later milestone. Until
-then, public Python APIs remain authoritative in the source code.
+- [Overview](api/index.md)
+- [Application](api/application.md)
+
+The API reference is generated from public Python interfaces and docstrings. It
+complements the manually maintained architecture pages and does not replace
+architectural reasoning.

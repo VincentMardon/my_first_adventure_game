@@ -1,0 +1,63 @@
+site_name: My First Adventure Game
+site_description: Architecture and API documentation for the project
+repo_name: VincentMardon/my_first_adventure_game
+repo_url: https://github.com/VincentMardon/my_first_adventure_game
+
+docs_dir: docs
+site_dir: site
+strict: true
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.indexes
+    - content.code.copy
+
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths:
+            - src
+          options:
+            line_length: 88
+            members_order: source
+            merge_init_into_class: true
+            separate_signature: true
+            show_root_heading: true
+            show_signature_annotations: true
+            show_signature_type_parameters: true
+            show_source: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            summary: true
+
+nav:
+  - Home: index.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - Boundaries: architecture/boundaries.md
+      - Application: architecture/application.md
+      - Scenes: architecture/scenes.md
+      - Input: architecture/input.md
+      - Assets: architecture/assets.md
+      - Graphics: architecture/graphics.md
+      - Collisions: architecture/collisions.md
+      - World: architecture/world.md
+      - Levels: architecture/levels.md
+  - API reference:
+      - Overview: api/index.md
+      - Application: api/application.md
+  - Decisions:
+      - Separate engine and game: decisions/0001-separate-engine-and-game.md
+      - Separate scenes and maps: decisions/0002-separate-scenes-and-maps.md
+      - Use action-based input: decisions/0003-use-action-based-input.md
