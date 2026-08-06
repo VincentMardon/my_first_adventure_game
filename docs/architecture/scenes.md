@@ -64,8 +64,7 @@ Created by:
 Used by:
 
 - `Application`;
-- future navigation collaborators or concrete scenes that need to request a
-  transition.
+- the game-owned navigation callback composed in `game.main`.
 
 Depends on:
 
@@ -164,10 +163,10 @@ The current game provides `TitleScene` and `GameplayScene`.
 `TitleScene`:
 
 - ignores events;
-- has no time-dependent behavior;
+- queries the action input state during updates;
 - draws the game-owned background and centered title;
 - loads its selected font lazily through `FontCache`;
-- does not yet provide navigation.
+- requests gameplay through an injected callback when `CONFIRM` is pressed.
 
 `GameplayScene`:
 
@@ -179,7 +178,9 @@ The current game provides `TitleScene` and `GameplayScene`.
 - draws walls before the player using game-owned colors;
 - rounds floating-point geometry only at rendering time.
 
-`GameplayScene` is implemented but is not yet composed by `game.main`.
+`game.main` composes `GameplayScene` from the player and walls provided by the
+demo map. It injects a game-owned callback into `TitleScene` that explicitly
+replaces the title with the gameplay scene.
 
 ## Invariants
 
@@ -229,4 +230,7 @@ Current tests verify:
 - drawing is delegated with the target surface;
 - the concrete title scene draws its background and centered title;
 - the gameplay scene delegates movement with game actions, speed, and walls;
-- the gameplay scene draws its background, walls, and player in order.
+- the gameplay scene draws its background, walls, and player in order;
+- the title scene requests gameplay only when confirmation is pressed;
+- the composition root connects the demo map and explicit title-to-gameplay
+  transition.

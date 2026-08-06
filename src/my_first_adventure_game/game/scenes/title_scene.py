@@ -1,8 +1,12 @@
+from collections.abc import Callable
+
 import pygame
 
 from my_first_adventure_game.engine.assets import FontCache
 from my_first_adventure_game.engine.graphics import draw_text
+from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.scenes import Scene
+from my_first_adventure_game.game.input import GameAction
 
 BACKGROUND_COLOR = (24, 28, 36)
 TITLE_TEXT = "My First Adventure Game"
@@ -15,14 +19,22 @@ TITLE_FONT_SIZE = 64
 class TitleScene(Scene):
     """Display the initial title screen."""
 
-    def __init__(self, font_cache: FontCache) -> None:
+    def __init__(
+        self,
+        font_cache: FontCache,
+        input_state: InputState[GameAction],
+        start_game: Callable[[], None],
+    ) -> None:
         self._font_cache = font_cache
+        self._input_state = input_state
+        self._start_game = start_game
 
     def handle_event(self, event: pygame.event.Event) -> None:
         return None
 
     def update(self, delta_time: float) -> None:
-        return None
+        if self._input_state.is_pressed(GameAction.CONFIRM):
+            self._start_game()
 
     def draw(self, surface: pygame.Surface) -> None:
         surface.fill(BACKGROUND_COLOR)

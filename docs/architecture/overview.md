@@ -111,6 +111,9 @@ game.
 
 Provides the concrete title and gameplay scenes.
 
+The title scene requests an explicit transition to gameplay when the
+confirmation action is pressed.
+
 The gameplay scene converts game actions into player movement, selects walls as
 solid obstacles, and owns the current presentation rules.
 
@@ -150,14 +153,25 @@ flowchart TD
     SceneManager["SceneManager"]
     Scene["Scene"]
     TitleScene["TitleScene"]
+    GameplayScene["GameplayScene"]
+    DemoMap["create_demo_map"]
+    GameMap["GameMap"]
+    World["World"]
+    Entity["Entity"]
     FontCache["FontCache"]
     DrawText["draw_text"]
 
     GameMain --> Application
     GameMain --> InputState
     GameMain --> SceneManager
-    GameMain --> TitleScene
+    GameMain -->|"injects transition callback"| TitleScene
+    GameMain --> GameplayScene
+    GameMain --> DemoMap
     GameMain --> FontCache
+
+    DemoMap --> GameMap
+    GameMap --> World
+    GameMap --> Entity
 
     Application --> WindowConfig
     Application --> InputProcessor
@@ -165,16 +179,24 @@ flowchart TD
 
     TitleScene --> FontCache
     TitleScene --> DrawText
+    TitleScene --> InputState
+    GameplayScene --> InputState
+    GameplayScene --> Entity
 
     InputState -. "implements structurally" .-> InputProcessor
     InputState --> KeyboardBindings
     SceneManager --> Scene
     TitleScene -. "implements" .-> Scene
+    GameplayScene -. "implements" .-> Scene
 ```
-`game.main` configures `FontCache` with Pygame's resource package.
-`TitleScene`
-loads the selected font lazily during drawing, after the application has
-initialized Pygame.
+
+`game.main` creates the demo map and composes `GameplayScene` from its player
+and walls. It injects a callback into `TitleScene` that explicitly replaces the
+active scene when confirmation is pressed.
+
+`game.main` also configures `FontCache` with Pygame's resource package.
+`TitleScene` loads the selected font lazily during drawing, after the application
+has initialized Pygame.
 
 ## Main frame flow
 

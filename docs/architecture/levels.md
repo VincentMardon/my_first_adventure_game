@@ -58,6 +58,8 @@ The game levels domain owns:
 ```mermaid
 flowchart TD
     GameMap["game.levels.GameMap"]
+    GameMain["game.main"]
+    GameplayScene["game.scenes.GameplayScene"]
     DemoMap["game.levels.create_demo_map"]
     World["engine.world.World"]
     Entity["engine.world.Entity"]
@@ -67,7 +69,14 @@ flowchart TD
     DemoMap --> Entity
     GameMap --> World
     GameMap --> Entity
+    GameMain --> DemoMap
+    GameMain -->|"reads entity roles"| GameMap
+    GameMain --> GameplayScene
 ```
+
+`game.main` creates the demo map and passes its player and walls to
+`GameplayScene`. The scene consumes these concrete roles without depending on
+the `GameMap` container itself.
 
 A map is spatial content managed during gameplay. It is not a scene and is not
 managed by `SceneManager`.

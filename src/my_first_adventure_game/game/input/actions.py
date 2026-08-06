@@ -8,3 +8,4 @@ class GameAction(Enum):
     MOVE_RIGHT = auto()
     MOVE_UP = auto()
     MOVE_DOWN = auto()
+    CONFIRM = auto()

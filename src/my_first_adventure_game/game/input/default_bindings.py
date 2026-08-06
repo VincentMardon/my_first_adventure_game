@@ -9,5 +9,6 @@ DEFAULT_KEYBOARD_BINDINGS = KeyboardBindings(
         GameAction.MOVE_RIGHT: (pygame.K_RIGHT,),
         GameAction.MOVE_UP: (pygame.K_UP,),
         GameAction.MOVE_DOWN: (pygame.K_DOWN,),
+        GameAction.CONFIRM: (pygame.K_RETURN,),
     }
 )

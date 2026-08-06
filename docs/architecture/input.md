@@ -209,14 +209,17 @@ Current concrete actions are:
 - `MOVE_LEFT`;
 - `MOVE_RIGHT`;
 - `MOVE_UP`;
-- `MOVE_DOWN`.
+- `MOVE_DOWN`;
+- `CONFIRM`.
 
-They are initially bound to the arrow keys.
+Directional actions are bound to the arrow keys. `CONFIRM` is bound to the
+Enter key.
 
 `game.main` creates the concrete `InputState` and passes it to `Application` as
 an `InputProcessor`.
 
-No scene or entity consumes directional actions yet.
+`TitleScene` queries the pressed state of `CONFIRM` to request the transition to
+gameplay. `GameplayScene` queries held directional actions to move the player.
 
 ## Device extensibility
 
@@ -286,5 +289,6 @@ Current tests verify:
 - cardinal direction conventions;
 - cancellation of opposite directions;
 - diagonal normalization;
-- concrete default arrow-key bindings;
+- concrete default arrow-key and confirmation bindings;
+- title navigation triggered only by a newly pressed confirmation action;
 - integration of the input lifecycle into `Application`.

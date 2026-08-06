@@ -10,6 +10,17 @@ and this project adheres to
 
 ### Added
 
+- Floating-point AABB geometry with positive-area overlap detection.
+- Lightweight spatial entities with stable identifiers and mutable geometry.
+- Deterministic world registration and entity lookup.
+- Axis-separated movement that prevents crossing solid AABB obstacles.
+- A concrete gameplay scene with normalized player movement and collision-aware
+  wall handling.
+- A game-owned Python-authored demo map with concrete player and wall roles.
+- A confirmation action bound to Enter.
+- An explicit title-to-gameplay transition composed in `game.main`.
+- Architecture documentation for collisions, world representation, game levels,
+  and the playable runtime composition.
 - Package-based image and font loading through `importlib.resources`.
 - Instance-local image caching and size-aware font caching.
 - Minimal centered and antialiased text rendering.

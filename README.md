@@ -61,6 +61,11 @@ Alternatively, use the installed command:
 my-first-adventure-game
 ```
 
+### Controls
+
+- press Enter on the title screen to start;
+- use the arrow keys to move the player.
+
 ## Development checks
 
 Check formatting:
@@ -89,24 +94,30 @@ python -m build
 
 ## Current status
 
-The project has completed its application, scene, input, resource, and minimal
-rendering foundations. It provides:
+The project now provides a minimal playable top-down loop:
+
+1. the application opens on a title screen;
+2. pressing Enter explicitly transitions to gameplay;
+3. the arrow keys move the player through a Python-authored map;
+4. axis-aligned collisions prevent the player from crossing walls.
+
+Implemented foundations include:
 
 - a reusable `engine` and game-specific `game` package structure;
-- immutable window configuration;
-- a generic Pygame application loop with delta-time calculation;
-- a decoupled scene contract and scene manager;
-- explicit, testable scene transitions;
-- generic action-based input with per-frame pressed, held, and released states;
-- normalized directional movement axes;
-- package-based image and font loading with instance-local caches;
-- size-aware font caching with safe resource stream lifetimes;
-- minimal centered, antialiased text rendering;
-- a title scene rendered with a cached Pygame font;
-- automated quality checks and package builds.
+- application lifecycle, frame timing, and window configuration;
+- explicit scene management and game-owned navigation;
+- action-based input with pressed, held, and released states;
+- normalized directional movement;
+- package-based image and font caches;
+- minimal engine text rendering and game-owned rectangle presentation;
+- immutable floating-point collision bounds;
+- lightweight spatial entities and deterministic world storage;
+- axis-separated movement against solid obstacles;
+- a game-owned Python-authored demo map;
+- automated tests, Ruff checks, package builds, and GitHub Actions CI.
 
-World simulation, collisions, persistence, and gameplay systems have not been
-implemented yet.
+Persistence, scoring, profiles, localization, combat, and interaction systems
+have not been implemented yet.
 
 ## Documentation
 

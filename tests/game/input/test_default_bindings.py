@@ -14,9 +14,10 @@ from my_first_adventure_game.game.input import (
         (GameAction.MOVE_RIGHT, pygame.K_RIGHT),
         (GameAction.MOVE_UP, pygame.K_UP),
         (GameAction.MOVE_DOWN, pygame.K_DOWN),
+        (GameAction.CONFIRM, pygame.K_RETURN),
     ],
 )
-def test_directional_action_has_default_key(
+def test_action_has_default_key(
     action: GameAction,
     key: int,
 ) -> None:
