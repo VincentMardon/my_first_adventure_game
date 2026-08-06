@@ -21,7 +21,7 @@ scene behavior while preserving the distinction between scenes and maps.
 
 ## Public components
 
-### `GameMap`
+### [`GameMap`](../api/game-levels.md#my_first_adventure_game.game.levels.GameMap)
 
 Groups:
 
@@ -31,7 +31,7 @@ Groups:
 
 The dataclass is immutable, but the grouped world and entities remain mutable.
 
-### `create_demo_map`
+### [`create_demo_map`](../api/game-levels.md#my_first_adventure_game.game.levels.create_demo_map)
 
 Creates the current demonstration map entirely in Python.
 

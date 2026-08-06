@@ -21,7 +21,7 @@ required by top-down movement.
 
 ## Public components
 
-### `AABB`
+### [`AABB`](../api/collisions.md#my_first_adventure_game.engine.collisions.AABB)
 
 Represents immutable axis-aligned bounds using a position and dimensions.
 

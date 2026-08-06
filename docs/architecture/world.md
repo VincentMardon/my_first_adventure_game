@@ -21,7 +21,7 @@ system.
 
 ## Public components
 
-### `Entity`
+### [`Entity`](../api/world.md#my_first_adventure_game.engine.world.Entity)
 
 Stores:
 
@@ -36,13 +36,13 @@ the caller's mutable vectors.
 The identifier is exposed without a public setter. Position, size, and active
 state remain mutable.
 
-### `Entity.bounds`
+### [`Entity.bounds`](../api/world.md#my_first_adventure_game.engine.world.Entity.bounds)
 
 Creates an immutable `AABB` snapshot from the current position and size.
 
 Later changes to the entity do not mutate bounds returned previously.
 
-### `World`
+### [`World`](../api/world.md#my_first_adventure_game.engine.world.World)
 
 Owns entities indexed by stable identifier.
 
@@ -55,7 +55,7 @@ It provides:
 Entity order follows registration order. Requesting an unknown identifier
 returns `None`.
 
-### `move_entity`
+### [`move_entity`](../api/world.md#my_first_adventure_game.engine.world.move_entity)
 
 Applies a requested floating-point movement to an entity while preventing it
 from crossing supplied solid `AABB` bounds.

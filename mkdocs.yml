@@ -15,6 +15,9 @@ theme:
     - content.code.copy
 
 markdown_extensions:
+  - toc:
+      permalink: true
+      permalink_title: Permanent link to this section
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -56,7 +59,18 @@ nav:
       - Levels: architecture/levels.md
   - API reference:
       - Overview: api/index.md
-      - Application: api/application.md
+      - Engine:
+          - Application: api/application.md
+          - Assets: api/assets.md
+          - Collisions: api/collisions.md
+          - Graphics: api/graphics.md
+          - Input: api/input.md
+          - Scenes: api/scenes.md
+          - World: api/world.md
+      - Game:
+          - Input: api/game-input.md
+          - Levels: api/game-levels.md
+          - Scenes: api/game-scenes.md
   - Decisions:
       - Separate engine and game: decisions/0001-separate-engine-and-game.md
       - Separate scenes and maps: decisions/0002-separate-scenes-and-maps.md

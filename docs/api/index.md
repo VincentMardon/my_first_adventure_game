@@ -12,3 +12,15 @@ design decisions, and change risks.
 ## Engine domains
 
 - [Application](application.md)
+- [Assets](assets.md)
+- [Collisions](collisions.md)
+- [Graphics](graphics.md)
+- [Input](input.md)
+- [Scenes](scenes.md)
+- [World](world.md)
+
+## Game domains
+
+- [Input](game-input.md)
+- [Levels](game-levels.md)
+- [Scenes](game-scenes.md)

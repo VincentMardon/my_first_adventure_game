@@ -4,7 +4,13 @@ from my_first_adventure_game.engine.collisions import AABB
 
 
 class Entity:
-    """Store the minimal spatial state shared by world entities."""
+    """Store the minimal spatial state shared by world entities.
+
+    Attributes:
+        position: Mutable floating-point position copied during construction.
+        size: Mutable floating-point size copied during construction.
+        active: Whether the entity is currently active.
+    """
 
     __slots__ = ("_entity_id", "active", "position", "size")
 

@@ -61,6 +61,15 @@ proposing changes.
 
 - [Overview](api/index.md)
 - [Application](api/application.md)
+- [Assets](api/assets.md)
+- [Collisions](api/collisions.md)
+- [Graphics](api/graphics.md)
+- [Input](api/input.md)
+- [Scenes](api/scenes.md)
+- [World](api/world.md)
+- [Game input](api/game-input.md)
+- [Game levels](api/game-levels.md)
+- [Game scenes](api/game-scenes.md)
 
 The API reference is generated from public Python interfaces and docstrings. It
 complements the manually maintained architecture pages and does not replace

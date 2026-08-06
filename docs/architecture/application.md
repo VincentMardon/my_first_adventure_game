@@ -28,7 +28,7 @@ and initial scene.
 
 ## Public components
 
-### `Application`
+### [`Application`](../api/application.md#my_first_adventure_game.engine.application.Application)
 
 Runs the Pygame lifecycle and coordinates each frame.
 
@@ -50,7 +50,7 @@ Does not know:
 - game colors or themes;
 - entities, levels, scoring, or profiles.
 
-### `WindowConfig`
+### [`WindowConfig`](../api/application.md#my_first_adventure_game.engine.application.WindowConfig)
 
 Stores the title and dimensions used to create the window.
 

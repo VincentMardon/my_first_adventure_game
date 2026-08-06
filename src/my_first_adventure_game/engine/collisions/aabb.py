@@ -3,7 +3,14 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True, slots=True)
 class AABB:
-    """Represent immutable axis-aligned bounds using floating-point values."""
+    """Represent immutable axis-aligned bounds using floating-point values.
+
+    Attributes:
+        x: Horizontal position of the left edge.
+        y: Vertical position of the top edge.
+        width: Non-negative horizontal extent.
+        height: Non-negative vertical extent.
+    """
 
     x: float
     y: float

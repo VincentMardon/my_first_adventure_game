@@ -27,7 +27,7 @@ providing one explicit transition mechanism.
 
 ## Public components
 
-### `Scene`
+### [`Scene`](../api/scenes.md#my_first_adventure_game.engine.scenes.Scene)
 
 Defines the required behavior of a scene.
 
@@ -53,7 +53,7 @@ Does not know:
 A concrete scene may receive selected collaborators through its constructor
 when its behavior requires them.
 
-### `SceneManager`
+### [`SceneManager`](../api/scenes.md#my_first_adventure_game.engine.scenes.SceneManager)
 
 Stores and delegates to the active scene.
 
@@ -158,7 +158,10 @@ player moves between maps.
 
 ## Game integration
 
-The current game provides `TitleScene` and `GameplayScene`.
+The current game provides
+[`TitleScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.TitleScene)
+and
+[`GameplayScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.GameplayScene).
 
 `TitleScene`:
 

@@ -18,7 +18,7 @@ concrete game-owned presentation need demonstrates its usefulness.
 
 ## Public components
 
-### `draw_text`
+### [`draw_text`](../api/graphics.md#my_first_adventure_game.engine.graphics.draw_text)
 
 Renders antialiased text with a supplied font and RGB color.
 

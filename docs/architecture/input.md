@@ -28,7 +28,7 @@ This separation allows:
 
 ## Public components
 
-### `InputProcessor`
+### [`InputProcessor`](../api/input.md#my_first_adventure_game.engine.input.InputProcessor)
 
 Defines the lifecycle required by `Application`.
 
@@ -48,7 +48,7 @@ Structurally implemented by:
 The application depends only on this protocol. It does not know action
 identifiers or query action state.
 
-### `KeyboardBindings`
+### [`KeyboardBindings`](../api/input.md#my_first_adventure_game.engine.input.KeyboardBindings)
 
 Maps generic action identifiers to integer key codes.
 
@@ -62,7 +62,7 @@ Provides:
 
 Stored key and action collections are exposed as immutable `frozenset` values.
 
-### `InputState`
+### [`InputState`](../api/input.md#my_first_adventure_game.engine.input.InputState)
 
 Tracks action state across frames.
 
@@ -75,7 +75,7 @@ Provides:
 Its public query API is action-oriented. Its current event ingestion is backed
 by keyboard bindings and Pygame key events.
 
-### `movement_axis`
+### [`movement_axis`](../api/input.md)
 
 Produces a `pygame.Vector2` from four directional actions.
 
@@ -201,8 +201,8 @@ its speed, and whether movement is currently allowed.
 
 The game defines:
 
-- `GameAction`;
-- `DEFAULT_KEYBOARD_BINDINGS`.
+- [`GameAction`](../api/game-input.md#my_first_adventure_game.game.input.GameAction);
+- [`DEFAULT_KEYBOARD_BINDINGS`](../api/game-input.md#my_first_adventure_game.game.input.DEFAULT_KEYBOARD_BINDINGS).
 
 Current concrete actions are:
 

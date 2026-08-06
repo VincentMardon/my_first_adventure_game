@@ -27,7 +27,7 @@ filesystem paths.
 
 ## Public components
 
-### `ImageCache`
+### [`ImageCache`](../api/assets.md#my_first_adventure_game.engine.assets.ImageCache)
 
 Loads images from a configured resource package.
 
@@ -44,7 +44,7 @@ instance.
 `convert_alpha()`. Such conversion requires an initialized display and its
 lifecycle has not yet been assigned to this domain.
 
-### `FontCache`
+### [`FontCache`](../api/assets.md#my_first_adventure_game.engine.assets.FontCache)
 
 Loads fonts from a configured resource package.
 
