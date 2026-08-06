@@ -36,8 +36,9 @@ flowchart TD
     Game --> Assets
     Game --> Graphics
     Game --> Input
-    Game --> Scenes
     Game --> Pygame
+    Game --> Scenes
+    Game --> World
 
     Application --> Input
     Application --> Scenes

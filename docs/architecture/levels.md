@@ -1,0 +1,101 @@
+# Levels domain
+
+## Responsibility
+
+The game levels domain defines the concrete spatial content used during gameplay.
+
+It currently provides:
+
+- `GameMap`, which groups a world with the entities whose roles matter to the game;
+- `create_demo_map()`, which creates the first Python-authored map.
+
+This domain belongs to `game`, not `engine`.
+
+## Why this domain exists
+
+The gameplay scene needs concrete spatial content without owning every entity
+definition and placement itself.
+
+Keeping this content in a dedicated game domain separates map construction from
+scene behavior while preserving the distinction between scenes and maps.
+
+## Public components
+
+### `GameMap`
+
+Groups:
+
+- the `World` containing all registered entities;
+- the player entity;
+- the wall entities used as solid obstacles.
+
+The dataclass is immutable, but the grouped world and entities remain mutable.
+
+### `create_demo_map`
+
+Creates the current demonstration map entirely in Python.
+
+It registers the player and walls in deterministic order and ensures the player
+starts outside every wall.
+
+The concrete identifiers, positions, sizes, and entity roles belong to the game.
+
+## Ownership
+
+The engine owns reusable world storage, spatial entities, bounds, and movement
+resolution.
+
+The game levels domain owns:
+
+- concrete map layouts;
+- player and wall roles;
+- entity identifiers;
+- initial positions and sizes;
+- the selection and ordering of map content.
+
+## Relationships
+
+```mermaid
+flowchart TD
+    GameMap["game.levels.GameMap"]
+    DemoMap["game.levels.create_demo_map"]
+    World["engine.world.World"]
+    Entity["engine.world.Entity"]
+
+    DemoMap --> GameMap
+    DemoMap --> World
+    DemoMap --> Entity
+    GameMap --> World
+    GameMap --> Entity
+```
+
+A map is spatial content managed during gameplay. It is not a scene and is not
+managed by `SceneManager`.
+
+## Invariants
+
+- The player and every wall are registered in the same world.
+- Entity identifiers are unique within the map.
+- Registration order is deterministic.
+- The map contains at least one wall.
+- The player starts outside every wall.
+- Wall bounds are distinct.
+
+## Extension points
+
+Additional Python-authored map factories may return other `GameMap` instances.
+
+A serialized map format, external editor, or generic loading abstraction should
+only be introduced when a concrete content-authoring requirement demonstrates
+the need.
+
+## Change risks
+
+Moving `GameMap` into the engine would leak concrete player and wall roles into
+a reusable mechanism.
+
+Treating maps as scenes would couple spatial navigation to global application
+state.
+
+Adding a generic map format prematurely would create an abstraction before the
+required content model is known.

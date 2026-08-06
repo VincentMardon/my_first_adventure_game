@@ -105,6 +105,23 @@ immutable collision bounds.
 Concrete entity types, solid obstacle selection, and behavior belong to the
 game.
 
+## Implemented game foundations
+
+### Scenes
+
+Provides the concrete title and gameplay scenes.
+
+The gameplay scene converts game actions into player movement, selects walls as
+solid obstacles, and owns the current presentation rules.
+
+### Levels
+
+Defines the first Python-authored game map.
+
+`GameMap` groups the reusable world representation with the concrete player and
+wall roles owned by the game. `create_demo_map()` defines their initial geometry
+and registration order.
+
 ## Reserved domains
 
 The package skeleton also reserves locations for capabilities that have not yet
@@ -112,7 +129,6 @@ been implemented:
 
 - persistence;
 - game entities;
-- levels;
 - scoring;
 - profiles;
 - localization.

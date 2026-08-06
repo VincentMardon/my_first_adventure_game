@@ -272,6 +272,11 @@ Implemented engine domains:
 - floating-point AABB geometry and overlap detection;
 - lightweight spatial entities, deterministic lookup and AABB movement;
 
+Implemented game foundations:
+
+- concrete title and gameplay scenes;
+- a Python-authored demo map with concrete player and wall roles.
+
 Reserved but not implemented:
 
 - persistence.

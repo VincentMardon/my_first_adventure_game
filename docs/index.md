@@ -49,6 +49,7 @@ proposing changes.
 - [Graphics](architecture/graphics.md)
 - [Collisions](architecture/collisions.md)
 - [World](architecture/world.md)
+- [Levels](architecture/levels.md)
 
 ### Architectural decisions
 
