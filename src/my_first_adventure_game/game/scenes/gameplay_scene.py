@@ -1,8 +1,11 @@
+from collections.abc import Callable
+
 import pygame
 
 from my_first_adventure_game.engine.input import InputState, movement_axis
 from my_first_adventure_game.engine.scenes import Scene
 from my_first_adventure_game.engine.world import Entity, move_entity
+from my_first_adventure_game.game.events import ItemCollected
 from my_first_adventure_game.game.input import GameAction
 
 PLAYER_SPEED = 160.0
@@ -21,11 +24,13 @@ class GameplayScene(Scene):
         player: Entity,
         walls: tuple[Entity, ...],
         collectibles: tuple[Entity, ...],
+        on_item_collected: Callable[[ItemCollected], None],
     ) -> None:
         self._input_state = input_state
         self._player = player
         self._walls = walls
         self._collectibles = collectibles
+        self._on_item_collected = on_item_collected
 
     def handle_event(self, event: pygame.event.Event) -> None:
         return None
@@ -48,6 +53,7 @@ class GameplayScene(Scene):
         for collectible in self._collectibles:
             if collectible.active and player_bounds.overlaps(collectible.bounds):
                 collectible.active = False
+                self._on_item_collected(ItemCollected(item_id=collectible.entity_id))
 
     def draw(self, surface: pygame.Surface) -> None:
         surface.fill(BACKGROUND_COLOR)

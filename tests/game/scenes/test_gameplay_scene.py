@@ -4,6 +4,7 @@ import pygame
 
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.world import Entity
+from my_first_adventure_game.game.events import ItemCollected
 from my_first_adventure_game.game.input import GameAction
 from my_first_adventure_game.game.scenes import gameplay_scene
 from my_first_adventure_game.game.scenes.gameplay_scene import (
@@ -28,6 +29,7 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
         position=pygame.Vector2(200.0, 80.0),
         size=pygame.Vector2(32.0, 32.0),
     )
+    on_item_collected = Mock()
 
     movement_axis = Mock(return_value=pygame.Vector2(0.6, 0.8))
     move_entity = Mock()
@@ -40,6 +42,7 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
         player=player,
         walls=(wall,),
         collectibles=(),
+        on_item_collected=on_item_collected,
     )
 
     scene.update(0.5)
@@ -84,6 +87,7 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         size=pygame.Vector2(12.0, 12.0),
         active=False,
     )
+    on_item_collected = Mock()
     draw_rect = Mock()
 
     monkeypatch.setattr(pygame.draw, "rect", draw_rect)
@@ -93,6 +97,7 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         player=player,
         walls=(wall,),
         collectibles=(active_collectible, inactive_collectible),
+        on_item_collected=on_item_collected,
     )
 
     scene.draw(surface)
@@ -117,7 +122,9 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
     ]
 
 
-def test_update_deactivates_overlapping_collectible(monkeypatch) -> None:
+def test_update_deactivates_overlapping_collectible_and_reports_event_once(
+    monkeypatch,
+) -> None:
     input_state = Mock(spec=InputState)
     player = Entity(
         entity_id="player",
@@ -134,6 +141,7 @@ def test_update_deactivates_overlapping_collectible(monkeypatch) -> None:
         position=pygame.Vector2(240.0, 160.0),
         size=pygame.Vector2(8.0, 8.0),
     )
+    on_item_collected = Mock()
 
     monkeypatch.setattr(
         gameplay_scene,
@@ -147,9 +155,14 @@ def test_update_deactivates_overlapping_collectible(monkeypatch) -> None:
         player=player,
         walls=(),
         collectibles=(overlapping, distant),
+        on_item_collected=on_item_collected,
     )
 
     scene.update(0.016)
+    scene.update(0.016)
 
+    on_item_collected.assert_called_once_with(
+        ItemCollected(item_id=overlapping.entity_id)
+    )
     assert not overlapping.active
     assert distant.active

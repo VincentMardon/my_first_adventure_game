@@ -26,6 +26,8 @@ and this project adheres to
 - A game-owned Python-authored demo map with concrete player, wall, and
   collectible roles.
 - Collectible objects that disappear when the player overlaps them.
+- Immutable `ItemCollected` facts delivered once through an explicit gameplay
+  callback.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

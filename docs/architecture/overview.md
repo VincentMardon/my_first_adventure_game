@@ -107,6 +107,13 @@ game.
 
 ## Implemented game foundations
 
+### Events
+
+Defines immutable facts produced by concrete gameplay behavior.
+
+The current `ItemCollected` event identifies a collected item without deciding
+its consequences for score, session state, or persistence.
+
 ### Scenes
 
 Provides the concrete title and gameplay scenes.
@@ -159,6 +166,7 @@ flowchart TD
     GameMap["GameMap"]
     World["World"]
     Entity["Entity"]
+    ItemCollected["ItemCollected"]
     FontCache["FontCache"]
     DrawText["draw_text"]
 
@@ -181,8 +189,10 @@ flowchart TD
     TitleScene --> FontCache
     TitleScene --> DrawText
     TitleScene --> InputState
+
     GameplayScene --> InputState
     GameplayScene --> Entity
+    GameplayScene --> ItemCollected
 
     InputState -. "implements structurally" .-> InputProcessor
     InputState --> KeyboardBindings
@@ -192,8 +202,12 @@ flowchart TD
 ```
 
 `game.main` creates the demo map and composes `GameplayScene` from its player,
-walls, and collectibles. It injects a callback into `TitleScene` that explicitly
-replaces the active scene when confirmation is pressed.
+walls, collectibles, and an explicit collection handler. `GameplayScene`
+delivers an `ItemCollected` fact when an active collectible is collected. The
+current handler intentionally applies no consequence.
+
+`game.main` also injects a callback into `TitleScene` that explicitly replaces
+the active scene when confirmation is pressed.
 
 `game.main` also configures `FontCache` with Pygame's resource package.
 `TitleScene` loads the selected font lazily during drawing, after the application

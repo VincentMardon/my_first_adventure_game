@@ -33,12 +33,16 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_input_state.assert_called_once_with(game_main.DEFAULT_KEYBOARD_BINDINGS)
     create_font_cache.assert_called_once_with(game_main.pygame)
     create_demo_map.assert_called_once_with()
-    create_gameplay_scene.assert_called_once_with(
+    create_gameplay_scene.assert_called_once()
+    gameplay_args = create_gameplay_scene.call_args.args
+
+    assert gameplay_args[:4] == (
         input_state,
         game_map.player,
         game_map.walls,
         game_map.collectibles,
     )
+    assert callable(gameplay_args[4])
 
     create_title_scene.assert_called_once()
     assert create_title_scene.call_args.args[:2] == (

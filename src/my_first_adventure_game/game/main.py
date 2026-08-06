@@ -4,6 +4,7 @@ from my_first_adventure_game.engine.application import Application, WindowConfig
 from my_first_adventure_game.engine.assets import FontCache
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.scenes import SceneManager
+from my_first_adventure_game.game.events import ItemCollected
 from my_first_adventure_game.game.input import DEFAULT_KEYBOARD_BINDINGS
 from my_first_adventure_game.game.levels import create_demo_map
 from my_first_adventure_game.game.scenes import GameplayScene, TitleScene
@@ -28,11 +29,16 @@ def main() -> None:
         start_game,
     )
     scene_manager = SceneManager(initial_scene)
+
+    def handle_item_collected(_event: ItemCollected) -> None:
+        return None
+
     gameplay_scene = GameplayScene(
         input_state,
         game_map.player,
         game_map.walls,
         game_map.collectibles,
+        handle_item_collected,
     )
     application = Application(
         window_config=WINDOW_CONFIG,

@@ -122,6 +122,7 @@ Implemented foundations include:
 - axis-separated movement against solid obstacles;
 - a game-owned Python-authored demo map with collectible objects;
 - game-owned collection behavior based on reusable entity overlap detection;
+- immutable factual gameplay events delivered through explicit callbacks;
 - automated tests, Ruff checks, strict documentation builds, package builds,
   and GitHub Actions CI.
 
