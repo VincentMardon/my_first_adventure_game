@@ -72,6 +72,9 @@ materializes it once so both axes inspect the same obstacles.
 The entity is expected to start outside the supplied obstacles. Existing
 overlaps are not resolved.
 
+The current concrete consumer is `game.scenes.GameplayScene`, which selects its
+wall bounds as solid obstacles and owns the movement speed.
+
 ## Ownership
 
 The engine owns common spatial state.

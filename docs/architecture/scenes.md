@@ -92,6 +92,12 @@ classDiagram
         +draw(surface)
     }
 
+    class GameplayScene {
+        +handle_event(event)
+        +update(delta_time)
+        +draw(surface)
+    }
+
     class TitleScene {
         +handle_event(event)
         +update(delta_time)
@@ -99,12 +105,13 @@ classDiagram
     }
 
     SceneManager o-- Scene : active scene
+    Scene <|-- GameplayScene
     Scene <|-- TitleScene
     Application --> SceneManager : delegates frame work
 ```
 
-`TitleScene` belongs to `game`, even though it implements the engine-owned
-`Scene` contract.
+`TitleScene` and `GameplayScene` belong to `game`, even though they implement
+the engine-owned `Scene` contract.
 
 ## Transition semantics
 
@@ -152,17 +159,27 @@ player moves between maps.
 
 ## Game integration
 
-The current game provides `TitleScene`.
+The current game provides `TitleScene` and `GameplayScene`.
 
-It:
+`TitleScene`:
 
 - ignores events;
 - has no time-dependent behavior;
-- draws the game-owned background color.
+- draws the game-owned background and centered title;
+- loads its selected font lazily through `FontCache`;
+- does not yet provide navigation.
 
-The title scene does not yet display text or provide navigation.
+`GameplayScene`:
 
-Future concrete scenes remain in `game.scenes`.
+- receives the action input state, player entity, and wall entities;
+- converts directional actions into normalized movement;
+- applies the game-owned movement speed using delta time;
+- selects wall bounds as solid obstacles;
+- delegates collision-aware movement to the engine;
+- draws walls before the player using game-owned colors;
+- rounds floating-point geometry only at rendering time.
+
+`GameplayScene` is implemented but is not yet composed by `game.main`.
 
 ## Invariants
 
@@ -210,4 +227,6 @@ Current tests verify:
 - events are delegated to the active scene;
 - updates are delegated with delta time;
 - drawing is delegated with the target surface;
-- the concrete title scene draws its game-owned background.
+- the concrete title scene draws its background and centered title;
+- the gameplay scene delegates movement with game actions, speed, and walls;
+- the gameplay scene draws its background, walls, and player in order.
