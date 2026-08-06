@@ -54,6 +54,9 @@ select = [
   "B",
 ]
 
+[tool.ruff.lint.isort]
+known-first-party = ["my_first_adventure_game"]
+
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"

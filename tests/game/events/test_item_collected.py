@@ -1,6 +1,7 @@
 from dataclasses import FrozenInstanceError
 
 import pytest
+
 from my_first_adventure_game.game.events import ItemCollected
 
 
