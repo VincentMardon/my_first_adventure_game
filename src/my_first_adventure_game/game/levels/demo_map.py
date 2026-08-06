@@ -38,14 +38,27 @@ def create_demo_map() -> GameMap:
             size=pygame.Vector2(32.0, 256.0),
         ),
     )
+    collectibles = (
+        Entity(
+            entity_id="collectible-1",
+            position=pygame.Vector2(256.0, 160.0),
+            size=pygame.Vector2(16.0, 16.0),
+        ),
+        Entity(
+            entity_id="collectible-2",
+            position=pygame.Vector2(640.0, 360.0),
+            size=pygame.Vector2(16.0, 16.0),
+        ),
+    )
 
     world = World()
 
-    for entity in (player, *walls):
+    for entity in (player, *walls, *collectibles):
         world.add(entity)
 
     return GameMap(
         world=world,
         player=player,
         walls=walls,
+        collectibles=collectibles,
     )

@@ -18,11 +18,6 @@ def main() -> None:
     input_state = InputState(DEFAULT_KEYBOARD_BINDINGS)
     font_cache = FontCache(pygame)
     game_map = create_demo_map()
-    gameplay_scene = GameplayScene(
-        input_state,
-        game_map.player,
-        game_map.walls,
-    )
 
     def start_game() -> None:
         scene_manager.change_scene(gameplay_scene)
@@ -33,6 +28,12 @@ def main() -> None:
         start_game,
     )
     scene_manager = SceneManager(initial_scene)
+    gameplay_scene = GameplayScene(
+        input_state,
+        game_map.player,
+        game_map.walls,
+        game_map.collectibles,
+    )
     application = Application(
         window_config=WINDOW_CONFIG,
         scene_manager=scene_manager,

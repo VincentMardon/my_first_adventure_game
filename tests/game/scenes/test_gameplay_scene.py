@@ -8,6 +8,7 @@ from my_first_adventure_game.game.input import GameAction
 from my_first_adventure_game.game.scenes import gameplay_scene
 from my_first_adventure_game.game.scenes.gameplay_scene import (
     BACKGROUND_COLOR,
+    COLLECTIBLE_COLOR,
     PLAYER_COLOR,
     PLAYER_SPEED,
     WALL_COLOR,
@@ -38,6 +39,7 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
         input_state=input_state,
         player=player,
         walls=(wall,),
+        collectibles=(),
     )
 
     scene.update(0.5)
@@ -56,7 +58,9 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
     )
 
 
-def test_draw_renders_background_walls_and_player(monkeypatch) -> None:
+def test_draw_renders_background_walls_active_collectibles_and_player(
+    monkeypatch,
+) -> None:
     surface = Mock(spec=pygame.Surface)
     input_state = Mock(spec=InputState)
     player = Entity(
@@ -69,6 +73,17 @@ def test_draw_renders_background_walls_and_player(monkeypatch) -> None:
         position=pygame.Vector2(160.0, 64.0),
         size=pygame.Vector2(32.0, 48.0),
     )
+    active_collectible = Entity(
+        entity_id="collectible-active",
+        position=pygame.Vector2(120.0, 96.0),
+        size=pygame.Vector2(12.0, 12.0),
+    )
+    inactive_collectible = Entity(
+        entity_id="collectible-inactive",
+        position=pygame.Vector2(136.0, 96.0),
+        size=pygame.Vector2(12.0, 12.0),
+        active=False,
+    )
     draw_rect = Mock()
 
     monkeypatch.setattr(pygame.draw, "rect", draw_rect)
@@ -77,6 +92,7 @@ def test_draw_renders_background_walls_and_player(monkeypatch) -> None:
         input_state=input_state,
         player=player,
         walls=(wall,),
+        collectibles=(active_collectible, inactive_collectible),
     )
 
     scene.draw(surface)
@@ -90,7 +106,50 @@ def test_draw_renders_background_walls_and_player(monkeypatch) -> None:
         ),
         call(
             surface,
+            COLLECTIBLE_COLOR,
+            pygame.Rect(120, 96, 12, 12),
+        ),
+        call(
+            surface,
             PLAYER_COLOR,
             pygame.Rect(100, 80, 24, 24),
         ),
     ]
+
+
+def test_update_deactivates_overlapping_collectible(monkeypatch) -> None:
+    input_state = Mock(spec=InputState)
+    player = Entity(
+        entity_id="player",
+        position=pygame.Vector2(100.0, 80.0),
+        size=pygame.Vector2(24.0, 24.0),
+    )
+    overlapping = Entity(
+        entity_id="collectible-overlapping",
+        position=pygame.Vector2(108.0, 88.0),
+        size=pygame.Vector2(8.0, 8.0),
+    )
+    distant = Entity(
+        entity_id="collectible-distant",
+        position=pygame.Vector2(240.0, 160.0),
+        size=pygame.Vector2(8.0, 8.0),
+    )
+
+    monkeypatch.setattr(
+        gameplay_scene,
+        "movement_axis",
+        Mock(return_value=pygame.Vector2()),
+    )
+    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+
+    scene = GameplayScene(
+        input_state=input_state,
+        player=player,
+        walls=(),
+        collectibles=(overlapping, distant),
+    )
+
+    scene.update(0.016)
+
+    assert not overlapping.active
+    assert distant.active

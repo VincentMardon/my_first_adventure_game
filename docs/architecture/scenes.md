@@ -173,17 +173,21 @@ and
 
 `GameplayScene`:
 
-- receives the action input state, player entity, and wall entities;
+- receives the action input state, player entity, wall entities, and collectible
+  entities;
 - converts directional actions into normalized movement;
 - applies the game-owned movement speed using delta time;
 - selects wall bounds as solid obstacles;
 - delegates collision-aware movement to the engine;
-- draws walls before the player using game-owned colors;
+- detects player overlap with active collectibles after movement;
+- applies the game-owned collection rule by deactivating overlapping
+  collectibles;
+- draws walls, active collectibles, and the player using game-owned colors;
 - rounds floating-point geometry only at rendering time.
 
-`game.main` composes `GameplayScene` from the player and walls provided by the
-demo map. It injects a game-owned callback into `TitleScene` that explicitly
-replaces the title with the gameplay scene.
+`game.main` composes `GameplayScene` from the player, walls, and collectibles
+provided by the demo map. It injects a game-owned callback into `TitleScene`
+that explicitly replaces the title with the gameplay scene.
 
 ## Invariants
 
@@ -233,7 +237,11 @@ Current tests verify:
 - drawing is delegated with the target surface;
 - the concrete title scene draws its background and centered title;
 - the gameplay scene delegates movement with game actions, speed, and walls;
-- the gameplay scene draws its background, walls, and player in order;
+- the gameplay scene draws its background, walls, active collectibles, and
+  player in order;
+- the gameplay scene deactivates an active collectible overlapping the player
+  while leaving distant collectibles active;
 - the title scene requests gameplay only when confirmation is pressed;
 - the composition root connects the demo map and explicit title-to-gameplay
   transition.
+  

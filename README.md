@@ -106,6 +106,7 @@ The project now provides a minimal playable top-down loop:
 2. pressing Enter explicitly transitions to gameplay;
 3. the arrow keys move the player through a Python-authored map;
 4. axis-aligned collisions prevent the player from crossing walls.
+5. overlapping a collectible deactivates it and removes it from view.
 
 Implemented foundations include:
 
@@ -119,7 +120,8 @@ Implemented foundations include:
 - immutable floating-point collision bounds;
 - lightweight spatial entities and deterministic world storage;
 - axis-separated movement against solid obstacles;
-- a game-owned Python-authored demo map;
+- a game-owned Python-authored demo map with collectible objects;
+- game-owned collection behavior based on reusable entity overlap detection;
 - automated tests, Ruff checks, strict documentation builds, package builds,
   and GitHub Actions CI.
 

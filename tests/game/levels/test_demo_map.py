@@ -3,17 +3,25 @@ import pygame
 from my_first_adventure_game.game.levels import create_demo_map
 
 
-def test_demo_map_registers_player_and_walls_in_world() -> None:
+def test_demo_map_registers_all_entities_in_world() -> None:
     game_map = create_demo_map()
 
     assert game_map.world.entities == (
         game_map.player,
         *game_map.walls,
+        *game_map.collectibles,
     )
     assert game_map.world.get(game_map.player.entity_id) is game_map.player
 
-    for wall in game_map.walls:
-        assert game_map.world.get(wall.entity_id) is wall
+    for entity in (*game_map.walls, *game_map.collectibles):
+        assert game_map.world.get(entity.entity_id) is entity
+
+
+def test_demo_map_has_active_collectibles() -> None:
+    game_map = create_demo_map()
+
+    assert game_map.collectibles
+    assert all(collectible.active for collectible in game_map.collectibles)
 
 
 def test_demo_map_has_active_player_and_solid_walls() -> None:
@@ -32,6 +40,16 @@ def test_demo_map_player_starts_outside_walls() -> None:
     )
 
 
+def test_demo_map_collectibles_start_outside_player_and_walls() -> None:
+    game_map = create_demo_map()
+
+    for collectible in game_map.collectibles:
+        assert not collectible.bounds.overlaps(game_map.player.bounds)
+        assert not any(
+            collectible.bounds.overlaps(wall.bounds) for wall in game_map.walls
+        )
+
+
 def test_demo_map_uses_floating_point_entity_geometry() -> None:
     game_map = create_demo_map()
 
@@ -41,6 +59,11 @@ def test_demo_map_uses_floating_point_entity_geometry() -> None:
         isinstance(wall.position, pygame.Vector2)
         and isinstance(wall.size, pygame.Vector2)
         for wall in game_map.walls
+    )
+    assert all(
+        isinstance(collectible.position, pygame.Vector2)
+        and isinstance(collectible.size, pygame.Vector2)
+        for collectible in game_map.collectibles
     )
 
 

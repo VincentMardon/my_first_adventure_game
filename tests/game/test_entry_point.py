@@ -37,6 +37,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         input_state,
         game_map.player,
         game_map.walls,
+        game_map.collectibles,
     )
 
     create_title_scene.assert_called_once()

@@ -27,7 +27,8 @@ Groups:
 
 - the `World` containing all registered entities;
 - the player entity;
-- the wall entities used as solid obstacles.
+- the wall entities used as solid obstacles;
+- the entities assigned the collectible role by the game.
 
 The dataclass is immutable, but the grouped world and entities remain mutable.
 
@@ -35,8 +36,9 @@ The dataclass is immutable, but the grouped world and entities remain mutable.
 
 Creates the current demonstration map entirely in Python.
 
-It registers the player and walls in deterministic order and ensures the player
-starts outside every wall.
+It registers the player, walls, and collectibles in deterministic order. Their
+initial geometry keeps the player and collectibles outside the walls and prevents
+collectibles from overlapping the player.
 
 The concrete identifiers, positions, sizes, and entity roles belong to the game.
 
@@ -48,7 +50,7 @@ resolution.
 The game levels domain owns:
 
 - concrete map layouts;
-- player and wall roles;
+- player, wall, and collectible roles;
 - entity identifiers;
 - initial positions and sizes;
 - the selection and ordering of map content.
@@ -74,20 +76,21 @@ flowchart TD
     GameMain --> GameplayScene
 ```
 
-`game.main` creates the demo map and passes its player and walls to
-`GameplayScene`. The scene consumes these concrete roles without depending on
-the `GameMap` container itself.
+`game.main` creates the demo map and passes its player, walls, and collectibles
+to `GameplayScene`. The scene consumes these concrete roles without depending
+on the `GameMap` container itself.
 
 A map is spatial content managed during gameplay. It is not a scene and is not
 managed by `SceneManager`.
 
 ## Invariants
 
-- The player and every wall are registered in the same world.
+- The player, every wall, and every collectible are registered in the same world.
 - Entity identifiers are unique within the map.
 - Registration order is deterministic.
-- The map contains at least one wall.
+- The map contains at least one wall and one collectible.
 - The player starts outside every wall.
+- Every collectible starts outside the player and every wall.
 - Wall bounds are distinct.
 
 ## Extension points
@@ -100,8 +103,8 @@ the need.
 
 ## Change risks
 
-Moving `GameMap` into the engine would leak concrete player and wall roles into
-a reusable mechanism.
+Moving `GameMap` into the engine would leak concrete player, wall, and
+collectible roles into a reusable mechanism.
 
 Treating maps as scenes would couple spatial navigation to global application
 state.

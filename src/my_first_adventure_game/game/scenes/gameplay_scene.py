@@ -8,6 +8,7 @@ from my_first_adventure_game.game.input import GameAction
 PLAYER_SPEED = 160.0
 PLAYER_COLOR = (224, 196, 96)
 WALL_COLOR = (84, 104, 92)
+COLLECTIBLE_COLOR = (112, 200, 224)
 BACKGROUND_COLOR = (18, 32, 24)
 
 
@@ -19,10 +20,12 @@ class GameplayScene(Scene):
         input_state: InputState[GameAction],
         player: Entity,
         walls: tuple[Entity, ...],
+        collectibles: tuple[Entity, ...],
     ) -> None:
         self._input_state = input_state
         self._player = player
         self._walls = walls
+        self._collectibles = collectibles
 
     def handle_event(self, event: pygame.event.Event) -> None:
         return None
@@ -40,6 +43,12 @@ class GameplayScene(Scene):
 
         move_entity(self._player, movement, solid_bounds)
 
+        player_bounds = self._player.bounds
+
+        for collectible in self._collectibles:
+            if collectible.active and player_bounds.overlaps(collectible.bounds):
+                collectible.active = False
+
     def draw(self, surface: pygame.Surface) -> None:
         surface.fill(BACKGROUND_COLOR)
 
@@ -49,6 +58,14 @@ class GameplayScene(Scene):
                 WALL_COLOR,
                 _entity_rect(wall),
             )
+
+        for collectible in self._collectibles:
+            if collectible.active:
+                pygame.draw.rect(
+                    surface,
+                    COLLECTIBLE_COLOR,
+                    _entity_rect(collectible),
+                )
 
         pygame.draw.rect(
             surface,

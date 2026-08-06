@@ -23,7 +23,9 @@ and this project adheres to
 - Axis-separated movement that prevents crossing solid AABB obstacles.
 - A concrete gameplay scene with normalized player movement and collision-aware
   wall handling.
-- A game-owned Python-authored demo map with concrete player and wall roles.
+- A game-owned Python-authored demo map with concrete player, wall, and
+  collectible roles.
+- Collectible objects that disappear when the player overlaps them.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,
