@@ -221,6 +221,20 @@ Update:
 Generated documentation must not become the only source of architectural
 reasoning.
 
+MkDocs provides the documentation site and mkdocstrings generates the API
+reference from public package entry points.
+
+When adding or changing a public domain:
+
+- update its architecture page;
+- update or create its page under `docs/api`;
+- update `docs/index.md` and `mkdocs.yml`;
+- keep architecture-to-API links valid;
+- run the strict documentation build.
+
+Generated API pages describe available contracts. They must not become the only
+source of responsibilities, design intent, invariants, or change risks.
+
 ## Commit convention
 
 Use Conventional Commits with a scope:
@@ -251,12 +265,15 @@ Activate the project virtual environment and use `python`, not the Windows
 python -m ruff format --check .
 python -m ruff check .
 python -m pytest
+python -m mkdocs build --strict
 python -m build
 ```
 
-`python -m build` creates files and is run by the owner.
+`python -m mkdocs build --strict` and `python -m build` create files and are run
+by the owner.
 
-The CI must reproduce formatting, lint, tests, and package build checks.
+The CI must reproduce formatting, lint, tests, strict documentation, and package
+build checks.
 
 ## Current implemented foundations
 

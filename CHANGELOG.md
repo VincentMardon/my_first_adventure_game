@@ -10,6 +10,13 @@ and this project adheres to
 
 ### Added
 
+- A searchable MkDocs documentation site with Material navigation and Mermaid
+  diagram rendering.
+- A generated public API reference backed by mkdocstrings and source docstrings.
+- Direct links between architectural component descriptions and generated API
+  contracts.
+- Strict documentation builds in the local verification workflow and GitHub
+  Actions CI.
 - Floating-point AABB geometry with positive-area overlap detection.
 - Lightweight spatial entities with stable identifiers and mutable geometry.
 - Deterministic world registration and entity lookup.

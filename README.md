@@ -40,11 +40,11 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-Install the project and its development dependencies:
+Install the project with its development and documentation dependencies:
 
 ```powershell
 python -m pip install --upgrade pip
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,docs]"
 ```
 
 ## Running the game
@@ -86,6 +86,12 @@ Run the tests:
 python -m pytest
 ```
 
+Build the documentation with strict link and configuration checks:
+
+```powershell
+python -m mkdocs build --strict
+```
+
 Build the package:
 
 ```powershell
@@ -114,15 +120,34 @@ Implemented foundations include:
 - lightweight spatial entities and deterministic world storage;
 - axis-separated movement against solid obstacles;
 - a game-owned Python-authored demo map;
-- automated tests, Ruff checks, package builds, and GitHub Actions CI.
+- automated tests, Ruff checks, strict documentation builds, package builds,
+  and GitHub Actions CI.
 
 Persistence, scoring, profiles, localization, combat, and interaction systems
 have not been implemented yet.
 
 ## Documentation
 
+The documentation site combines manually maintained architecture pages with an
+API reference generated from public Python interfaces and docstrings.
+
+Build the site:
+
+```powershell
+python -m mkdocs build --strict
+```
+
+Preview it locally:
+
+```powershell
+python -m mkdocs serve
+```
+
 See [docs/index.md](docs/index.md) for the architecture overview, domain
-responsibilities, project boundaries, and architectural decision records.
+responsibilities, project boundaries, decision records, and API reference.
+
+Generated API documentation complements architectural reasoning. It does not
+replace manually maintained architecture pages or decision records.
 
 ## Changelog
 
