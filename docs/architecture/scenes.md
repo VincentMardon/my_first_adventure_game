@@ -249,4 +249,3 @@ Current tests verify:
 - the title scene requests gameplay only when confirmation is pressed;
 - the composition root connects the demo map and explicit title-to-gameplay
   transition.
-  

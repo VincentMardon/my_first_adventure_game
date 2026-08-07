@@ -35,6 +35,9 @@ jobs:
       - name: Check formatting
         run: python -m ruff format --check .
 
+      - name: Check Markdown formatting
+        run: python -m mdformat --check README.md CHANGELOG.md AGENTS.md docs
+
       - name: Run lint
         run: python -m ruff check .
 

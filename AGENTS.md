@@ -140,7 +140,7 @@ For each increment:
 9. run the relevant quality checks;
 10. inspect the complete diff;
 11. report the documentation changes and propose one Conventional Commit
-    message with a scope;
+   message with a scope;
 12. let the owner review, commit, and push;
 13. verify the remote CI when requested.
 
@@ -234,6 +234,10 @@ reasoning.
 MkDocs provides the documentation site and mkdocstrings generates the API
 reference from public package entry points.
 
+Mdformat enforces consistent Markdown structure, list indentation, tables, and
+line endings. Keep its versions pinned and preserve the validated MkDocs and
+GFM extensions.
+
 When adding or changing a public domain:
 
 - update its architecture page;
@@ -273,6 +277,7 @@ Activate the project virtual environment and use `python`, not the Windows
 ```powershell
 .\.venv\Scripts\Activate.ps1
 python -m ruff format --check .
+python -m mdformat --check README.md CHANGELOG.md AGENTS.md docs
 python -m ruff check .
 python -m pytest
 python -m mkdocs build --strict
@@ -282,8 +287,8 @@ python -m build
 `python -m mkdocs build --strict` and `python -m build` create files and are run
 by the owner.
 
-The CI must reproduce formatting, lint, tests, strict documentation, and package
-build checks.
+The CI must reproduce Python and Markdown formatting, lint, tests, strict
+documentation, and package build checks.
 
 ## Current implemented foundations
 

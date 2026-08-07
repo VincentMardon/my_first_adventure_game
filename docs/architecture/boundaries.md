@@ -129,12 +129,12 @@ A rule decides what that event means for this game.
 
 Examples:
 
-| Mechanism owned by the engine | Rule owned by the game |
-| --- | --- |
-| An action is held | The player moves left |
-| Two rectangles overlap | The player takes damage |
-| An entity was removed | The score increases |
-| Data can be stored atomically | A profile records a completed level |
+| Mechanism owned by the engine  | Rule owned by the game                 |
+| ------------------------------ | -------------------------------------- |
+| An action is held              | The player moves left                  |
+| Two rectangles overlap         | The player takes damage                |
+| An entity was removed          | The score increases                    |
+| Data can be stored atomically  | A profile records a completed level    |
 | A map transition was requested | A particular destination map is loaded |
 
 Whenever possible, the engine should expose facts and capabilities. The game
@@ -183,7 +183,7 @@ API.
 A capability belongs in the engine only when all of the following are true:
 
 1. it solves a current requirement or an explicit prerequisite in the accepted
-    project roadmap;
+   project roadmap;
 2. it can be described without using game-specific rules or content;
 3. it has a concrete use case or named future consumer in that roadmap;
 4. it can be tested independently from a concrete game;

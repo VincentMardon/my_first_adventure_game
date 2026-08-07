@@ -74,6 +74,12 @@ Check formatting:
 python -m ruff format --check .
 ```
 
+Check Markdown formatting:
+
+```powershell
+python -m mdformat --check README.md CHANGELOG.md AGENTS.md docs
+```
+
 Run the linter:
 
 ```powershell
