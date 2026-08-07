@@ -142,7 +142,8 @@ have not been implemented yet.
 ## Documentation
 
 The documentation site combines manually maintained architecture pages with an
-API reference generated from public Python interfaces and docstrings.
+API reference generated during each build from public package entry points and
+their docstrings.
 
 Build the site:
 

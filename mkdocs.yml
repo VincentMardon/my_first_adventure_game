@@ -26,6 +26,9 @@ markdown_extensions:
 
 plugins:
   - search
+  - gen-files:
+      scripts:
+        - scripts/generate_api_pages.py
   - mkdocstrings:
       handlers:
         python:

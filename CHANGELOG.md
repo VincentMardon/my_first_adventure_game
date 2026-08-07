@@ -18,6 +18,7 @@ and this project adheres to
 - Strict documentation builds in the local verification workflow and GitHub
   Actions CI.
 - Consistent Markdown formatting enforced locally and in GitHub Actions CI.
+- Automatic API page discovery and generation from public package entry points.
 - Floating-point AABB geometry with positive-area overlap detection.
 - Lightweight spatial entities with stable identifiers and mutable geometry.
 - Deterministic world registration and entity lookup.

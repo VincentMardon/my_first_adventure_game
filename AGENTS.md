@@ -231,8 +231,14 @@ Update:
 Generated documentation must not become the only source of architectural
 reasoning.
 
-MkDocs provides the documentation site and mkdocstrings generates the API
-reference from public package entry points.
+MkDocs provides the documentation site. Mkdocs-gen-files discovers public
+domains and creates their virtual API pages during each build, while
+mkdocstrings renders the public interfaces and docstrings.
+
+`scripts/generate_api_pages.py` discovers two-level package entry points whose
+`__init__.py` defines a non-empty `__all__`. Generated domain pages do not exist
+as physical files under `docs/api`; `docs/api/index.md` remains manually
+maintained.
 
 Mdformat enforces consistent Markdown structure, list indentation, tables, and
 line endings. Keep its versions pinned and preserve the validated MkDocs and
@@ -241,8 +247,9 @@ GFM extensions.
 When adding or changing a public domain:
 
 - update its architecture page;
-- update or create its page under `docs/api`;
-- update `docs/index.md` and `mkdocs.yml`;
+- expose its public contracts through a non-empty `__all__`;
+- update `docs/api/index.md`, `docs/index.md`, and the `mkdocs.yml` navigation
+  when the domain itself is new;
 - keep architecture-to-API links valid;
 - run the strict documentation build.
 
