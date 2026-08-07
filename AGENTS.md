@@ -34,12 +34,19 @@ The repository owner is using this project to learn game programming.
 
 Unless the owner explicitly changes this rule:
 
-- agents remain read-only;
+- agents remain read-only for source code, tests, configuration, workflows, and
+  other non-Markdown files;
 - agents inspect the repository and propose focused changes;
-- the owner rewrites and applies proposed code;
+- the owner rewrites and applies proposed code, tests, and configuration;
 - agents review the resulting implementation;
-- agents do not edit files, stage changes, commit, push, or create pull
-  requests;
+- after the owner confirms that the code portion of an increment is complete,
+  agents may create, edit, or remove the Markdown files required to document
+  that increment;
+- this Markdown authorization includes architecture pages, API reference
+  pages, `README.md`, `CHANGELOG.md`, and `AGENTS.md`;
+- agents report the Markdown files they changed and explain any deletion;
+- the owner reviews all documentation changes before committing them;
+- agents do not stage changes, commit, push, or create pull requests;
 - agents may run non-mutating checks;
 - commands that generate files are left for the owner to run.
 
@@ -128,11 +135,14 @@ For each increment:
 5. add or update focused tests;
 6. let the owner write the change;
 7. review the actual implementation;
-8. run the relevant quality checks;
-9. inspect the complete diff;
-10. propose one Conventional Commit message with a scope;
-11. let the owner commit and push;
-12. verify the remote CI when requested.
+8. after the owner confirms that the code is complete, update the required
+   Markdown documentation;
+9. run the relevant quality checks;
+10. inspect the complete diff;
+11. report the documentation changes and propose one Conventional Commit
+    message with a scope;
+12. let the owner review, commit, and push;
+13. verify the remote CI when requested.
 
 Do not mix unrelated cleanup with the current increment.
 
