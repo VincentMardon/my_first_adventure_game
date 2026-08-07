@@ -8,6 +8,10 @@ from my_first_adventure_game.game.events import ItemCollected
 from my_first_adventure_game.game.input import DEFAULT_KEYBOARD_BINDINGS
 from my_first_adventure_game.game.levels import create_demo_map
 from my_first_adventure_game.game.scenes import GameplayScene, TitleScene
+from my_first_adventure_game.game.scoring import (
+    SessionScore,
+    item_collection_points,
+)
 
 WINDOW_CONFIG = WindowConfig(title="My First Adventure Game", size=(1280, 720))
 FRAMES_PER_SECOND = 60
@@ -19,6 +23,7 @@ def main() -> None:
     input_state = InputState(DEFAULT_KEYBOARD_BINDINGS)
     font_cache = FontCache(pygame)
     game_map = create_demo_map()
+    session_score = SessionScore()
 
     def start_game() -> None:
         scene_manager.change_scene(gameplay_scene)
@@ -30,11 +35,13 @@ def main() -> None:
     )
     scene_manager = SceneManager(initial_scene)
 
-    def handle_item_collected(_event: ItemCollected) -> None:
-        return None
+    def handle_item_collected(event: ItemCollected) -> None:
+        session_score.add(item_collection_points(event))
 
     gameplay_scene = GameplayScene(
         input_state,
+        font_cache,
+        session_score,
         game_map.player,
         game_map.walls,
         game_map.collectibles,

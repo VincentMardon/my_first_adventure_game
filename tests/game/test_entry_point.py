@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 
 from my_first_adventure_game.game import main as game_main
+from my_first_adventure_game.game.events import ItemCollected
 
 
 def test_main_builds_and_runs_application(monkeypatch) -> None:
@@ -9,6 +10,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     scene_manager = Mock()
     font_cache = Mock()
     game_map = Mock()
+    session_score = Mock()
     gameplay_scene = Mock()
     application = Mock()
 
@@ -17,6 +19,8 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_scene_manager = Mock(return_value=scene_manager)
     create_font_cache = Mock(return_value=font_cache)
     create_demo_map = Mock(return_value=game_map)
+    create_session_score = Mock(return_value=session_score)
+    score_item_collection = Mock(return_value=100)
     create_gameplay_scene = Mock(return_value=gameplay_scene)
     create_application = Mock(return_value=application)
 
@@ -25,6 +29,12 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     monkeypatch.setattr(game_main, "InputState", create_input_state)
     monkeypatch.setattr(game_main, "FontCache", create_font_cache)
     monkeypatch.setattr(game_main, "create_demo_map", create_demo_map)
+    monkeypatch.setattr(game_main, "SessionScore", create_session_score)
+    monkeypatch.setattr(
+        game_main,
+        "item_collection_points",
+        score_item_collection,
+    )
     monkeypatch.setattr(game_main, "GameplayScene", create_gameplay_scene)
     monkeypatch.setattr(game_main, "Application", create_application)
 
@@ -33,16 +43,27 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_input_state.assert_called_once_with(game_main.DEFAULT_KEYBOARD_BINDINGS)
     create_font_cache.assert_called_once_with(game_main.pygame)
     create_demo_map.assert_called_once_with()
+    create_session_score.assert_called_once_with()
     create_gameplay_scene.assert_called_once()
     gameplay_args = create_gameplay_scene.call_args.args
 
-    assert gameplay_args[:4] == (
+    assert gameplay_args[:6] == (
         input_state,
+        font_cache,
+        session_score,
         game_map.player,
         game_map.walls,
         game_map.collectibles,
     )
-    assert callable(gameplay_args[4])
+    assert callable(gameplay_args[6])
+
+    handle_item_collected = gameplay_args[6]
+    event = ItemCollected(item_id="collectible-1")
+
+    handle_item_collected(event)
+
+    score_item_collection.assert_called_once_with(event)
+    session_score.add.assert_called_once_with(100)
 
     create_title_scene.assert_called_once()
     assert create_title_scene.call_args.args[:2] == (

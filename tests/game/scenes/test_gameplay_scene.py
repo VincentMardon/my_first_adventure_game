@@ -2,6 +2,7 @@ from unittest.mock import Mock, call
 
 import pygame
 
+from my_first_adventure_game.engine.assets import FontCache
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.world import Entity
 from my_first_adventure_game.game.events import ItemCollected
@@ -12,13 +13,20 @@ from my_first_adventure_game.game.scenes.gameplay_scene import (
     COLLECTIBLE_COLOR,
     PLAYER_COLOR,
     PLAYER_SPEED,
+    SCORE_CENTER,
+    SCORE_COLOR,
+    SCORE_FONT_PATH,
+    SCORE_FONT_SIZE,
     WALL_COLOR,
     GameplayScene,
 )
+from my_first_adventure_game.game.scoring import SessionScore
 
 
 def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
     input_state = Mock(spec=InputState)
+    font_cache = Mock(spec=FontCache)
+    session_score = Mock(spec=SessionScore)
     player = Entity(
         entity_id="player",
         position=pygame.Vector2(100.0, 80.0),
@@ -39,6 +47,8 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
 
     scene = GameplayScene(
         input_state=input_state,
+        font_cache=font_cache,
+        session_score=session_score,
         player=player,
         walls=(wall,),
         collectibles=(),
@@ -66,6 +76,8 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
 ) -> None:
     surface = Mock(spec=pygame.Surface)
     input_state = Mock(spec=InputState)
+    font_cache = Mock(spec=FontCache)
+    session_score = Mock(spec=SessionScore)
     player = Entity(
         entity_id="player",
         position=pygame.Vector2(100.0, 80.0),
@@ -88,12 +100,19 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         active=False,
     )
     on_item_collected = Mock()
+    score_font = Mock(spec=pygame.font.Font)
+    session_score.value = 200
+    font_cache.load.return_value = score_font
+    draw_text = Mock()
     draw_rect = Mock()
 
+    monkeypatch.setattr(gameplay_scene, "draw_text", draw_text)
     monkeypatch.setattr(pygame.draw, "rect", draw_rect)
 
     scene = GameplayScene(
         input_state=input_state,
+        font_cache=font_cache,
+        session_score=session_score,
         player=player,
         walls=(wall,),
         collectibles=(active_collectible, inactive_collectible),
@@ -102,6 +121,17 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
 
     scene.draw(surface)
 
+    font_cache.load.assert_called_once_with(
+        SCORE_FONT_PATH,
+        SCORE_FONT_SIZE,
+    )
+    draw_text.assert_called_once_with(
+        surface,
+        "Score: 200",
+        score_font,
+        SCORE_COLOR,
+        center=SCORE_CENTER,
+    )
     surface.fill.assert_called_once_with(BACKGROUND_COLOR)
     assert draw_rect.call_args_list == [
         call(
@@ -126,6 +156,8 @@ def test_update_deactivates_overlapping_collectible_and_reports_event_once(
     monkeypatch,
 ) -> None:
     input_state = Mock(spec=InputState)
+    font_cache = Mock(spec=FontCache)
+    session_score = Mock(spec=SessionScore)
     player = Entity(
         entity_id="player",
         position=pygame.Vector2(100.0, 80.0),
@@ -152,6 +184,8 @@ def test_update_deactivates_overlapping_collectible_and_reports_event_once(
 
     scene = GameplayScene(
         input_state=input_state,
+        font_cache=font_cache,
+        session_score=session_score,
         player=player,
         walls=(),
         collectibles=(overlapping, distant),

@@ -114,6 +114,15 @@ Defines immutable facts produced by concrete gameplay behavior.
 The current `ItemCollected` event identifies a collected item without deciding
 its consequences for score, session state, or persistence.
 
+### Scoring
+
+Defines concrete game-owned point rules and the mutable score for the current
+session.
+
+An item collection currently awards 100 points. `game.main` converts each
+`ItemCollected` fact into points, accumulates them in `SessionScore`, and shares
+that score with `GameplayScene` for display.
+
 ### Scenes
 
 Provides the concrete title and gameplay scenes.
@@ -122,8 +131,8 @@ The title scene requests an explicit transition to gameplay when the
 confirmation action is pressed.
 
 The gameplay scene converts game actions into player movement, selects walls as
-solid obstacles, deactivates collectibles overlapping the player, and owns the
-current presentation rules.
+solid obstacles, deactivates collectibles overlapping the player, emits factual
+collection events, and displays the current session score.
 
 ### Levels
 
@@ -140,7 +149,6 @@ been implemented:
 
 - persistence;
 - game entities;
-- scoring;
 - profiles;
 - localization.
 
@@ -167,6 +175,8 @@ flowchart TD
     World["World"]
     Entity["Entity"]
     ItemCollected["ItemCollected"]
+    ItemCollectionPoints["item_collection_points"]
+    SessionScore["SessionScore"]
     FontCache["FontCache"]
     DrawText["draw_text"]
 
@@ -176,6 +186,8 @@ flowchart TD
     GameMain -->|"injects transition callback"| TitleScene
     GameMain --> GameplayScene
     GameMain --> DemoMap
+    GameMain --> ItemCollectionPoints
+    GameMain --> SessionScore
     GameMain --> FontCache
 
     DemoMap --> GameMap
@@ -193,6 +205,9 @@ flowchart TD
     GameplayScene --> InputState
     GameplayScene --> Entity
     GameplayScene --> ItemCollected
+    GameplayScene --> SessionScore
+    GameplayScene --> FontCache
+    GameplayScene --> DrawText
 
     InputState -. "implements structurally" .-> InputProcessor
     InputState --> KeyboardBindings
@@ -201,17 +216,18 @@ flowchart TD
     GameplayScene -. "implements" .-> Scene
 ```
 
-`game.main` creates the demo map and composes `GameplayScene` from its player,
-walls, collectibles, and an explicit collection handler. `GameplayScene`
-delivers an `ItemCollected` fact when an active collectible is collected. The
-current handler intentionally applies no consequence.
+`game.main` creates the demo map and the current `SessionScore`, then composes
+`GameplayScene` from its gameplay entities, shared rendering services, score,
+and explicit collection handler. `GameplayScene` delivers an `ItemCollected`
+fact when an active collectible is collected.
+
+The collection handler converts that fact through `item_collection_points()`
+and adds the result to the same `SessionScore` displayed by `GameplayScene`.
 
 `game.main` also injects a callback into `TitleScene` that explicitly replaces
-the active scene when confirmation is pressed.
-
-`game.main` also configures `FontCache` with Pygame's resource package.
-`TitleScene` loads the selected font lazily during drawing, after the application
-has initialized Pygame.
+the active scene when confirmation is pressed. It configures the shared
+`FontCache` with Pygame's resource package, and both concrete scenes load their
+selected fonts lazily during drawing after Pygame initialization.
 
 ## Main frame flow
 

@@ -2,17 +2,24 @@ from collections.abc import Callable
 
 import pygame
 
+from my_first_adventure_game.engine.assets import FontCache
+from my_first_adventure_game.engine.graphics import draw_text
 from my_first_adventure_game.engine.input import InputState, movement_axis
 from my_first_adventure_game.engine.scenes import Scene
 from my_first_adventure_game.engine.world import Entity, move_entity
 from my_first_adventure_game.game.events import ItemCollected
 from my_first_adventure_game.game.input import GameAction
+from my_first_adventure_game.game.scoring import SessionScore
 
 PLAYER_SPEED = 160.0
 PLAYER_COLOR = (224, 196, 96)
 WALL_COLOR = (84, 104, 92)
 COLLECTIBLE_COLOR = (112, 200, 224)
 BACKGROUND_COLOR = (18, 32, 24)
+SCORE_COLOR = (240, 240, 240)
+SCORE_CENTER = (80, 24)
+SCORE_FONT_PATH = pygame.font.get_default_font()
+SCORE_FONT_SIZE = 24
 
 
 class GameplayScene(Scene):
@@ -21,12 +28,16 @@ class GameplayScene(Scene):
     def __init__(
         self,
         input_state: InputState[GameAction],
+        font_cache: FontCache,
+        session_score: SessionScore,
         player: Entity,
         walls: tuple[Entity, ...],
         collectibles: tuple[Entity, ...],
         on_item_collected: Callable[[ItemCollected], None],
     ) -> None:
         self._input_state = input_state
+        self._font_cache = font_cache
+        self._session_score = session_score
         self._player = player
         self._walls = walls
         self._collectibles = collectibles
@@ -77,6 +88,18 @@ class GameplayScene(Scene):
             surface,
             PLAYER_COLOR,
             _entity_rect(self._player),
+        )
+
+        score_font = self._font_cache.load(
+            SCORE_FONT_PATH,
+            SCORE_FONT_SIZE,
+        )
+        draw_text(
+            surface,
+            f"Score: {self._session_score.value}",
+            score_font,
+            SCORE_COLOR,
+            center=SCORE_CENTER,
         )
 
 

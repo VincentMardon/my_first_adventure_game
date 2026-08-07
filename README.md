@@ -107,6 +107,8 @@ The project now provides a minimal playable top-down loop:
 3. the arrow keys move the player through a Python-authored map;
 4. axis-aligned collisions prevent the player from crossing walls.
 5. overlapping a collectible deactivates it and removes it from view.
+6. each collected object awards 100 points and updates the displayed session
+   score.
 
 Implemented foundations include:
 
@@ -123,10 +125,12 @@ Implemented foundations include:
 - a game-owned Python-authored demo map with collectible objects;
 - game-owned collection behavior based on reusable entity overlap detection;
 - immutable factual gameplay events delivered through explicit callbacks;
+- game-owned item collection scoring rules;
+- an accumulated session score displayed during gameplay;
 - automated tests, Ruff checks, strict documentation builds, package builds,
   and GitHub Actions CI.
 
-Persistence, scoring, profiles, localization, combat, and interaction systems
+Persistence, profiles, localization, combat, and broader interaction systems
 have not been implemented yet.
 
 ## Documentation

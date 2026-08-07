@@ -51,6 +51,7 @@ proposing changes.
 - [World](architecture/world.md)
 - [Levels](architecture/levels.md)
 - [Events](architecture/events.md)
+- [Scoring](architecture/scoring.md)
 
 ### Architectural decisions
 
@@ -69,6 +70,7 @@ proposing changes.
 - [Scenes](api/scenes.md)
 - [World](api/world.md)
 - [Game events](api/game-events.md)
+- [Game scoring](api/game-scoring.md)
 - [Game input](api/game-input.md)
 - [Game levels](api/game-levels.md)
 - [Game scenes](api/game-scenes.md)

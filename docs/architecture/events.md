@@ -54,9 +54,9 @@ flowchart LR
     ItemCollected --> Handler
 ```
 
-The current handler composed in `game.main` intentionally has no consequence.
-It keeps event delivery explicit until a concrete scoring requirement provides
-the first consumer.
+The handler composed in `game.main` converts `ItemCollected` into points through
+the game-owned scoring rule and adds them to the current `SessionScore`. The
+event itself remains independent from that consequence.
 
 ## Delivery semantics
 
@@ -73,8 +73,8 @@ There is no global event bus, subscription registry, or runtime event queue.
 Additional factual event types should be introduced only when concrete gameplay
 behavior produces them.
 
-The injected collection handler may later coordinate score, session state, or
-presentation without changing the collection event itself.
+The injected collection handler may later coordinate additional session or
+presentation consequences without changing the collection event itself.
 
 ## Change risks
 

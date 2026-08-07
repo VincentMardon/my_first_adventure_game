@@ -58,6 +58,7 @@ nav:
       - World: architecture/world.md
       - Levels: architecture/levels.md
       - Events: architecture/events.md
+      - Scoring: architecture/scoring.md
   - API reference:
       - Overview: api/index.md
       - Engine:
@@ -70,6 +71,7 @@ nav:
           - World: api/world.md
       - Game:
           - Events: api/game-events.md
+          - Scoring: api/game-scoring.md
           - Input: api/game-input.md
           - Levels: api/game-levels.md
           - Scenes: api/game-scenes.md

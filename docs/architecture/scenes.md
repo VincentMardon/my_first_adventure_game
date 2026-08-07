@@ -173,8 +173,8 @@ and
 
 `GameplayScene`:
 
-- receives the action input state, player entity, wall entities, collectible
-  entities, and an explicit collection handler;
+- receives the action input state, font cache, session score, player entity,
+  wall entities, collectible entities, and an explicit collection handler;
 - converts directional actions into normalized movement;
 - applies the game-owned movement speed using delta time;
 - selects wall bounds as solid obstacles;
@@ -183,12 +183,14 @@ and
 - applies the game-owned collection rule by deactivating overlapping
   collectibles;
 - delivers an immutable `ItemCollected` fact after deactivation;
-- draws walls, active collectibles, and the player using game-owned colors;
+- draws walls, active collectibles, the player, and the current session score
+  using game-owned presentation rules;
 - rounds floating-point geometry only at rendering time.
 
-`game.main` composes `GameplayScene` from the player, walls, and collectibles
-provided by the demo map and injects an explicit collection handler. The current
-handler intentionally applies no consequence.
+`game.main` composes `GameplayScene` from the shared font cache and session
+score, the player, walls, and collectibles provided by the demo map, and an
+explicit collection handler. The handler applies the game-owned collection
+point rule to the same session score displayed by the scene.
 
 ## Invariants
 
@@ -243,6 +245,7 @@ Current tests verify:
 - the gameplay scene deactivates an active overlapping collectible and delivers
   its event exactly once across subsequent updates while leaving distant
   collectibles active;
+- the gameplay scene loads its score font and draws the current session score;
 - the title scene requests gameplay only when confirmation is pressed;
 - the composition root connects the demo map and explicit title-to-gameplay
   transition.

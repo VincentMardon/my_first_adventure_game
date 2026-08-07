@@ -28,6 +28,9 @@ and this project adheres to
 - Collectible objects that disappear when the player overlaps them.
 - Immutable `ItemCollected` facts delivered once through an explicit gameplay
   callback.
+- A game-owned rule awarding 100 points for each collected item.
+- A mutable session score accumulated through the collection event handler.
+- A gameplay score display using the shared font cache and text renderer.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,
