@@ -86,8 +86,9 @@ paths, sizes, themes, and presentation decisions belong to the game.
 Provides small tested drawing operations without owning game presentation
 rules.
 
-The current implementation renders centered antialiased text and returns its
-destination rectangle.
+The current implementation renders centered antialiased text, returns its
+destination rectangle, and advances looping image-frame animations using
+elapsed time.
 
 ### Collisions
 
