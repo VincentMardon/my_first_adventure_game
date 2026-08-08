@@ -3,7 +3,7 @@ from collections.abc import Callable
 import pygame
 
 from my_first_adventure_game.engine.assets import FontCache
-from my_first_adventure_game.engine.graphics import draw_text
+from my_first_adventure_game.engine.graphics import Animation, draw_text
 from my_first_adventure_game.engine.input import InputState, movement_axis
 from my_first_adventure_game.engine.scenes import Scene
 from my_first_adventure_game.engine.world import Entity, move_entity
@@ -12,7 +12,6 @@ from my_first_adventure_game.game.input import GameAction
 from my_first_adventure_game.game.scoring import SessionScore
 
 PLAYER_SPEED = 160.0
-PLAYER_COLOR = (224, 196, 96)
 WALL_COLOR = (84, 104, 92)
 COLLECTIBLE_COLOR = (112, 200, 224)
 BACKGROUND_COLOR = (18, 32, 24)
@@ -34,6 +33,7 @@ class GameplayScene(Scene):
         walls: tuple[Entity, ...],
         collectibles: tuple[Entity, ...],
         on_item_collected: Callable[[ItemCollected], None],
+        player_animation: Animation,
     ) -> None:
         self._input_state = input_state
         self._font_cache = font_cache
@@ -42,6 +42,7 @@ class GameplayScene(Scene):
         self._walls = walls
         self._collectibles = collectibles
         self._on_item_collected = on_item_collected
+        self._player_animation = player_animation
 
     def handle_event(self, event: pygame.event.Event) -> None:
         return None
@@ -54,6 +55,7 @@ class GameplayScene(Scene):
             up=GameAction.MOVE_UP,
             down=GameAction.MOVE_DOWN,
         )
+        self._player_animation.update(delta_time)
         movement = axis * PLAYER_SPEED * delta_time
         solid_bounds = tuple(wall.bounds for wall in self._walls)
 
@@ -84,9 +86,8 @@ class GameplayScene(Scene):
                     _entity_rect(collectible),
                 )
 
-        pygame.draw.rect(
-            surface,
-            PLAYER_COLOR,
+        surface.blit(
+            self._player_animation.current_frame,
             _entity_rect(self._player),
         )
 

@@ -178,6 +178,7 @@ flowchart TD
     ItemCollected["ItemCollected"]
     ItemCollectionPoints["item_collection_points"]
     SessionScore["SessionScore"]
+    Animation["Animation"]
     FontCache["FontCache"]
     DrawText["draw_text"]
 
@@ -189,6 +190,7 @@ flowchart TD
     GameMain --> DemoMap
     GameMain --> ItemCollectionPoints
     GameMain --> SessionScore
+    GameMain --> Animation
     GameMain --> FontCache
 
     DemoMap --> GameMap
@@ -207,6 +209,7 @@ flowchart TD
     GameplayScene --> Entity
     GameplayScene --> ItemCollected
     GameplayScene --> SessionScore
+    GameplayScene --> Animation
     GameplayScene --> FontCache
     GameplayScene --> DrawText
 
@@ -217,10 +220,11 @@ flowchart TD
     GameplayScene -. "implements" .-> Scene
 ```
 
-`game.main` creates the demo map and the current `SessionScore`, then composes
-`GameplayScene` from its gameplay entities, shared rendering services, score,
-and explicit collection handler. `GameplayScene` delivers an `ItemCollected`
-fact when an active collectible is collected.
+`game.main` creates the demo map, current `SessionScore`, and a temporary
+two-frame player animation, then composes `GameplayScene` from its gameplay
+entities, shared rendering services, score, animation, and explicit collection
+handler. `GameplayScene` advances and renders the injected animation and
+delivers an `ItemCollected` fact when an active collectible is collected.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.

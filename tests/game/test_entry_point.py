@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 from my_first_adventure_game.game import main as game_main
 from my_first_adventure_game.game.events import ItemCollected
@@ -13,6 +13,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     session_score = Mock()
     gameplay_scene = Mock()
     application = Mock()
+    first_player_frame = Mock()
+    second_player_frame = Mock()
+    player_animation = Mock()
 
     create_input_state = Mock(return_value=input_state)
     create_title_scene = Mock(return_value=initial_scene)
@@ -23,6 +26,10 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     score_item_collection = Mock(return_value=100)
     create_gameplay_scene = Mock(return_value=gameplay_scene)
     create_application = Mock(return_value=application)
+    create_surface = Mock(
+        side_effect=(first_player_frame, second_player_frame),
+    )
+    create_animation = Mock(return_value=player_animation)
 
     monkeypatch.setattr(game_main, "TitleScene", create_title_scene)
     monkeypatch.setattr(game_main, "SceneManager", create_scene_manager)
@@ -37,6 +44,8 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     )
     monkeypatch.setattr(game_main, "GameplayScene", create_gameplay_scene)
     monkeypatch.setattr(game_main, "Application", create_application)
+    monkeypatch.setattr(game_main.pygame, "Surface", create_surface)
+    monkeypatch.setattr(game_main, "Animation", create_animation)
 
     game_main.main()
 
@@ -44,6 +53,20 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_font_cache.assert_called_once_with(game_main.pygame)
     create_demo_map.assert_called_once_with()
     create_session_score.assert_called_once_with()
+    assert create_surface.call_args_list == [
+        call(game_main.PLAYER_FRAME_SIZE),
+        call(game_main.PLAYER_FRAME_SIZE),
+    ]
+    first_player_frame.fill.assert_called_once_with(
+        game_main.PLAYER_IDLE_COLORS[0],
+    )
+    second_player_frame.fill.assert_called_once_with(
+        game_main.PLAYER_IDLE_COLORS[1],
+    )
+    create_animation.assert_called_once_with(
+        frames=(first_player_frame, second_player_frame),
+        frame_duration=game_main.PLAYER_IDLE_FRAME_DURATION,
+    )
     create_gameplay_scene.assert_called_once()
     gameplay_args = create_gameplay_scene.call_args.args
 
@@ -56,6 +79,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         game_map.collectibles,
     )
     assert callable(gameplay_args[6])
+    assert gameplay_args[7] is player_animation
 
     handle_item_collected = gameplay_args[6]
     event = ItemCollected(item_id="collectible-1")

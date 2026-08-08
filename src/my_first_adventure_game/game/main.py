@@ -2,6 +2,7 @@ import pygame
 
 from my_first_adventure_game.engine.application import Application, WindowConfig
 from my_first_adventure_game.engine.assets import FontCache
+from my_first_adventure_game.engine.graphics import Animation
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.scenes import SceneManager
 from my_first_adventure_game.game.events import ItemCollected
@@ -15,6 +16,12 @@ from my_first_adventure_game.game.scoring import (
 
 WINDOW_CONFIG = WindowConfig(title="My First Adventure Game", size=(1280, 720))
 FRAMES_PER_SECOND = 60
+PLAYER_FRAME_SIZE = (32, 32)
+PLAYER_IDLE_COLORS = (
+    (224, 196, 96),
+    (240, 212, 112),
+)
+PLAYER_IDLE_FRAME_DURATION = 0.4
 
 
 def main() -> None:
@@ -24,6 +31,19 @@ def main() -> None:
     font_cache = FontCache(pygame)
     game_map = create_demo_map()
     session_score = SessionScore()
+    player_frames = tuple(pygame.Surface(PLAYER_FRAME_SIZE) for _ in PLAYER_IDLE_COLORS)
+
+    for frame, color in zip(
+        player_frames,
+        PLAYER_IDLE_COLORS,
+        strict=True,
+    ):
+        frame.fill(color)
+
+    player_animation = Animation(
+        frames=player_frames,
+        frame_duration=PLAYER_IDLE_FRAME_DURATION,
+    )
 
     def start_game() -> None:
         scene_manager.change_scene(gameplay_scene)
@@ -46,6 +66,7 @@ def main() -> None:
         game_map.walls,
         game_map.collectibles,
         handle_item_collected,
+        player_animation,
     )
     application = Application(
         window_config=WINDOW_CONFIG,

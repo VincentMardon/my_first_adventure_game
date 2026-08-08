@@ -3,6 +3,7 @@ from unittest.mock import Mock, call
 import pygame
 
 from my_first_adventure_game.engine.assets import FontCache
+from my_first_adventure_game.engine.graphics import Animation
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.world import Entity
 from my_first_adventure_game.game.events import ItemCollected
@@ -11,7 +12,6 @@ from my_first_adventure_game.game.scenes import gameplay_scene
 from my_first_adventure_game.game.scenes.gameplay_scene import (
     BACKGROUND_COLOR,
     COLLECTIBLE_COLOR,
-    PLAYER_COLOR,
     PLAYER_SPEED,
     SCORE_CENTER,
     SCORE_COLOR,
@@ -42,6 +42,8 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
     movement_axis = Mock(return_value=pygame.Vector2(0.6, 0.8))
     move_entity = Mock()
 
+    player_animation = Mock(spec=Animation)
+
     monkeypatch.setattr(gameplay_scene, "movement_axis", movement_axis)
     monkeypatch.setattr(gameplay_scene, "move_entity", move_entity)
 
@@ -53,10 +55,14 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
         walls=(wall,),
         collectibles=(),
         on_item_collected=on_item_collected,
+        player_animation=player_animation,
     )
 
     scene.update(0.5)
 
+    player_animation.update.assert_called_once_with(0.5)
+
+    player_animation.update.assert_called_once_with(0.5)
     movement_axis.assert_called_once_with(
         input_state,
         left=GameAction.MOVE_LEFT,
@@ -105,6 +111,9 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
     font_cache.load.return_value = score_font
     draw_text = Mock()
     draw_rect = Mock()
+    player_animation = Mock(spec=Animation)
+    player_frame = Mock(spec=pygame.Surface)
+    player_animation.current_frame = player_frame
 
     monkeypatch.setattr(gameplay_scene, "draw_text", draw_text)
     monkeypatch.setattr(pygame.draw, "rect", draw_rect)
@@ -117,6 +126,7 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         walls=(wall,),
         collectibles=(active_collectible, inactive_collectible),
         on_item_collected=on_item_collected,
+        player_animation=player_animation,
     )
 
     scene.draw(surface)
@@ -144,12 +154,11 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
             COLLECTIBLE_COLOR,
             pygame.Rect(120, 96, 12, 12),
         ),
-        call(
-            surface,
-            PLAYER_COLOR,
-            pygame.Rect(100, 80, 24, 24),
-        ),
     ]
+    surface.blit.assert_called_once_with(
+        player_frame,
+        pygame.Rect(100, 80, 24, 24),
+    )
 
 
 def test_update_deactivates_overlapping_collectible_and_reports_event_once(
@@ -174,6 +183,7 @@ def test_update_deactivates_overlapping_collectible_and_reports_event_once(
         size=pygame.Vector2(8.0, 8.0),
     )
     on_item_collected = Mock()
+    player_animation = Mock(spec=Animation)
 
     monkeypatch.setattr(
         gameplay_scene,
@@ -190,6 +200,7 @@ def test_update_deactivates_overlapping_collectible_and_reports_event_once(
         walls=(),
         collectibles=(overlapping, distant),
         on_item_collected=on_item_collected,
+        player_animation=player_animation,
     )
 
     scene.update(0.016)

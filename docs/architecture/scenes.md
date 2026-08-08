@@ -174,8 +174,10 @@ and
 `GameplayScene`:
 
 - receives the action input state, font cache, session score, player entity,
-  wall entities, collectible entities, and an explicit collection handler;
+  wall entities, collectible entities, player animation, and an explicit
+  collection handler;
 - converts directional actions into normalized movement;
+- advances the injected player animation using frame delta time;
 - applies the game-owned movement speed using delta time;
 - selects wall bounds as solid obstacles;
 - delegates collision-aware movement to the engine;
@@ -183,14 +185,20 @@ and
 - applies the game-owned collection rule by deactivating overlapping
   collectibles;
 - delivers an immutable `ItemCollected` fact after deactivation;
-- draws walls, active collectibles, the player, and the current session score
-  using game-owned presentation rules;
+- draws walls and active collectibles as game-owned rectangles, blits the
+  current player animation frame, and draws the current session score;
 - rounds floating-point geometry only at rendering time.
 
 `game.main` composes `GameplayScene` from the shared font cache and session
-score, the player, walls, and collectibles provided by the demo map, and an
-explicit collection handler. The handler applies the game-owned collection
-point rule to the same session score displayed by the scene.
+score, the player, walls, and collectibles provided by the demo map, a player
+animation, and an explicit collection handler. The handler applies the
+game-owned collection point rule to the same session score displayed by the
+scene.
+
+The current player animation uses two game-owned colored surfaces as temporary
+frames. This validates animation timing and rendering without treating those
+placeholder visuals as engine defaults. Idle and movement state selection has
+not yet been implemented.
 
 ## Invariants
 
@@ -240,8 +248,9 @@ Current tests verify:
 - drawing is delegated with the target surface;
 - the concrete title scene draws its background and centered title;
 - the gameplay scene delegates movement with game actions, speed, and walls;
+- the gameplay scene advances and draws its injected player animation;
 - the gameplay scene draws its background, walls, active collectibles, and
-  player in order;
+  animated player in order;
 - the gameplay scene deactivates an active overlapping collectible and delivers
   its event exactly once across subsequent updates while leaving distant
   collectibles active;
