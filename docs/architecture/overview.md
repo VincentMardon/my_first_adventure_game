@@ -87,8 +87,8 @@ Provides small tested drawing operations without owning game presentation
 rules.
 
 The current implementation renders centered antialiased text, returns its
-destination rectangle, and advances looping image-frame animations using
-elapsed time.
+destination rectangle, and advances looping or one-shot image-frame animations
+using elapsed time.
 
 ### Collisions
 

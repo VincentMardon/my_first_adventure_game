@@ -125,7 +125,7 @@ Implemented foundations include:
 - normalized directional movement;
 - package-based image and font caches;
 - minimal engine text rendering and game-owned rectangle presentation;
-- reusable elapsed-time-driven looping frame animations;
+- reusable elapsed-time-driven looping and one-shot frame animations;
 - an animated player with game-owned temporary idle and movement states;
 - immutable floating-point collision bounds;
 - lightweight spatial entities and deterministic world storage;

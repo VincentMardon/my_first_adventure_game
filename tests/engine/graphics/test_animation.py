@@ -59,6 +59,7 @@ def test_animation_loops_after_last_frame() -> None:
     animation.update(0.2)
 
     assert animation.current_frame is first_frame
+    assert not animation.finished
 
 
 def test_animation_reset_returns_to_first_frame() -> None:
@@ -96,3 +97,69 @@ def test_animation_rejects_non_positive_frame_duration(
             frames=(frame,),
             frame_duration=frame_duration,
         )
+
+
+def test_non_looping_animation_finishes_on_last_frame() -> None:
+    first_frame = Mock(spec=pygame.Surface)
+    second_frame = Mock(spec=pygame.Surface)
+
+    animation = Animation(
+        frames=(first_frame, second_frame),
+        frame_duration=0.1,
+        loop=False,
+    )
+
+    animation.update(0.2)
+
+    assert animation.current_frame is second_frame
+    assert animation.finished
+
+
+def test_non_looping_animation_is_not_finished_on_last_frame() -> None:
+    first_frame = Mock(spec=pygame.Surface)
+    second_frame = Mock(spec=pygame.Surface)
+
+    animation = Animation(
+        frames=(first_frame, second_frame),
+        frame_duration=0.1,
+        loop=False,
+    )
+
+    animation.update(0.1)
+
+    assert animation.current_frame is second_frame
+    assert not animation.finished
+
+
+def test_finished_animation_ignores_later_updates() -> None:
+    first_frame = Mock(spec=pygame.Surface)
+    second_frame = Mock(spec=pygame.Surface)
+
+    animation = Animation(
+        frames=(first_frame, second_frame),
+        frame_duration=0.1,
+        loop=False,
+    )
+
+    animation.update(0.2)
+    animation.update(1.0)
+
+    assert animation.current_frame is second_frame
+    assert animation.finished
+
+
+def test_reset_restarts_finished_animation() -> None:
+    first_frame = Mock(spec=pygame.Surface)
+    second_frame = Mock(spec=pygame.Surface)
+
+    animation = Animation(
+        frames=(first_frame, second_frame),
+        frame_duration=0.1,
+        loop=False,
+    )
+    animation.update(0.2)
+
+    animation.reset()
+
+    assert animation.current_frame is first_frame
+    assert not animation.finished

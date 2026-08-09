@@ -31,12 +31,14 @@ the occupied area without rendering the text again.
 ### [`Animation`](../api/graphics.md#my_first_adventure_game.engine.graphics.Animation)
 
 Advances a non-empty sequence of Pygame surfaces at a fixed positive frame
-duration.
+duration. Playback may loop or stop after displaying the final frame for its
+full duration.
 
 The animation starts on its first frame, preserves partial elapsed time between
-updates, advances across every frame covered by a long update, and loops after
-its final frame. Resetting it restores both the first frame and the initial
-timing state.
+updates, and advances across every frame covered by a long update. Looping
+playback restarts after its final frame. Non-looping playback stops on its final
+frame, reports completion, and ignores later updates. Resetting restores the
+first frame, initial timing state, and unfinished status.
 
 ## Ownership
 
@@ -67,13 +69,16 @@ The game owns:
 - Frame duration is strictly positive.
 - Partial elapsed time is preserved between updates.
 - Looping remains correct when one update spans multiple frames.
-- Resetting clears both the selected frame and accumulated time.
+- Looping animations never report completion.
+- A non-looping animation finishes only after the final frame's duration has
+  elapsed.
+- A finished animation remains on its final frame and ignores later updates.
+- Resetting clears the selected frame, accumulated time, and finished state.
 
 ## Extension points
 
 Future requirements may justify additional alignment, opacity, wrapping, or
-layout helpers. Concrete consumers may also justify non-looping animations,
-per-frame durations, or completion reporting.
+layout helpers. Concrete consumers may also justify per-frame durations.
 
 These capabilities must not be added until a concrete consumer defines their
 semantics.

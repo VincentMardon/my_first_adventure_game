@@ -33,7 +33,7 @@ and this project adheres to
 - A game-owned rule awarding 100 points for each collected item.
 - A mutable session score accumulated through the collection event handler.
 - A gameplay score display using the shared font cache and text renderer.
-- A reusable looping frame animation driven by elapsed time.
+- Reusable looping and one-shot frame animations driven by elapsed time.
 - Game-owned temporary idle and movement animations selected from directional
   input.
 - A confirmation action bound to Enter.
