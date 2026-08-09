@@ -34,7 +34,8 @@ and this project adheres to
 - A mutable session score accumulated through the collection event handler.
 - A gameplay score display using the shared font cache and text renderer.
 - A reusable looping frame animation driven by elapsed time.
-- A game-owned temporary idle animation rendered for the player.
+- Game-owned temporary idle and movement animations selected from directional
+  input.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

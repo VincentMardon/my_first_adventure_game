@@ -33,7 +33,8 @@ class GameplayScene(Scene):
         walls: tuple[Entity, ...],
         collectibles: tuple[Entity, ...],
         on_item_collected: Callable[[ItemCollected], None],
-        player_animation: Animation,
+        player_idle_animation: Animation,
+        player_movement_animation: Animation,
     ) -> None:
         self._input_state = input_state
         self._font_cache = font_cache
@@ -42,7 +43,9 @@ class GameplayScene(Scene):
         self._walls = walls
         self._collectibles = collectibles
         self._on_item_collected = on_item_collected
-        self._player_animation = player_animation
+        self._player_idle_animation = player_idle_animation
+        self._player_movement_animation = player_movement_animation
+        self._player_animation = player_idle_animation
 
     def handle_event(self, event: pygame.event.Event) -> None:
         return None
@@ -55,6 +58,16 @@ class GameplayScene(Scene):
             up=GameAction.MOVE_UP,
             down=GameAction.MOVE_DOWN,
         )
+        next_player_animation = (
+            self._player_movement_animation
+            if axis.length_squared() > 0.0
+            else self._player_idle_animation
+        )
+
+        if next_player_animation is not self._player_animation:
+            self._player_animation = next_player_animation
+            self._player_animation.reset()
+
         self._player_animation.update(delta_time)
         movement = axis * PLAYER_SPEED * delta_time
         solid_bounds = tuple(wall.bounds for wall in self._walls)

@@ -220,10 +220,11 @@ flowchart TD
     GameplayScene -. "implements" .-> Scene
 ```
 
-`game.main` creates the demo map, current `SessionScore`, and a temporary
-two-frame player animation, then composes `GameplayScene` from its gameplay
-entities, shared rendering services, score, animation, and explicit collection
-handler. `GameplayScene` advances and renders the injected animation and
+`game.main` creates the demo map, current `SessionScore`, and temporary
+two-frame idle and movement animations, then composes `GameplayScene` from its
+gameplay entities, shared rendering services, score, animations, and explicit
+collection handler. `GameplayScene` selects an animation from directional
+intent, resets it when movement state changes, advances and renders it, and
 delivers an `ItemCollected` fact when an active collectible is collected.
 
 The collection handler converts that fact through `item_collection_points()`

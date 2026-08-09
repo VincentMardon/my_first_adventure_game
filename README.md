@@ -126,7 +126,7 @@ Implemented foundations include:
 - package-based image and font caches;
 - minimal engine text rendering and game-owned rectangle presentation;
 - reusable elapsed-time-driven looping frame animations;
-- an animated player using game-owned temporary idle frames;
+- an animated player with game-owned temporary idle and movement states;
 - immutable floating-point collision bounds;
 - lightweight spatial entities and deterministic world storage;
 - axis-separated movement against solid obstacles;

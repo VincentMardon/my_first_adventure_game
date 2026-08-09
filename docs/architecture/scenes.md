@@ -174,10 +174,13 @@ and
 `GameplayScene`:
 
 - receives the action input state, font cache, session score, player entity,
-  wall entities, collectible entities, player animation, and an explicit
-  collection handler;
+  wall entities, collectible entities, idle and movement animations, and an
+  explicit collection handler;
 - converts directional actions into normalized movement;
-- advances the injected player animation using frame delta time;
+- selects the movement animation while the directional axis is non-zero and
+  the idle animation otherwise;
+- resets the newly selected animation when the movement state changes;
+- advances only the selected player animation using frame delta time;
 - applies the game-owned movement speed using delta time;
 - selects wall bounds as solid obstacles;
 - delegates collision-aware movement to the engine;
@@ -190,15 +193,19 @@ and
 - rounds floating-point geometry only at rendering time.
 
 `game.main` composes `GameplayScene` from the shared font cache and session
-score, the player, walls, and collectibles provided by the demo map, a player
-animation, and an explicit collection handler. The handler applies the
-game-owned collection point rule to the same session score displayed by the
-scene.
+score, the player, walls, and collectibles provided by the demo map, idle and
+movement animations, and an explicit collection handler. The handler applies
+the game-owned collection point rule to the same session score displayed by
+the scene.
 
-The current player animation uses two game-owned colored surfaces as temporary
-frames. This validates animation timing and rendering without treating those
-placeholder visuals as engine defaults. Idle and movement state selection has
-not yet been implemented.
+The current idle and movement animations each use two game-owned colored
+surfaces as temporary frames. This validates animation timing, state selection,
+reset behavior, and rendering without treating those placeholder visuals as
+engine defaults.
+
+Movement animation follows directional intent rather than collision-resolved
+displacement. Holding a direction against a wall therefore continues to show
+movement, which is a concrete presentation rule owned by the game.
 
 ## Invariants
 
@@ -248,7 +255,8 @@ Current tests verify:
 - drawing is delegated with the target surface;
 - the concrete title scene draws its background and centered title;
 - the gameplay scene delegates movement with game actions, speed, and walls;
-- the gameplay scene advances and draws its injected player animation;
+- the gameplay scene selects, resets, advances, and draws its injected idle and
+  movement animations;
 - the gameplay scene draws its background, walls, active collectibles, and
   animated player in order;
 - the gameplay scene deactivates an active overlapping collectible and delivers

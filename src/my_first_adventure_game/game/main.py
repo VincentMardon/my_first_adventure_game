@@ -21,7 +21,12 @@ PLAYER_IDLE_COLORS = (
     (224, 196, 96),
     (240, 212, 112),
 )
+PLAYER_MOVEMENT_COLORS = (
+    (240, 144, 72),
+    (255, 184, 88),
+)
 PLAYER_IDLE_FRAME_DURATION = 0.4
+PLAYER_MOVEMENT_FRAME_DURATION = 0.15
 
 
 def main() -> None:
@@ -31,18 +36,34 @@ def main() -> None:
     font_cache = FontCache(pygame)
     game_map = create_demo_map()
     session_score = SessionScore()
-    player_frames = tuple(pygame.Surface(PLAYER_FRAME_SIZE) for _ in PLAYER_IDLE_COLORS)
+    player_idle_frames = tuple(
+        pygame.Surface(PLAYER_FRAME_SIZE) for _ in PLAYER_IDLE_COLORS
+    )
+    player_movement_frames = tuple(
+        pygame.Surface(PLAYER_FRAME_SIZE) for _ in PLAYER_MOVEMENT_COLORS
+    )
 
     for frame, color in zip(
-        player_frames,
+        player_idle_frames,
         PLAYER_IDLE_COLORS,
         strict=True,
     ):
         frame.fill(color)
 
-    player_animation = Animation(
-        frames=player_frames,
+    for frame, color in zip(
+        player_movement_frames,
+        PLAYER_MOVEMENT_COLORS,
+        strict=True,
+    ):
+        frame.fill(color)
+
+    player_idle_animation = Animation(
+        frames=player_idle_frames,
         frame_duration=PLAYER_IDLE_FRAME_DURATION,
+    )
+    player_movement_animation = Animation(
+        frames=player_movement_frames,
+        frame_duration=PLAYER_MOVEMENT_FRAME_DURATION,
     )
 
     def start_game() -> None:
@@ -66,7 +87,8 @@ def main() -> None:
         game_map.walls,
         game_map.collectibles,
         handle_item_collected,
-        player_animation,
+        player_idle_animation,
+        player_movement_animation,
     )
     application = Application(
         window_config=WINDOW_CONFIG,
