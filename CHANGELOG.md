@@ -52,6 +52,7 @@ and this project adheres to
 - A game-owned `Enemy` that composes reusable spatial state with validated,
   mutable health.
 - One-point player attack damage requiring two hits to defeat the demo enemy.
+- Brief color feedback after non-fatal enemy damage.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

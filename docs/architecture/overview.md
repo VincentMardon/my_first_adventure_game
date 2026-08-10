@@ -251,8 +251,9 @@ obstacle, removes it from later collision and rendering, and delivers an
 `ObstacleDestroyed` fact. The same input starts a one-shot attack presentation
 that has priority over movement and idle animation. An active enemy within the
 same attack reach takes one point of damage. The current enemy survives the
-first hit; the second hit deactivates its spatial entity, removes it from later
-collision and rendering, and reports an `EnemyDefeated` fact.
+first hit and briefly flashes with a game-owned feedback color. The second hit
+deactivates its spatial entity, removes it from later collision and rendering,
+and reports an `EnemyDefeated` fact.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.

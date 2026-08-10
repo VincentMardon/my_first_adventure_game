@@ -119,7 +119,8 @@ The project now provides a minimal playable top-down loop:
 7. pressing Space near the destructible obstacle removes it and opens the
    passage it blocked.
 8. a stationary enemy blocks movement and survives the first nearby attack;
-9. a second nearby attack defeats it and opens its former position.
+9. non-fatal damage briefly changes the enemy's color;
+10. a second nearby attack defeats it and opens its former position.
 
 Implemented foundations include:
 
@@ -142,6 +143,7 @@ Implemented foundations include:
   mutable health;
 - game-owned damage behavior requiring two nearby attacks to defeat the current
   enemy;
+- brief game-owned color feedback after non-fatal enemy damage;
 - game-owned collection behavior based on reusable entity overlap detection;
 - immutable collection, destruction, and enemy defeat facts delivered through
   explicit callbacks;

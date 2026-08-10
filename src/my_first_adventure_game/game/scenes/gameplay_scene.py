@@ -21,6 +21,8 @@ PLAYER_SPEED = 160.0
 PLAYER_ATTACK_DAMAGE = 1
 WALL_COLOR = (84, 104, 92)
 ENEMY_COLOR = (200, 72, 96)
+ENEMY_HIT_COLOR = (255, 224, 224)
+ENEMY_HIT_DURATION = 0.15
 COLLECTIBLE_COLOR = (112, 200, 224)
 BACKGROUND_COLOR = (18, 32, 24)
 SCORE_COLOR = (240, 240, 240)
@@ -57,6 +59,9 @@ class GameplayScene(Scene):
         self._player = player
         self._walls = walls
         self._enemies = enemies
+        self._enemy_hit_time_remaining = {
+            enemy.entity.entity_id: 0.0 for enemy in enemies
+        }
         self._on_enemy_defeated = on_enemy_defeated
         self._collectibles = collectibles
         self._on_item_collected = on_item_collected
@@ -74,6 +79,11 @@ class GameplayScene(Scene):
         return None
 
     def update(self, delta_time: float) -> None:
+        for enemy_id, time_remaining in self._enemy_hit_time_remaining.items():
+            self._enemy_hit_time_remaining[enemy_id] = max(
+                0.0,
+                time_remaining - delta_time,
+            )
         axis = movement_axis(
             self._input_state,
             left=GameAction.MOVE_LEFT,
@@ -102,13 +112,21 @@ class GameplayScene(Scene):
             )
 
             for enemy in self._enemies:
-                if (
-                    enemy.entity.active
-                    and attack_bounds.overlaps(enemy.entity.bounds)
-                    and enemy.take_damage(PLAYER_ATTACK_DAMAGE)
-                ):
+                if not enemy.entity.active:
+                    continue
+
+                if not attack_bounds.overlaps(enemy.entity.bounds):
+                    continue
+
+                defeated = enemy.take_damage(PLAYER_ATTACK_DAMAGE)
+
+                if defeated:
                     self._on_enemy_defeated(
                         EnemyDefeated(enemy_id=enemy.entity.entity_id)
+                    )
+                else:
+                    self._enemy_hit_time_remaining[enemy.entity.entity_id] = (
+                        ENEMY_HIT_DURATION
                     )
 
             for obstacle in self._destructible_obstacles:
@@ -166,11 +184,12 @@ class GameplayScene(Scene):
 
         for enemy in self._enemies:
             if enemy.entity.active:
-                pygame.draw.rect(
-                    surface,
-                    ENEMY_COLOR,
-                    _entity_rect(enemy.entity),
+                color = (
+                    ENEMY_HIT_COLOR
+                    if self._enemy_hit_time_remaining[enemy.entity.entity_id] > 0.0
+                    else ENEMY_COLOR
                 )
+                pygame.draw.rect(surface, color, _entity_rect(enemy.entity))
 
         for collectible in self._collectibles:
             if collectible.active:

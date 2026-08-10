@@ -19,6 +19,8 @@ from my_first_adventure_game.game.scenes.gameplay_scene import (
     BACKGROUND_COLOR,
     COLLECTIBLE_COLOR,
     ENEMY_COLOR,
+    ENEMY_HIT_COLOR,
+    ENEMY_HIT_DURATION,
     PLAYER_SPEED,
     SCORE_CENTER,
     SCORE_COLOR,
@@ -250,6 +252,63 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
     surface.blit.assert_called_once_with(
         player_idle_frame,
         pygame.Rect(100, 80, 24, 24),
+    )
+
+
+def test_draw_flashes_enemy_after_non_fatal_damage(
+    monkeypatch,
+) -> None:
+    surface = Mock(spec=pygame.Surface)
+    input_state = Mock(spec=InputState)
+    input_state.is_pressed.side_effect = (True, False)
+    enemy = Enemy(
+        entity=Entity(
+            entity_id="enemy",
+            position=pygame.Vector2(124.0, 80.0),
+            size=pygame.Vector2(16.0, 16.0),
+        ),
+        health=2,
+    )
+    draw_rect = Mock()
+    player_collection_animation = Mock(spec=Animation)
+    player_collection_animation.finished = False
+    player_attack_animation = Mock(spec=Animation)
+    player_attack_animation.finished = False
+
+    monkeypatch.setattr(
+        gameplay_scene,
+        "movement_axis",
+        Mock(return_value=pygame.Vector2()),
+    )
+    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+    monkeypatch.setattr(gameplay_scene, "draw_text", Mock())
+    monkeypatch.setattr(pygame.draw, "rect", draw_rect)
+
+    scene = _create_gameplay_scene(
+        input_state=input_state,
+        enemies=(enemy,),
+        player_collection_animation=player_collection_animation,
+        player_attack_animation=player_attack_animation,
+    )
+
+    scene.update(0.016)
+    scene.draw(surface)
+
+    draw_rect.assert_called_once_with(
+        surface,
+        ENEMY_HIT_COLOR,
+        pygame.Rect(124, 80, 16, 16),
+    )
+
+    draw_rect.reset_mock()
+
+    scene.update(ENEMY_HIT_DURATION)
+    scene.draw(surface)
+
+    draw_rect.assert_called_once_with(
+        surface,
+        ENEMY_COLOR,
+        pygame.Rect(124, 80, 16, 16),
     )
 
 

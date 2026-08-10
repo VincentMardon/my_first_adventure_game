@@ -58,7 +58,9 @@ classDiagram
 registers only its spatial `Entity` in the engine-owned `World`.
 
 `GameplayScene` applies one point of game-owned attack damage. It emits
-`EnemyDefeated` only when `take_damage()` reports the fatal hit.
+`EnemyDefeated` only when `take_damage()` reports the fatal hit. After a
+non-fatal hit, the scene temporarily renders the enemy with a game-owned damage
+feedback color; this presentation timer does not belong to `Enemy`.
 
 ## Invariants
 
@@ -73,7 +75,7 @@ registers only its spatial `Entity` in the engine-owned `World`.
 ## Extension points
 
 Concrete requirements may later add enemy movement, attack behavior, damage
-presentation, or distinct enemy configurations.
+animations, or distinct enemy configurations.
 
 A reusable health component, combatant hierarchy, or damage system should not
 be introduced until more than one concrete consumer demonstrates shared

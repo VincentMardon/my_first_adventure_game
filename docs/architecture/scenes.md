@@ -192,6 +192,8 @@ and
   delivers an immutable `ObstacleDestroyed` fact;
 - applies one point of game-owned damage to active enemies within attack reach
   and delivers immutable `EnemyDefeated` facts only after fatal hits;
+- displays a brief game-owned color flash after non-fatal enemy damage and
+  restores the normal enemy color when its scene-owned timer expires;
 - detects player overlap with active collectibles after movement;
 - applies the game-owned collection rule by deactivating overlapping
   collectibles;
@@ -299,6 +301,8 @@ Current tests verify:
   ordinary walls remain unaffected;
 - active enemies participate in collision and rendering, survive non-fatal
   attacks, and are removed only after a fatal hit reported exactly once;
+- non-fatal enemy damage starts temporary visual feedback that expires using
+  frame delta time;
 - the gameplay scene loads its score font and draws the current session score;
 - the title scene requests gameplay only when confirmation is pressed;
 - the composition root connects the demo map and explicit title-to-gameplay
