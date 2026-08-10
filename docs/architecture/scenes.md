@@ -174,8 +174,8 @@ and
 `GameplayScene`:
 
 - receives the action input state, font cache, session score, player entity,
-  wall entities, collectible entities, idle and movement animations, and an
-  explicit collection handler;
+  wall entities, collectible entities, idle, movement, and collection
+  animations, and an explicit collection handler;
 - converts directional actions into normalized movement;
 - selects the movement animation while the directional axis is non-zero and
   the idle animation otherwise;
@@ -188,20 +188,33 @@ and
 - applies the game-owned collection rule by deactivating overlapping
   collectibles;
 - delivers an immutable `ItemCollected` fact after deactivation;
+- restarts the one-shot collection animation when an item is collected and
+  gives it priority over idle and movement presentation;
+- returns to the animation selected by directional intent after collection
+  playback finishes;
 - draws walls and active collectibles as game-owned rectangles, blits the
   current player animation frame, and draws the current session score;
 - rounds floating-point geometry only at rendering time.
 
 `game.main` composes `GameplayScene` from the shared font cache and session
-score, the player, walls, and collectibles provided by the demo map, idle and
-movement animations, and an explicit collection handler. The handler applies
-the game-owned collection point rule to the same session score displayed by
-the scene.
+score, the player, walls, and collectibles provided by the demo map, idle,
+movement, and collection animations, and an explicit collection handler. The
+handler applies the game-owned collection point rule to the same session score
+displayed by the scene.
 
-The current idle and movement animations each use two game-owned colored
-surfaces as temporary frames. This validates animation timing, state selection,
-reset behavior, and rendering without treating those placeholder visuals as
-engine defaults.
+The current idle, movement, and collection animations each use two game-owned
+colored surfaces as temporary frames. This validates animation timing, state
+selection, reset and completion behavior, and rendering without treating those
+placeholder visuals as engine defaults.
+
+Animation priority is:
+
+```text
+collection > movement > idle
+```
+
+Collection presentation does not block movement. It is a temporary visual
+state that finishes automatically.
 
 Movement animation follows directional intent rather than collision-resolved
 displacement. Holding a direction against a wall therefore continues to show
@@ -255,8 +268,10 @@ Current tests verify:
 - drawing is delegated with the target surface;
 - the concrete title scene draws its background and centered title;
 - the gameplay scene delegates movement with game actions, speed, and walls;
-- the gameplay scene selects, resets, advances, and draws its injected idle and
-  movement animations;
+- the gameplay scene selects, resets, advances, and draws its injected idle,
+  movement, and collection animations;
+- the collection animation takes priority until completion before returning to
+  the state selected by directional input;
 - the gameplay scene draws its background, walls, active collectibles, and
   animated player in order;
 - the gameplay scene deactivates an active overlapping collectible and delivers

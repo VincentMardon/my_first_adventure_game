@@ -19,6 +19,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     player_movement_animation = Mock()
     third_player_frame = Mock()
     fourth_player_frame = Mock()
+    fifth_player_frame = Mock()
+    sixth_player_frame = Mock()
+    player_collection_animation = Mock()
 
     create_input_state = Mock(return_value=input_state)
     create_title_scene = Mock(return_value=initial_scene)
@@ -35,12 +38,15 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
             second_player_frame,
             third_player_frame,
             fourth_player_frame,
+            fifth_player_frame,
+            sixth_player_frame,
         ),
     )
     create_animation = Mock(
         side_effect=(
             player_idle_animation,
             player_movement_animation,
+            player_collection_animation,
         )
     )
 
@@ -71,6 +77,8 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         call(game_main.PLAYER_FRAME_SIZE),
         call(game_main.PLAYER_FRAME_SIZE),
         call(game_main.PLAYER_FRAME_SIZE),
+        call(game_main.PLAYER_FRAME_SIZE),
+        call(game_main.PLAYER_FRAME_SIZE),
     ]
     first_player_frame.fill.assert_called_once_with(
         game_main.PLAYER_IDLE_COLORS[0],
@@ -84,6 +92,12 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     fourth_player_frame.fill.assert_called_once_with(
         game_main.PLAYER_MOVEMENT_COLORS[1],
     )
+    fifth_player_frame.fill.assert_called_once_with(
+        game_main.PLAYER_COLLECTION_COLORS[0],
+    )
+    sixth_player_frame.fill.assert_called_once_with(
+        game_main.PLAYER_COLLECTION_COLORS[1]
+    )
     assert create_animation.call_args_list == [
         call(
             frames=(first_player_frame, second_player_frame),
@@ -92,6 +106,11 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         call(
             frames=(third_player_frame, fourth_player_frame),
             frame_duration=game_main.PLAYER_MOVEMENT_FRAME_DURATION,
+        ),
+        call(
+            frames=(fifth_player_frame, sixth_player_frame),
+            frame_duration=game_main.PLAYER_COLLECTION_FRAME_DURATION,
+            loop=False,
         ),
     ]
     create_gameplay_scene.assert_called_once()
@@ -108,6 +127,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert callable(gameplay_args[6])
     assert gameplay_args[7] is player_idle_animation
     assert gameplay_args[8] is player_movement_animation
+    assert gameplay_args[9] is player_collection_animation
 
     handle_item_collected = gameplay_args[6]
     event = ItemCollected(item_id="collectible-1")

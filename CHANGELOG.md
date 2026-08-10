@@ -36,6 +36,8 @@ and this project adheres to
 - Reusable looping and one-shot frame animations driven by elapsed time.
 - Game-owned temporary idle and movement animations selected from directional
   input.
+- A one-shot player collection animation with priority over idle and movement
+  presentation.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

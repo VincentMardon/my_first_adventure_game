@@ -27,6 +27,11 @@ PLAYER_MOVEMENT_COLORS = (
 )
 PLAYER_IDLE_FRAME_DURATION = 0.4
 PLAYER_MOVEMENT_FRAME_DURATION = 0.15
+PLAYER_COLLECTION_COLORS = (
+    (248, 248, 248),
+    (112, 240, 160),
+)
+PLAYER_COLLECTION_FRAME_DURATION = 0.1
 
 
 def main() -> None:
@@ -41,6 +46,9 @@ def main() -> None:
     )
     player_movement_frames = tuple(
         pygame.Surface(PLAYER_FRAME_SIZE) for _ in PLAYER_MOVEMENT_COLORS
+    )
+    player_collection_frames = tuple(
+        pygame.Surface(PLAYER_FRAME_SIZE) for _ in PLAYER_COLLECTION_COLORS
     )
 
     for frame, color in zip(
@@ -57,6 +65,11 @@ def main() -> None:
     ):
         frame.fill(color)
 
+    for frame, color in zip(
+        player_collection_frames, PLAYER_COLLECTION_COLORS, strict=True
+    ):
+        frame.fill(color)
+
     player_idle_animation = Animation(
         frames=player_idle_frames,
         frame_duration=PLAYER_IDLE_FRAME_DURATION,
@@ -64,6 +77,11 @@ def main() -> None:
     player_movement_animation = Animation(
         frames=player_movement_frames,
         frame_duration=PLAYER_MOVEMENT_FRAME_DURATION,
+    )
+    player_collection_animation = Animation(
+        frames=player_collection_frames,
+        frame_duration=PLAYER_COLLECTION_FRAME_DURATION,
+        loop=False,
     )
 
     def start_game() -> None:
@@ -89,6 +107,7 @@ def main() -> None:
         handle_item_collected,
         player_idle_animation,
         player_movement_animation,
+        player_collection_animation,
     )
     application = Application(
         window_config=WINDOW_CONFIG,

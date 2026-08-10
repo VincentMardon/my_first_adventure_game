@@ -133,7 +133,8 @@ confirmation action is pressed.
 
 The gameplay scene converts game actions into player movement, selects walls as
 solid obstacles, deactivates collectibles overlapping the player, emits factual
-collection events, and displays the current session score.
+collection events, prioritizes a one-shot collection animation over movement
+and idle presentation, and displays the current session score.
 
 ### Levels
 
@@ -221,11 +222,13 @@ flowchart TD
 ```
 
 `game.main` creates the demo map, current `SessionScore`, and temporary
-two-frame idle and movement animations, then composes `GameplayScene` from its
-gameplay entities, shared rendering services, score, animations, and explicit
-collection handler. `GameplayScene` selects an animation from directional
-intent, resets it when movement state changes, advances and renders it, and
-delivers an `ItemCollected` fact when an active collectible is collected.
+two-frame idle, movement, and collection animations, then composes
+`GameplayScene` from its gameplay entities, shared rendering services, score,
+animations, and explicit collection handler. `GameplayScene` selects idle or
+movement presentation from directional intent, gives one-shot collection
+presentation priority until completion, advances and renders the selected
+animation, and delivers an `ItemCollected` fact when an active collectible is
+collected.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.
