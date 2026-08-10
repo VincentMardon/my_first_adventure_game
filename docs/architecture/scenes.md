@@ -174,7 +174,7 @@ and
 `GameplayScene`:
 
 - receives the action input state, font cache, session score, player entity,
-  wall entities, enemy entities, destructible obstacles, collectible entities,
+  wall entities, game-owned enemies, destructible obstacles, collectible entities,
   idle, movement, collection, and attack animations, and explicit collection,
   destruction, and enemy defeat handlers;
 - converts directional actions into normalized movement;
@@ -190,8 +190,8 @@ and
   priority over idle and movement presentation;
 - deactivates the first active destructible obstacle within attack reach and
   delivers an immutable `ObstacleDestroyed` fact;
-- deactivates active enemies within attack reach and delivers immutable
-  `EnemyDefeated` facts;
+- applies one point of game-owned damage to active enemies within attack reach
+  and delivers immutable `EnemyDefeated` facts only after fatal hits;
 - detects player overlap with active collectibles after movement;
 - applies the game-owned collection rule by deactivating overlapping
   collectibles;
@@ -297,8 +297,8 @@ Current tests verify:
   attack is newly pressed and delivers its event exactly once;
 - inactive destroyed obstacles are excluded from collision and rendering while
   ordinary walls remain unaffected;
-- active enemies participate in collision and rendering until a nearby attack
-  defeats them exactly once;
+- active enemies participate in collision and rendering, survive non-fatal
+  attacks, and are removed only after a fatal hit reported exactly once;
 - the gameplay scene loads its score font and draws the current session score;
 - the title scene requests gameplay only when confirmation is pressed;
 - the composition root connects the demo map and explicit title-to-gameplay

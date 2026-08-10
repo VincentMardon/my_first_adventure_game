@@ -28,17 +28,18 @@ Groups:
 - the `World` containing all registered entities;
 - the player entity;
 - the wall entities used as solid obstacles;
-- the entities assigned the enemy role by the game;
+- the `Enemy` objects assigned the enemy role by the game;
 - the wall entities assigned the destructible obstacle role by the game;
 - the entities assigned the collectible role by the game.
 
-The dataclass is immutable, but the grouped world and entities remain mutable.
+The dataclass is immutable, but the grouped world, entities, and enemies remain
+mutable.
 
 ### [`create_demo_map`](../api/game-levels.md#my_first_adventure_game.game.levels.create_demo_map)
 
 Creates the current demonstration map entirely in Python.
 
-It registers the player, walls, enemies, and collectibles in deterministic
+It registers the player, walls, enemy spatial entities, and collectibles in deterministic
 order. One wall is also assigned the destructible obstacle role. Their initial
 geometry keeps the player, enemies, and collectibles outside the walls and
 prevents collectibles from overlapping the player.
@@ -68,12 +69,15 @@ flowchart TD
     DemoMap["game.levels.create_demo_map"]
     World["engine.world.World"]
     Entity["engine.world.Entity"]
+    Enemy["game.entities.Enemy"]
 
     DemoMap --> GameMap
     DemoMap --> World
     DemoMap --> Entity
+    DemoMap --> Enemy
     GameMap --> World
     GameMap --> Entity
+    GameMap --> Enemy
     GameMain --> DemoMap
     GameMain -->|"reads entity roles"| GameMap
     GameMain --> GameplayScene
@@ -94,6 +98,7 @@ managed by `SceneManager`.
 - Registration order is deterministic.
 - The map contains at least one wall and one collectible.
 - The map contains at least one active enemy.
+- The current demo enemy starts with two health points.
 - Enemies are not registered as walls.
 - The map contains at least one active destructible obstacle.
 - Every destructible obstacle is also registered as a wall.

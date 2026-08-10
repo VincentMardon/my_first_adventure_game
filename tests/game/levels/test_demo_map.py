@@ -9,13 +9,16 @@ def test_demo_map_registers_all_entities_in_world() -> None:
     assert game_map.world.entities == (
         game_map.player,
         *game_map.walls,
-        *game_map.enemies,
+        *(enemy.entity for enemy in game_map.enemies),
         *game_map.collectibles,
     )
     assert game_map.world.get(game_map.player.entity_id) is game_map.player
 
-    for entity in (*game_map.walls, *game_map.enemies, *game_map.collectibles):
+    for entity in (*game_map.walls, *game_map.collectibles):
         assert game_map.world.get(entity.entity_id) is entity
+
+    for enemy in game_map.enemies:
+        assert game_map.world.get(enemy.entity.entity_id) is enemy.entity
 
 
 def test_demo_map_has_active_collectibles() -> None:
@@ -68,8 +71,8 @@ def test_demo_map_uses_floating_point_entity_geometry() -> None:
     )
 
     assert all(
-        isinstance(enemy.position, pygame.Vector2)
-        and isinstance(enemy.size, pygame.Vector2)
+        isinstance(enemy.entity.position, pygame.Vector2)
+        and isinstance(enemy.entity.size, pygame.Vector2)
         for enemy in game_map.enemies
     )
 
@@ -94,5 +97,6 @@ def test_demo_map_has_active_enemies() -> None:
     game_map = create_demo_map()
 
     assert game_map.enemies
-    assert all(enemy.active for enemy in game_map.enemies)
-    assert not any(enemy in game_map.walls for enemy in game_map.enemies)
+    assert all(enemy.entity.active for enemy in game_map.enemies)
+    assert all(enemy.health == 2 for enemy in game_map.enemies)
+    assert not any(enemy.entity in game_map.walls for enemy in game_map.enemies)

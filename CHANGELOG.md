@@ -49,6 +49,9 @@ and this project adheres to
   defeated by a nearby attack.
 - Immutable `EnemyDefeated` facts delivered once through an explicit gameplay
   callback.
+- A game-owned `Enemy` that composes reusable spatial state with validated,
+  mutable health.
+- One-point player attack damage requiring two hits to defeat the demo enemy.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

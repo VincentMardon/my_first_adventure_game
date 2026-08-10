@@ -1,6 +1,7 @@
 import pygame
 
 from my_first_adventure_game.engine.world import Entity, World
+from my_first_adventure_game.game.entities import Enemy
 from my_first_adventure_game.game.levels.game_map import GameMap
 
 
@@ -47,10 +48,13 @@ def create_demo_map() -> GameMap:
         *destructible_obstacles,
     )
     enemies = (
-        Entity(
-            entity_id="enemy-1",
-            position=pygame.Vector2(960.0, 480.0),
-            size=pygame.Vector2(32.0, 32.0),
+        Enemy(
+            entity=Entity(
+                entity_id="enemy-1",
+                position=pygame.Vector2(960.0, 480.0),
+                size=pygame.Vector2(32.0, 32.0),
+            ),
+            health=2,
         ),
     )
     collectibles = (
@@ -68,7 +72,7 @@ def create_demo_map() -> GameMap:
 
     world = World()
 
-    for entity in (player, *walls, *enemies, *collectibles):
+    for entity in (player, *walls, *(enemy.entity for enemy in enemies), *collectibles):
         world.add(entity)
 
     return GameMap(

@@ -108,6 +108,14 @@ game.
 
 ## Implemented game foundations
 
+### Entities
+
+Defines concrete gameplay objects that compose reusable engine entities.
+
+The current `Enemy` owns mutable integer health, applies positive damage,
+deactivates its spatial entity on the fatal hit, and reports whether that hit
+caused the defeat.
+
 ### Events
 
 Defines immutable facts produced by concrete gameplay behavior.
@@ -152,7 +160,6 @@ The package skeleton also reserves locations for capabilities that have not yet
 been implemented:
 
 - persistence;
-- game entities;
 - profiles;
 - localization.
 
@@ -178,6 +185,7 @@ flowchart TD
     GameMap["GameMap"]
     World["World"]
     Entity["Entity"]
+    Enemy["Enemy"]
     ItemCollected["ItemCollected"]
     ObstacleDestroyed["ObstacleDestroyed"]
     EnemyDefeated["EnemyDefeated"]
@@ -201,6 +209,8 @@ flowchart TD
     DemoMap --> GameMap
     GameMap --> World
     GameMap --> Entity
+    GameMap --> Enemy
+    Enemy --> Entity
 
     Application --> WindowConfig
     Application --> InputProcessor
@@ -212,6 +222,7 @@ flowchart TD
 
     GameplayScene --> InputState
     GameplayScene --> Entity
+    GameplayScene --> Enemy
     GameplayScene --> ItemCollected
     GameplayScene --> ObstacleDestroyed
     GameplayScene --> EnemyDefeated
@@ -239,8 +250,9 @@ collected. A newly pressed attack deactivates a nearby active destructible
 obstacle, removes it from later collision and rendering, and delivers an
 `ObstacleDestroyed` fact. The same input starts a one-shot attack presentation
 that has priority over movement and idle animation. An active enemy within the
-same attack reach is defeated, removed from later collision and rendering, and
-reported through an `EnemyDefeated` fact.
+same attack reach takes one point of damage. The current enemy survives the
+first hit; the second hit deactivates its spatial entity, removes it from later
+collision and rendering, and reports an `EnemyDefeated` fact.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.

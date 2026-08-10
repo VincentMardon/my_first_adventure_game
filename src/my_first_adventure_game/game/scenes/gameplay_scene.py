@@ -8,6 +8,7 @@ from my_first_adventure_game.engine.graphics import Animation, draw_text
 from my_first_adventure_game.engine.input import InputState, movement_axis
 from my_first_adventure_game.engine.scenes import Scene
 from my_first_adventure_game.engine.world import Entity, move_entity
+from my_first_adventure_game.game.entities import Enemy
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
@@ -17,6 +18,7 @@ from my_first_adventure_game.game.input import GameAction
 from my_first_adventure_game.game.scoring import SessionScore
 
 PLAYER_SPEED = 160.0
+PLAYER_ATTACK_DAMAGE = 1
 WALL_COLOR = (84, 104, 92)
 ENEMY_COLOR = (200, 72, 96)
 COLLECTIBLE_COLOR = (112, 200, 224)
@@ -38,7 +40,7 @@ class GameplayScene(Scene):
         session_score: SessionScore,
         player: Entity,
         walls: tuple[Entity, ...],
-        enemies: tuple[Entity, ...],
+        enemies: tuple[Enemy, ...],
         on_enemy_defeated: Callable[[EnemyDefeated], None],
         collectibles: tuple[Entity, ...],
         on_item_collected: Callable[[ItemCollected], None],
@@ -82,7 +84,7 @@ class GameplayScene(Scene):
         movement = axis * PLAYER_SPEED * delta_time
         solid_bounds = (
             *(wall.bounds for wall in self._walls if wall.active),
-            *(enemy.bounds for enemy in self._enemies if enemy.active),
+            *(enemy.entity.bounds for enemy in self._enemies if enemy.entity.active),
         )
 
         move_entity(self._player, movement, solid_bounds)
@@ -100,9 +102,14 @@ class GameplayScene(Scene):
             )
 
             for enemy in self._enemies:
-                if enemy.active and attack_bounds.overlaps(enemy.bounds):
-                    enemy.active = False
-                    self._on_enemy_defeated(EnemyDefeated(enemy_id=enemy.entity_id))
+                if (
+                    enemy.entity.active
+                    and attack_bounds.overlaps(enemy.entity.bounds)
+                    and enemy.take_damage(PLAYER_ATTACK_DAMAGE)
+                ):
+                    self._on_enemy_defeated(
+                        EnemyDefeated(enemy_id=enemy.entity.entity_id)
+                    )
 
             for obstacle in self._destructible_obstacles:
                 if obstacle.active and attack_bounds.overlaps(obstacle.bounds):
@@ -158,11 +165,11 @@ class GameplayScene(Scene):
                 )
 
         for enemy in self._enemies:
-            if enemy.active:
+            if enemy.entity.active:
                 pygame.draw.rect(
                     surface,
                     ENEMY_COLOR,
-                    _entity_rect(enemy),
+                    _entity_rect(enemy.entity),
                 )
 
         for collectible in self._collectibles:

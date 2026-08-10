@@ -118,7 +118,8 @@ The project now provides a minimal playable top-down loop:
    score.
 7. pressing Space near the destructible obstacle removes it and opens the
    passage it blocked.
-8. a stationary enemy blocks movement until a nearby attack defeats it.
+8. a stationary enemy blocks movement and survives the first nearby attack;
+9. a second nearby attack defeats it and opens its former position.
 
 Implemented foundations include:
 
@@ -137,8 +138,10 @@ Implemented foundations include:
 - axis-separated movement against solid obstacles;
 - a game-owned Python-authored demo map with collectible objects;
 - a game-owned destructible obstacle removed by a proximity attack;
-- a game-owned stationary enemy that is solid while active and defeated by one
-  nearby attack;
+- a game-owned stationary enemy composed from reusable spatial state and
+  mutable health;
+- game-owned damage behavior requiring two nearby attacks to defeat the current
+  enemy;
 - game-owned collection behavior based on reusable entity overlap detection;
 - immutable collection, destruction, and enemy defeat facts delivered through
   explicit callbacks;

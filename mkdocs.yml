@@ -59,6 +59,7 @@ nav:
       - Graphics: architecture/graphics.md
       - Collisions: architecture/collisions.md
       - World: architecture/world.md
+      - Game entities: architecture/entities.md
       - Levels: architecture/levels.md
       - Events: architecture/events.md
       - Scoring: architecture/scoring.md
@@ -73,6 +74,7 @@ nav:
           - Scenes: api/scenes.md
           - World: api/world.md
       - Game:
+          - Entities: api/game-entities.md
           - Events: api/game-events.md
           - Scoring: api/game-scoring.md
           - Input: api/game-input.md
