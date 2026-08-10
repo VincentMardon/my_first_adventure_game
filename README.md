@@ -130,7 +130,7 @@ Implemented foundations include:
 - minimal engine text rendering and game-owned rectangle presentation;
 - reusable elapsed-time-driven looping and one-shot frame animations;
 - an animated player with game-owned temporary idle, movement, and one-shot
-  collection states;
+  collection and attack states;
 - immutable floating-point collision bounds;
 - lightweight spatial entities and deterministic world storage;
 - axis-separated movement against solid obstacles;

@@ -43,6 +43,7 @@ class GameplayScene(Scene):
         player_idle_animation: Animation,
         player_movement_animation: Animation,
         player_collection_animation: Animation,
+        player_attack_animation: Animation,
     ) -> None:
         self._input_state = input_state
         self._font_cache = font_cache
@@ -58,6 +59,8 @@ class GameplayScene(Scene):
         self._player_animation = player_idle_animation
         self._player_collection_animation = player_collection_animation
         self._player_is_collecting = False
+        self._player_attack_animation = player_attack_animation
+        self._player_is_attacking = False
 
     def handle_event(self, event: pygame.event.Event) -> None:
         return None
@@ -77,7 +80,9 @@ class GameplayScene(Scene):
 
         player_bounds = self._player.bounds
 
-        if self._input_state.is_pressed(GameAction.ATTACK):
+        attack_started = self._input_state.is_pressed(GameAction.ATTACK)
+
+        if attack_started:
             attack_bounds = AABB(
                 x=player_bounds.x - ATTACK_REACH,
                 y=player_bounds.y - ATTACK_REACH,
@@ -102,9 +107,14 @@ class GameplayScene(Scene):
 
         if collection_started:
             self._player_is_collecting = True
+            self._player_is_attacking = False
             self._player_animation = self._player_collection_animation
             self._player_collection_animation.reset()
-        elif not self._player_is_collecting:
+        elif attack_started and not self._player_is_collecting:
+            self._player_is_attacking = True
+            self._player_animation = self._player_attack_animation
+            self._player_attack_animation.reset()
+        elif not self._player_is_collecting and not self._player_is_attacking:
             next_player_animation = (
                 self._player_movement_animation
                 if axis.length_squared() > 0.0
@@ -119,6 +129,8 @@ class GameplayScene(Scene):
 
         if self._player_is_collecting and self._player_collection_animation.finished:
             self._player_is_collecting = False
+        elif self._player_is_attacking and self._player_attack_animation.finished:
+            self._player_is_attacking = False
 
     def draw(self, surface: pygame.Surface) -> None:
         surface.fill(BACKGROUND_COLOR)

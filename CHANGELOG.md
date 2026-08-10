@@ -43,6 +43,8 @@ and this project adheres to
   collision and rendering.
 - Immutable `ObstacleDestroyed` facts delivered once through an explicit
   gameplay callback.
+- A one-shot player attack animation with priority over idle and movement
+  presentation.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

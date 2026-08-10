@@ -51,6 +51,7 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
     player_movement_animation = Mock(spec=Animation)
     player_collection_animation = Mock(spec=Animation)
     player_collection_animation.finished = False
+    player_attack_animation = Mock(spec=Animation)
 
     monkeypatch.setattr(gameplay_scene, "movement_axis", movement_axis)
     monkeypatch.setattr(gameplay_scene, "move_entity", move_entity)
@@ -68,6 +69,7 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
         player_idle_animation=player_idle_animation,
         player_movement_animation=player_movement_animation,
         player_collection_animation=player_collection_animation,
+        player_attack_animation=player_attack_animation,
     )
 
     scene.update(0.5)
@@ -138,6 +140,7 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
     player_idle_animation.current_frame = player_idle_frame
     player_collection_animation = Mock(spec=Animation)
     player_collection_animation.finished = False
+    player_attack_animation = Mock(spec=Animation)
 
     monkeypatch.setattr(gameplay_scene, "draw_text", draw_text)
     monkeypatch.setattr(pygame.draw, "rect", draw_rect)
@@ -155,6 +158,7 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         player_idle_animation=player_idle_animation,
         player_movement_animation=player_movement_animation,
         player_collection_animation=player_collection_animation,
+        player_attack_animation=player_attack_animation,
     )
 
     scene.draw(surface)
@@ -217,7 +221,7 @@ def test_update_deactivates_overlapping_collectible_and_reports_event_once(
     player_movement_animation = Mock(spec=Animation)
     player_collection_animation = Mock(spec=Animation)
     player_collection_animation.finished = False
-
+    player_attack_animation = Mock(spec=Animation)
     monkeypatch.setattr(
         gameplay_scene,
         "movement_axis",
@@ -238,6 +242,7 @@ def test_update_deactivates_overlapping_collectible_and_reports_event_once(
         player_idle_animation=player_idle_animation,
         player_movement_animation=player_movement_animation,
         player_collection_animation=player_collection_animation,
+        player_attack_animation=player_attack_animation,
     )
 
     scene.update(0.016)
@@ -275,6 +280,7 @@ def test_update_resets_animation_when_movement_state_changes(
     player_movement_animation = Mock(spec=Animation)
     player_collection_animation = Mock(spec=Animation)
     player_collection_animation.finished = False
+    player_attack_animation = Mock(spec=Animation)
 
     movement_axis = Mock(
         side_effect=(
@@ -299,6 +305,7 @@ def test_update_resets_animation_when_movement_state_changes(
         player_idle_animation=player_idle_animation,
         player_movement_animation=player_movement_animation,
         player_collection_animation=player_collection_animation,
+        player_attack_animation=player_attack_animation,
     )
 
     scene.update(0.1)
@@ -333,6 +340,7 @@ def test_update_returns_to_movement_after_collection_finished(
     player_movement_animation = Mock(spec=Animation)
     player_collection_animation = Mock(spec=Animation)
     player_collection_animation.finished = False
+    player_attack_animation = Mock(spec=Animation)
 
     movement_axis = Mock(
         side_effect=(
@@ -363,6 +371,7 @@ def test_update_returns_to_movement_after_collection_finished(
         player_idle_animation=player_idle_animation,
         player_movement_animation=player_movement_animation,
         player_collection_animation=player_collection_animation,
+        player_attack_animation=player_attack_animation,
     )
 
     scene.update(0.1)
@@ -404,6 +413,8 @@ def test_update_destroys_nearby_destructible_on_attack(
     player_movement_animation = Mock(spec=Animation)
     player_collection_animation = Mock(spec=Animation)
     player_collection_animation.finished = False
+    player_attack_animation = Mock(spec=Animation)
+    player_attack_animation.finished = False
 
     monkeypatch.setattr(
         gameplay_scene, "movement_axis", Mock(return_value=pygame.Vector2())
@@ -426,11 +437,20 @@ def test_update_destroys_nearby_destructible_on_attack(
         player_idle_animation=player_idle_animation,
         player_movement_animation=player_movement_animation,
         player_collection_animation=player_collection_animation,
+        player_attack_animation=player_attack_animation,
     )
 
     scene.update(0.016)
     scene.update(0.016)
 
+    player_attack_animation.reset.assert_called_once_with()
+    assert player_attack_animation.update.call_args_list == [
+        call(0.016),
+        call(0.016),
+    ]
+    player_idle_animation.update.assert_not_called()
+    player_movement_animation.update.assert_not_called()
+    player_collection_animation.update.assert_not_called()
     assert input_state.is_pressed.call_args_list == [
         call(GameAction.ATTACK),
         call(GameAction.ATTACK),
@@ -452,3 +472,67 @@ def test_update_destroys_nearby_destructible_on_attack(
     )
     assert not nearby_obstacle.active
     assert distant_obstacle.active
+
+
+def test_update_returns_to_movement_after_attack_finished(
+    monkeypatch,
+) -> None:
+    input_state = Mock(spec=InputState)
+    input_state.is_pressed.side_effect = (True, False)
+    font_cache = Mock(spec=FontCache)
+    session_score = Mock(spec=SessionScore)
+    player = Entity(
+        entity_id="player",
+        position=pygame.Vector2(100.0, 80.0),
+        size=pygame.Vector2(24.0, 24.0),
+    )
+    on_item_collected = Mock()
+    on_obstacle_destroyed = Mock()
+    player_idle_animation = Mock(spec=Animation)
+    player_movement_animation = Mock(spec=Animation)
+    player_collection_animation = Mock(spec=Animation)
+    player_collection_animation.finished = False
+    player_attack_animation = Mock(spec=Animation)
+    player_attack_animation.finished = False
+
+    movement_axis = Mock(
+        side_effect=(
+            pygame.Vector2(),
+            pygame.Vector2(1.0, 0.0),
+        )
+    )
+
+    def finish_attack_animation(delta_time: float) -> None:
+        assert delta_time == 0.1
+        player_attack_animation.finished = True
+
+    player_attack_animation.update.side_effect = finish_attack_animation
+
+    monkeypatch.setattr(gameplay_scene, "movement_axis", movement_axis)
+    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+
+    scene = GameplayScene(
+        input_state=input_state,
+        font_cache=font_cache,
+        session_score=session_score,
+        player=player,
+        walls=(),
+        collectibles=(),
+        on_item_collected=on_item_collected,
+        destructible_obstacles=(),
+        on_obstacle_destroyed=on_obstacle_destroyed,
+        player_idle_animation=player_idle_animation,
+        player_movement_animation=player_movement_animation,
+        player_collection_animation=player_collection_animation,
+        player_attack_animation=player_attack_animation,
+    )
+
+    scene.update(0.1)
+    scene.update(0.2)
+
+    player_attack_animation.reset.assert_called_once_with()
+    player_attack_animation.update.assert_called_once_with(0.1)
+    player_movement_animation.reset.assert_called_once_with()
+    player_movement_animation.update.assert_called_once_with(0.2)
+    player_idle_animation.update.assert_not_called()
+    player_collection_animation.update.assert_not_called()

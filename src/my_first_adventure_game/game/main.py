@@ -35,6 +35,11 @@ PLAYER_COLLECTION_COLORS = (
     (112, 240, 160),
 )
 PLAYER_COLLECTION_FRAME_DURATION = 0.1
+PLAYER_ATTACK_COLORS = (
+    (248, 96, 96),
+    (255, 176, 96),
+)
+PLAYER_ATTACK_FRAME_DURATION = 0.1
 
 
 def main() -> None:
@@ -52,6 +57,9 @@ def main() -> None:
     )
     player_collection_frames = tuple(
         pygame.Surface(PLAYER_FRAME_SIZE) for _ in PLAYER_COLLECTION_COLORS
+    )
+    player_attack_frames = tuple(
+        pygame.Surface(PLAYER_FRAME_SIZE) for _ in PLAYER_ATTACK_COLORS
     )
 
     for frame, color in zip(
@@ -73,6 +81,13 @@ def main() -> None:
     ):
         frame.fill(color)
 
+    for frame, color in zip(
+        player_attack_frames,
+        PLAYER_ATTACK_COLORS,
+        strict=True,
+    ):
+        frame.fill(color)
+
     player_idle_animation = Animation(
         frames=player_idle_frames,
         frame_duration=PLAYER_IDLE_FRAME_DURATION,
@@ -84,6 +99,12 @@ def main() -> None:
     player_collection_animation = Animation(
         frames=player_collection_frames,
         frame_duration=PLAYER_COLLECTION_FRAME_DURATION,
+        loop=False,
+    )
+
+    player_attack_animation = Animation(
+        frames=player_attack_frames,
+        frame_duration=PLAYER_ATTACK_FRAME_DURATION,
         loop=False,
     )
 
@@ -118,6 +139,7 @@ def main() -> None:
         player_idle_animation,
         player_movement_animation,
         player_collection_animation,
+        player_attack_animation,
     )
     application = Application(
         window_config=WINDOW_CONFIG,

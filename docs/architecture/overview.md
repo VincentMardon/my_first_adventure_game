@@ -134,7 +134,7 @@ confirmation action is pressed.
 The gameplay scene converts game actions into player movement, selects active
 walls as solid obstacles, deactivates collectibles overlapping the player,
 destroys nearby destructible obstacles when attacking, emits factual events,
-prioritizes a one-shot collection animation over movement and idle
+prioritizes one-shot collection and attack animations over movement and idle
 presentation, and displays the current session score.
 
 ### Levels
@@ -225,7 +225,7 @@ flowchart TD
 ```
 
 `game.main` creates the demo map, current `SessionScore`, and temporary
-two-frame idle, movement, and collection animations, then composes
+two-frame idle, movement, collection, and attack animations, then composes
 `GameplayScene` from its gameplay entities, shared rendering services, score,
 animations, and explicit collection and destruction handlers. `GameplayScene`
 selects idle or
@@ -234,7 +234,8 @@ presentation priority until completion, advances and renders the selected
 animation, and delivers an `ItemCollected` fact when an active collectible is
 collected. A newly pressed attack deactivates a nearby active destructible
 obstacle, removes it from later collision and rendering, and delivers an
-`ObstacleDestroyed` fact.
+`ObstacleDestroyed` fact. The same input starts a one-shot attack presentation
+that has priority over movement and idle animation.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.

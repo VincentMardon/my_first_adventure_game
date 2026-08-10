@@ -175,7 +175,8 @@ and
 
 - receives the action input state, font cache, session score, player entity,
   wall entities, destructible obstacles, collectible entities, idle, movement,
-  and collection animations, and explicit collection and destruction handlers;
+  collection, and attack animations, and explicit collection and destruction
+  handlers;
 - converts directional actions into normalized movement;
 - selects the movement animation while the directional axis is non-zero and
   the idle animation otherwise;
@@ -185,6 +186,8 @@ and
 - selects wall bounds as solid obstacles;
 - delegates collision-aware movement to the engine;
 - applies a game-owned proximity attack when `ATTACK` is pressed;
+- restarts a one-shot attack animation when the attack begins and gives it
+  priority over idle and movement presentation;
 - deactivates the first active destructible obstacle within attack reach and
   delivers an immutable `ObstacleDestroyed` fact;
 - detects player overlap with active collectibles after movement;
@@ -201,24 +204,28 @@ and
 
 `game.main` composes `GameplayScene` from the shared font cache and session
 score, the player, walls, destructible obstacles, and collectibles provided by
-the demo map, idle, movement, and collection animations, and explicit
+the demo map, idle, movement, collection, and attack animations, and explicit
 collection and destruction handlers. The collection handler applies the
 game-owned collection point rule to the same session score displayed by the
 scene. The destruction handler currently has no additional consequence.
 
-The current idle, movement, and collection animations each use two game-owned
-colored surfaces as temporary frames. This validates animation timing, state
-selection, reset and completion behavior, and rendering without treating those
-placeholder visuals as engine defaults.
+The current idle, movement, collection, and attack animations each use two
+game-owned colored surfaces as temporary frames. This validates animation
+timing, state selection, reset and completion behavior, and rendering without
+treating those placeholder visuals as engine defaults.
 
 Animation priority is:
 
 ```text
-collection > movement > idle
+collection > attack > movement > idle
 ```
 
 Collection presentation does not block movement. It is a temporary visual
 state that finishes automatically.
+
+Attack presentation also does not block movement. A collection beginning on
+the same frame takes visual priority, while the attack's gameplay consequence
+is still evaluated.
 
 Movement animation follows directional intent rather than collision-resolved
 displacement. Holding a direction against a wall therefore continues to show
@@ -276,6 +283,8 @@ Current tests verify:
   movement, and collection animations;
 - the collection animation takes priority until completion before returning to
   the state selected by directional input;
+- the attack animation starts on a newly pressed attack, remains selected until
+  completion, and then returns to the state selected by directional input;
 - the gameplay scene draws its background, walls, active collectibles, and
   animated player in order;
 - the gameplay scene deactivates an active overlapping collectible and delivers

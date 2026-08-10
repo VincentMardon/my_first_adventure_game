@@ -25,6 +25,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     fifth_player_frame = Mock()
     sixth_player_frame = Mock()
     player_collection_animation = Mock()
+    seventh_player_frame = Mock()
+    eighth_player_frame = Mock()
+    player_attack_animation = Mock()
 
     create_input_state = Mock(return_value=input_state)
     create_title_scene = Mock(return_value=initial_scene)
@@ -43,6 +46,8 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
             fourth_player_frame,
             fifth_player_frame,
             sixth_player_frame,
+            seventh_player_frame,
+            eighth_player_frame,
         ),
     )
     create_animation = Mock(
@@ -50,6 +55,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
             player_idle_animation,
             player_movement_animation,
             player_collection_animation,
+            player_attack_animation,
         )
     )
 
@@ -82,6 +88,8 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         call(game_main.PLAYER_FRAME_SIZE),
         call(game_main.PLAYER_FRAME_SIZE),
         call(game_main.PLAYER_FRAME_SIZE),
+        call(game_main.PLAYER_FRAME_SIZE),
+        call(game_main.PLAYER_FRAME_SIZE),
     ]
     first_player_frame.fill.assert_called_once_with(
         game_main.PLAYER_IDLE_COLORS[0],
@@ -101,6 +109,12 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     sixth_player_frame.fill.assert_called_once_with(
         game_main.PLAYER_COLLECTION_COLORS[1],
     )
+    seventh_player_frame.fill.assert_called_once_with(
+        game_main.PLAYER_ATTACK_COLORS[0],
+    )
+    eighth_player_frame.fill.assert_called_once_with(
+        game_main.PLAYER_ATTACK_COLORS[1],
+    )
     assert create_animation.call_args_list == [
         call(
             frames=(first_player_frame, second_player_frame),
@@ -113,6 +127,11 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         call(
             frames=(fifth_player_frame, sixth_player_frame),
             frame_duration=game_main.PLAYER_COLLECTION_FRAME_DURATION,
+            loop=False,
+        ),
+        call(
+            frames=(seventh_player_frame, eighth_player_frame),
+            frame_duration=game_main.PLAYER_ATTACK_FRAME_DURATION,
             loop=False,
         ),
     ]
@@ -133,6 +152,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert gameplay_args[9] is player_idle_animation
     assert gameplay_args[10] is player_movement_animation
     assert gameplay_args[11] is player_collection_animation
+    assert gameplay_args[12] is player_attack_animation
 
     handle_item_collected = gameplay_args[6]
     event = ItemCollected(item_id="collectible-1")
