@@ -71,3 +71,13 @@ def test_demo_map_wall_bounds_are_distinct() -> None:
     game_map = create_demo_map()
 
     assert len({wall.bounds for wall in game_map.walls}) == len(game_map.walls)
+
+
+def test_demo_map_has_active_destructible_obstacles() -> None:
+    game_map = create_demo_map()
+
+    assert game_map.destructible_obstacles
+    assert all(obstacle.active for obstacle in game_map.destructible_obstacles)
+    assert all(
+        obstacle in game_map.walls for obstacle in game_map.destructible_obstacles
+    )

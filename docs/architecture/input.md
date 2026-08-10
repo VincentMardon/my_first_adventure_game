@@ -210,16 +210,18 @@ Current concrete actions are:
 - `MOVE_RIGHT`;
 - `MOVE_UP`;
 - `MOVE_DOWN`;
+- `ATTACK`;
 - `CONFIRM`.
 
-Directional actions are bound to the arrow keys. `CONFIRM` is bound to the
-Enter key.
+Directional actions are bound to the arrow keys. `ATTACK` is bound to Space and
+`CONFIRM` is bound to Enter.
 
 `game.main` creates the concrete `InputState` and passes it to `Application` as
 an `InputProcessor`.
 
 `TitleScene` queries the pressed state of `CONFIRM` to request the transition to
-gameplay. `GameplayScene` queries held directional actions to move the player.
+gameplay. `GameplayScene` queries held directional actions to move the player
+and the pressed state of `ATTACK` to apply the game-owned proximity attack.
 
 ## Device extensibility
 
@@ -289,6 +291,6 @@ Current tests verify:
 - cardinal direction conventions;
 - cancellation of opposite directions;
 - diagonal normalization;
-- concrete default arrow-key and confirmation bindings;
+- concrete default arrow-key, attack, and confirmation bindings;
 - title navigation triggered only by a newly pressed confirmation action;
 - integration of the input lifecycle into `Application`.

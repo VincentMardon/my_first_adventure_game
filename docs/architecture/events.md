@@ -6,7 +6,8 @@ The game events domain defines immutable facts produced by concrete gameplay
 behavior.
 
 It currently provides `ItemCollected`, which identifies an item collected by
-the player.
+the player, and `ObstacleDestroyed`, which identifies a destructible obstacle
+removed by an attack.
 
 The domain does not calculate score, update session state, persist statistics,
 or provide a general event dispatcher.
@@ -29,14 +30,20 @@ Reports that an item was collected.
 It contains only the stable identifier of that item. It is immutable so
 consumers receive a factual snapshot that cannot be altered after emission.
 
+### [`ObstacleDestroyed`](../api/game-events.md#my_first_adventure_game.game.events.ObstacleDestroyed)
+
+Reports that a destructible obstacle was destroyed.
+
+It contains only the stable identifier of that obstacle and is immutable.
+
 ## Ownership
 
-`ItemCollected` belongs to `game` because collecting an item is concrete game
-vocabulary rather than a reusable engine mechanism.
+Both events belong to `game` because collection, attacks, and destruction are
+concrete game vocabulary rather than reusable engine mechanisms.
 
 The engine provides entity identity and overlap detection. The game decides
 that a particular overlap represents collection and emits the corresponding
-fact.
+fact. It also decides that an attack near a destructible obstacle destroys it.
 
 ## Relationships
 
@@ -45,18 +52,27 @@ flowchart LR
     GameMain["game.main"]
     GameplayScene["game.scenes.GameplayScene"]
     ItemCollected["game.events.ItemCollected"]
+    ObstacleDestroyed["game.events.ObstacleDestroyed"]
     Handler["injected collection handler"]
+    DestructionHandler["injected destruction handler"]
 
     GameMain -->|"injects"| Handler
     GameMain --> GameplayScene
     GameplayScene -->|"creates after collection"| ItemCollected
     GameplayScene -->|"delivers synchronously"| Handler
     ItemCollected --> Handler
+    GameMain -->|"injects"| DestructionHandler
+    GameplayScene -->|"creates after destruction"| ObstacleDestroyed
+    GameplayScene -->|"delivers synchronously"| DestructionHandler
+    ObstacleDestroyed --> DestructionHandler
 ```
 
 The handler composed in `game.main` converts `ItemCollected` into points through
 the game-owned scoring rule and adds them to the current `SessionScore`. The
 event itself remains independent from that consequence.
+
+The destruction handler currently has no additional consequence. The scene
+deactivates the obstacle before reporting the factual event.
 
 ## Delivery semantics
 
@@ -65,6 +81,9 @@ event itself remains independent from that consequence.
 - One `ItemCollected` value is delivered through the injected callback.
 - An inactive item cannot emit the event again on later frames.
 - Delivery is synchronous and local to the gameplay scene.
+- `GameplayScene` deactivates an active destructible obstacle within attack
+  reach before delivering one `ObstacleDestroyed` value.
+- An inactive obstacle cannot emit the destruction event again.
 
 There is no global event bus, subscription registry, or runtime event queue.
 
@@ -73,8 +92,8 @@ There is no global event bus, subscription registry, or runtime event queue.
 Additional factual event types should be introduced only when concrete gameplay
 behavior produces them.
 
-The injected collection handler may later coordinate additional session or
-presentation consequences without changing the collection event itself.
+The injected handlers may later coordinate additional session or presentation
+consequences without changing the factual events themselves.
 
 ## Change risks
 
@@ -96,3 +115,8 @@ Current tests verify:
 - collecting an active overlapping item deactivates it;
 - the event is delivered exactly once across subsequent updates;
 - distant items remain active.
+- `ObstacleDestroyed` stores the destroyed obstacle identifier and is
+  immutable;
+- attacking near an active destructible obstacle deactivates it and delivers
+  its event exactly once;
+- distant destructible obstacles remain active.

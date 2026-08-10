@@ -38,6 +38,11 @@ and this project adheres to
   input.
 - A one-shot player collection animation with priority over idle and movement
   presentation.
+- A game-owned attack action bound to Space.
+- A destructible obstacle removed by a proximity attack and excluded from later
+  collision and rendering.
+- Immutable `ObstacleDestroyed` facts delivered once through an explicit
+  gameplay callback.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

@@ -1,7 +1,10 @@
 from unittest.mock import Mock, call
 
 from my_first_adventure_game.game import main as game_main
-from my_first_adventure_game.game.events import ItemCollected
+from my_first_adventure_game.game.events import (
+    ItemCollected,
+    ObstacleDestroyed,
+)
 
 
 def test_main_builds_and_runs_application(monkeypatch) -> None:
@@ -96,7 +99,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         game_main.PLAYER_COLLECTION_COLORS[0],
     )
     sixth_player_frame.fill.assert_called_once_with(
-        game_main.PLAYER_COLLECTION_COLORS[1]
+        game_main.PLAYER_COLLECTION_COLORS[1],
     )
     assert create_animation.call_args_list == [
         call(
@@ -125,14 +128,21 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         game_map.collectibles,
     )
     assert callable(gameplay_args[6])
-    assert gameplay_args[7] is player_idle_animation
-    assert gameplay_args[8] is player_movement_animation
-    assert gameplay_args[9] is player_collection_animation
+    assert gameplay_args[7] is game_map.destructible_obstacles
+    assert callable(gameplay_args[8])
+    assert gameplay_args[9] is player_idle_animation
+    assert gameplay_args[10] is player_movement_animation
+    assert gameplay_args[11] is player_collection_animation
 
     handle_item_collected = gameplay_args[6]
     event = ItemCollected(item_id="collectible-1")
 
     handle_item_collected(event)
+
+    handle_obstacle_destroyed = gameplay_args[8]
+    obstacle_event = ObstacleDestroyed(obstacle_id="destructible-1")
+
+    assert handle_obstacle_destroyed(obstacle_event) is None
 
     score_item_collection.assert_called_once_with(event)
     session_score.add.assert_called_once_with(100)

@@ -174,8 +174,8 @@ and
 `GameplayScene`:
 
 - receives the action input state, font cache, session score, player entity,
-  wall entities, collectible entities, idle, movement, and collection
-  animations, and an explicit collection handler;
+  wall entities, destructible obstacles, collectible entities, idle, movement,
+  and collection animations, and explicit collection and destruction handlers;
 - converts directional actions into normalized movement;
 - selects the movement animation while the directional axis is non-zero and
   the idle animation otherwise;
@@ -184,6 +184,9 @@ and
 - applies the game-owned movement speed using delta time;
 - selects wall bounds as solid obstacles;
 - delegates collision-aware movement to the engine;
+- applies a game-owned proximity attack when `ATTACK` is pressed;
+- deactivates the first active destructible obstacle within attack reach and
+  delivers an immutable `ObstacleDestroyed` fact;
 - detects player overlap with active collectibles after movement;
 - applies the game-owned collection rule by deactivating overlapping
   collectibles;
@@ -192,15 +195,16 @@ and
   gives it priority over idle and movement presentation;
 - returns to the animation selected by directional intent after collection
   playback finishes;
-- draws walls and active collectibles as game-owned rectangles, blits the
+- draws active walls and active collectibles as game-owned rectangles, blits the
   current player animation frame, and draws the current session score;
 - rounds floating-point geometry only at rendering time.
 
 `game.main` composes `GameplayScene` from the shared font cache and session
-score, the player, walls, and collectibles provided by the demo map, idle,
-movement, and collection animations, and an explicit collection handler. The
-handler applies the game-owned collection point rule to the same session score
-displayed by the scene.
+score, the player, walls, destructible obstacles, and collectibles provided by
+the demo map, idle, movement, and collection animations, and explicit
+collection and destruction handlers. The collection handler applies the
+game-owned collection point rule to the same session score displayed by the
+scene. The destruction handler currently has no additional consequence.
 
 The current idle, movement, and collection animations each use two game-owned
 colored surfaces as temporary frames. This validates animation timing, state
@@ -277,6 +281,10 @@ Current tests verify:
 - the gameplay scene deactivates an active overlapping collectible and delivers
   its event exactly once across subsequent updates while leaving distant
   collectibles active;
+- the gameplay scene destroys a nearby active destructible obstacle only when
+  attack is newly pressed and delivers its event exactly once;
+- inactive destroyed obstacles are excluded from collision and rendering while
+  ordinary walls remain unaffected;
 - the gameplay scene loads its score font and draws the current session score;
 - the title scene requests gameplay only when confirmation is pressed;
 - the composition root connects the demo map and explicit title-to-gameplay

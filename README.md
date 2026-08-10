@@ -64,7 +64,8 @@ my-first-adventure-game
 ### Controls
 
 - press Enter on the title screen to start;
-- use the arrow keys to move the player.
+- use the arrow keys to move the player;
+- press Space near a destructible obstacle to destroy it.
 
 ## Development checks
 
@@ -115,6 +116,8 @@ The project now provides a minimal playable top-down loop:
 5. overlapping a collectible deactivates it and removes it from view.
 6. each collected object awards 100 points and updates the displayed session
    score.
+7. pressing Space near the destructible obstacle removes it and opens the
+   passage it blocked.
 
 Implemented foundations include:
 
@@ -132,8 +135,10 @@ Implemented foundations include:
 - lightweight spatial entities and deterministic world storage;
 - axis-separated movement against solid obstacles;
 - a game-owned Python-authored demo map with collectible objects;
+- a game-owned destructible obstacle removed by a proximity attack;
 - game-owned collection behavior based on reusable entity overlap detection;
-- immutable factual gameplay events delivered through explicit callbacks;
+- immutable collection and destruction facts delivered through explicit
+  callbacks;
 - game-owned item collection scoring rules;
 - an accumulated session score displayed during gameplay;
 - automated tests, Ruff checks, strict documentation builds, package builds,

@@ -112,8 +112,8 @@ game.
 
 Defines immutable facts produced by concrete gameplay behavior.
 
-The current `ItemCollected` event identifies a collected item without deciding
-its consequences for score, session state, or persistence.
+The current `ItemCollected` and `ObstacleDestroyed` events identify concrete
+gameplay facts without deciding their consequences.
 
 ### Scoring
 
@@ -131,18 +131,19 @@ Provides the concrete title and gameplay scenes.
 The title scene requests an explicit transition to gameplay when the
 confirmation action is pressed.
 
-The gameplay scene converts game actions into player movement, selects walls as
-solid obstacles, deactivates collectibles overlapping the player, emits factual
-collection events, prioritizes a one-shot collection animation over movement
-and idle presentation, and displays the current session score.
+The gameplay scene converts game actions into player movement, selects active
+walls as solid obstacles, deactivates collectibles overlapping the player,
+destroys nearby destructible obstacles when attacking, emits factual events,
+prioritizes a one-shot collection animation over movement and idle
+presentation, and displays the current session score.
 
 ### Levels
 
 Defines the first Python-authored game map.
 
 `GameMap` groups the reusable world representation with the concrete player,
-wall, and collectible roles owned by the game. `create_demo_map()` defines
-their initial geometry and registration order.
+wall, destructible obstacle, and collectible roles owned by the game.
+`create_demo_map()` defines their initial geometry and registration order.
 
 ## Reserved domains
 
@@ -177,6 +178,7 @@ flowchart TD
     World["World"]
     Entity["Entity"]
     ItemCollected["ItemCollected"]
+    ObstacleDestroyed["ObstacleDestroyed"]
     ItemCollectionPoints["item_collection_points"]
     SessionScore["SessionScore"]
     Animation["Animation"]
@@ -209,6 +211,7 @@ flowchart TD
     GameplayScene --> InputState
     GameplayScene --> Entity
     GameplayScene --> ItemCollected
+    GameplayScene --> ObstacleDestroyed
     GameplayScene --> SessionScore
     GameplayScene --> Animation
     GameplayScene --> FontCache
@@ -224,11 +227,14 @@ flowchart TD
 `game.main` creates the demo map, current `SessionScore`, and temporary
 two-frame idle, movement, and collection animations, then composes
 `GameplayScene` from its gameplay entities, shared rendering services, score,
-animations, and explicit collection handler. `GameplayScene` selects idle or
+animations, and explicit collection and destruction handlers. `GameplayScene`
+selects idle or
 movement presentation from directional intent, gives one-shot collection
 presentation priority until completion, advances and renders the selected
 animation, and delivers an `ItemCollected` fact when an active collectible is
-collected.
+collected. A newly pressed attack deactivates a nearby active destructible
+obstacle, removes it from later collision and rendering, and delivers an
+`ObstacleDestroyed` fact.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.

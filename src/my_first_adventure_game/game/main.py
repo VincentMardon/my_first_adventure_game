@@ -5,7 +5,10 @@ from my_first_adventure_game.engine.assets import FontCache
 from my_first_adventure_game.engine.graphics import Animation
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.scenes import SceneManager
-from my_first_adventure_game.game.events import ItemCollected
+from my_first_adventure_game.game.events import (
+    ItemCollected,
+    ObstacleDestroyed,
+)
 from my_first_adventure_game.game.input import DEFAULT_KEYBOARD_BINDINGS
 from my_first_adventure_game.game.levels import create_demo_map
 from my_first_adventure_game.game.scenes import GameplayScene, TitleScene
@@ -97,6 +100,11 @@ def main() -> None:
     def handle_item_collected(event: ItemCollected) -> None:
         session_score.add(item_collection_points(event))
 
+    def handle_obstacle_destroyed(
+        _event: ObstacleDestroyed,
+    ) -> None:
+        pass
+
     gameplay_scene = GameplayScene(
         input_state,
         font_cache,
@@ -105,6 +113,8 @@ def main() -> None:
         game_map.walls,
         game_map.collectibles,
         handle_item_collected,
+        game_map.destructible_obstacles,
+        handle_obstacle_destroyed,
         player_idle_animation,
         player_movement_animation,
         player_collection_animation,

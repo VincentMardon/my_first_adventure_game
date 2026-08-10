@@ -15,6 +15,7 @@ from my_first_adventure_game.game.input import (
         (GameAction.MOVE_UP, pygame.K_UP),
         (GameAction.MOVE_DOWN, pygame.K_DOWN),
         (GameAction.CONFIRM, pygame.K_RETURN),
+        (GameAction.ATTACK, pygame.K_SPACE),
     ],
 )
 def test_action_has_default_key(

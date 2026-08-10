@@ -3,11 +3,15 @@ from collections.abc import Callable
 import pygame
 
 from my_first_adventure_game.engine.assets import FontCache
+from my_first_adventure_game.engine.collisions import AABB
 from my_first_adventure_game.engine.graphics import Animation, draw_text
 from my_first_adventure_game.engine.input import InputState, movement_axis
 from my_first_adventure_game.engine.scenes import Scene
 from my_first_adventure_game.engine.world import Entity, move_entity
-from my_first_adventure_game.game.events import ItemCollected
+from my_first_adventure_game.game.events import (
+    ItemCollected,
+    ObstacleDestroyed,
+)
 from my_first_adventure_game.game.input import GameAction
 from my_first_adventure_game.game.scoring import SessionScore
 
@@ -19,6 +23,7 @@ SCORE_COLOR = (240, 240, 240)
 SCORE_CENTER = (80, 24)
 SCORE_FONT_PATH = pygame.font.get_default_font()
 SCORE_FONT_SIZE = 24
+ATTACK_REACH = 16.0
 
 
 class GameplayScene(Scene):
@@ -33,6 +38,8 @@ class GameplayScene(Scene):
         walls: tuple[Entity, ...],
         collectibles: tuple[Entity, ...],
         on_item_collected: Callable[[ItemCollected], None],
+        destructible_obstacles: tuple[Entity, ...],
+        on_obstacle_destroyed: Callable[[ObstacleDestroyed], None],
         player_idle_animation: Animation,
         player_movement_animation: Animation,
         player_collection_animation: Animation,
@@ -44,6 +51,8 @@ class GameplayScene(Scene):
         self._walls = walls
         self._collectibles = collectibles
         self._on_item_collected = on_item_collected
+        self._destructible_obstacles = destructible_obstacles
+        self._on_obstacle_destroyed = on_obstacle_destroyed
         self._player_idle_animation = player_idle_animation
         self._player_movement_animation = player_movement_animation
         self._player_animation = player_idle_animation
@@ -62,11 +71,27 @@ class GameplayScene(Scene):
             down=GameAction.MOVE_DOWN,
         )
         movement = axis * PLAYER_SPEED * delta_time
-        solid_bounds = tuple(wall.bounds for wall in self._walls)
+        solid_bounds = tuple(wall.bounds for wall in self._walls if wall.active)
 
         move_entity(self._player, movement, solid_bounds)
 
         player_bounds = self._player.bounds
+
+        if self._input_state.is_pressed(GameAction.ATTACK):
+            attack_bounds = AABB(
+                x=player_bounds.x - ATTACK_REACH,
+                y=player_bounds.y - ATTACK_REACH,
+                width=player_bounds.width + ATTACK_REACH * 2.0,
+                height=player_bounds.height + ATTACK_REACH * 2.0,
+            )
+
+            for obstacle in self._destructible_obstacles:
+                if obstacle.active and attack_bounds.overlaps(obstacle.bounds):
+                    obstacle.active = False
+                    self._on_obstacle_destroyed(
+                        ObstacleDestroyed(obstacle_id=obstacle.entity_id)
+                    )
+
         collection_started = False
 
         for collectible in self._collectibles:
@@ -99,11 +124,12 @@ class GameplayScene(Scene):
         surface.fill(BACKGROUND_COLOR)
 
         for wall in self._walls:
-            pygame.draw.rect(
-                surface,
-                WALL_COLOR,
-                _entity_rect(wall),
-            )
+            if wall.active:
+                pygame.draw.rect(
+                    surface,
+                    WALL_COLOR,
+                    _entity_rect(wall),
+                )
 
         for collectible in self._collectibles:
             if collectible.active:
