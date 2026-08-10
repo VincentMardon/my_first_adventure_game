@@ -28,6 +28,7 @@ Groups:
 - the `World` containing all registered entities;
 - the player entity;
 - the wall entities used as solid obstacles;
+- the entities assigned the enemy role by the game;
 - the wall entities assigned the destructible obstacle role by the game;
 - the entities assigned the collectible role by the game.
 
@@ -37,10 +38,10 @@ The dataclass is immutable, but the grouped world and entities remain mutable.
 
 Creates the current demonstration map entirely in Python.
 
-It registers the player, walls, and collectibles in deterministic order. One
-wall is also assigned the destructible obstacle role. Their initial geometry
-keeps the player and collectibles outside the walls and prevents collectibles
-from overlapping the player.
+It registers the player, walls, enemies, and collectibles in deterministic
+order. One wall is also assigned the destructible obstacle role. Their initial
+geometry keeps the player, enemies, and collectibles outside the walls and
+prevents collectibles from overlapping the player.
 
 The concrete identifiers, positions, sizes, and entity roles belong to the game.
 
@@ -52,7 +53,7 @@ resolution.
 The game levels domain owns:
 
 - concrete map layouts;
-- player, wall, destructible obstacle, and collectible roles;
+- player, wall, enemy, destructible obstacle, and collectible roles;
 - entity identifiers;
 - initial positions and sizes;
 - the selection and ordering of map content.
@@ -78,8 +79,8 @@ flowchart TD
     GameMain --> GameplayScene
 ```
 
-`game.main` creates the demo map and passes its player, walls, destructible
-obstacles, and collectibles to `GameplayScene`. The scene consumes these
+`game.main` creates the demo map and passes its player, walls, enemies,
+destructible obstacles, and collectibles to `GameplayScene`. The scene consumes these
 concrete roles without depending on the `GameMap` container itself.
 
 A map is spatial content managed during gameplay. It is not a scene and is not
@@ -87,10 +88,13 @@ managed by `SceneManager`.
 
 ## Invariants
 
-- The player, every wall, and every collectible are registered in the same world.
+- The player, every wall, enemy, and collectible are registered in the same
+  world.
 - Entity identifiers are unique within the map.
 - Registration order is deterministic.
 - The map contains at least one wall and one collectible.
+- The map contains at least one active enemy.
+- Enemies are not registered as walls.
 - The map contains at least one active destructible obstacle.
 - Every destructible obstacle is also registered as a wall.
 - The player starts outside every wall.
@@ -107,8 +111,8 @@ the need.
 
 ## Change risks
 
-Moving `GameMap` into the engine would leak concrete player, wall, destructible
-obstacle, and collectible roles into a reusable mechanism.
+Moving `GameMap` into the engine would leak concrete player, wall, enemy,
+destructible obstacle, and collectible roles into a reusable mechanism.
 
 Treating maps as scenes would couple spatial navigation to global application
 state.

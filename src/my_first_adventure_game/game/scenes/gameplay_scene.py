@@ -9,6 +9,7 @@ from my_first_adventure_game.engine.input import InputState, movement_axis
 from my_first_adventure_game.engine.scenes import Scene
 from my_first_adventure_game.engine.world import Entity, move_entity
 from my_first_adventure_game.game.events import (
+    EnemyDefeated,
     ItemCollected,
     ObstacleDestroyed,
 )
@@ -17,6 +18,7 @@ from my_first_adventure_game.game.scoring import SessionScore
 
 PLAYER_SPEED = 160.0
 WALL_COLOR = (84, 104, 92)
+ENEMY_COLOR = (200, 72, 96)
 COLLECTIBLE_COLOR = (112, 200, 224)
 BACKGROUND_COLOR = (18, 32, 24)
 SCORE_COLOR = (240, 240, 240)
@@ -36,6 +38,8 @@ class GameplayScene(Scene):
         session_score: SessionScore,
         player: Entity,
         walls: tuple[Entity, ...],
+        enemies: tuple[Entity, ...],
+        on_enemy_defeated: Callable[[EnemyDefeated], None],
         collectibles: tuple[Entity, ...],
         on_item_collected: Callable[[ItemCollected], None],
         destructible_obstacles: tuple[Entity, ...],
@@ -50,6 +54,8 @@ class GameplayScene(Scene):
         self._session_score = session_score
         self._player = player
         self._walls = walls
+        self._enemies = enemies
+        self._on_enemy_defeated = on_enemy_defeated
         self._collectibles = collectibles
         self._on_item_collected = on_item_collected
         self._destructible_obstacles = destructible_obstacles
@@ -74,7 +80,10 @@ class GameplayScene(Scene):
             down=GameAction.MOVE_DOWN,
         )
         movement = axis * PLAYER_SPEED * delta_time
-        solid_bounds = tuple(wall.bounds for wall in self._walls if wall.active)
+        solid_bounds = (
+            *(wall.bounds for wall in self._walls if wall.active),
+            *(enemy.bounds for enemy in self._enemies if enemy.active),
+        )
 
         move_entity(self._player, movement, solid_bounds)
 
@@ -89,6 +98,11 @@ class GameplayScene(Scene):
                 width=player_bounds.width + ATTACK_REACH * 2.0,
                 height=player_bounds.height + ATTACK_REACH * 2.0,
             )
+
+            for enemy in self._enemies:
+                if enemy.active and attack_bounds.overlaps(enemy.bounds):
+                    enemy.active = False
+                    self._on_enemy_defeated(EnemyDefeated(enemy_id=enemy.entity_id))
 
             for obstacle in self._destructible_obstacles:
                 if obstacle.active and attack_bounds.overlaps(obstacle.bounds):
@@ -141,6 +155,14 @@ class GameplayScene(Scene):
                     surface,
                     WALL_COLOR,
                     _entity_rect(wall),
+                )
+
+        for enemy in self._enemies:
+            if enemy.active:
+                pygame.draw.rect(
+                    surface,
+                    ENEMY_COLOR,
+                    _entity_rect(enemy),
                 )
 
         for collectible in self._collectibles:

@@ -2,6 +2,7 @@ from unittest.mock import Mock, call
 
 from my_first_adventure_game.game import main as game_main
 from my_first_adventure_game.game.events import (
+    EnemyDefeated,
     ItemCollected,
     ObstacleDestroyed,
 )
@@ -144,22 +145,29 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         session_score,
         game_map.player,
         game_map.walls,
-        game_map.collectibles,
+        game_map.enemies,
     )
     assert callable(gameplay_args[6])
-    assert gameplay_args[7] is game_map.destructible_obstacles
+    assert gameplay_args[7] is game_map.collectibles
     assert callable(gameplay_args[8])
-    assert gameplay_args[9] is player_idle_animation
-    assert gameplay_args[10] is player_movement_animation
-    assert gameplay_args[11] is player_collection_animation
-    assert gameplay_args[12] is player_attack_animation
+    assert gameplay_args[9] is game_map.destructible_obstacles
+    assert callable(gameplay_args[10])
+    assert gameplay_args[11] is player_idle_animation
+    assert gameplay_args[12] is player_movement_animation
+    assert gameplay_args[13] is player_collection_animation
+    assert gameplay_args[14] is player_attack_animation
 
-    handle_item_collected = gameplay_args[6]
+    handle_enemy_defeated = gameplay_args[6]
+    enemy_event = EnemyDefeated(enemy_id="enemy-1")
+
+    assert handle_enemy_defeated(enemy_event) is None
+
+    handle_item_collected = gameplay_args[8]
     event = ItemCollected(item_id="collectible-1")
 
     handle_item_collected(event)
 
-    handle_obstacle_destroyed = gameplay_args[8]
+    handle_obstacle_destroyed = gameplay_args[10]
     obstacle_event = ObstacleDestroyed(obstacle_id="destructible-1")
 
     assert handle_obstacle_destroyed(obstacle_event) is None

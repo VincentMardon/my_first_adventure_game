@@ -45,6 +45,10 @@ and this project adheres to
   gameplay callback.
 - A one-shot player attack animation with priority over idle and movement
   presentation.
+- A stationary game-owned enemy that blocks movement while active and is
+  defeated by a nearby attack.
+- Immutable `EnemyDefeated` facts delivered once through an explicit gameplay
+  callback.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

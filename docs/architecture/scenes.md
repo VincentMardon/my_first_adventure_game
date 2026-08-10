@@ -174,22 +174,24 @@ and
 `GameplayScene`:
 
 - receives the action input state, font cache, session score, player entity,
-  wall entities, destructible obstacles, collectible entities, idle, movement,
-  collection, and attack animations, and explicit collection and destruction
-  handlers;
+  wall entities, enemy entities, destructible obstacles, collectible entities,
+  idle, movement, collection, and attack animations, and explicit collection,
+  destruction, and enemy defeat handlers;
 - converts directional actions into normalized movement;
 - selects the movement animation while the directional axis is non-zero and
   the idle animation otherwise;
 - resets the newly selected animation when the movement state changes;
 - advances only the selected player animation using frame delta time;
 - applies the game-owned movement speed using delta time;
-- selects wall bounds as solid obstacles;
+- selects active wall and enemy bounds as solid obstacles;
 - delegates collision-aware movement to the engine;
 - applies a game-owned proximity attack when `ATTACK` is pressed;
 - restarts a one-shot attack animation when the attack begins and gives it
   priority over idle and movement presentation;
 - deactivates the first active destructible obstacle within attack reach and
   delivers an immutable `ObstacleDestroyed` fact;
+- deactivates active enemies within attack reach and delivers immutable
+  `EnemyDefeated` facts;
 - detects player overlap with active collectibles after movement;
 - applies the game-owned collection rule by deactivating overlapping
   collectibles;
@@ -198,16 +200,17 @@ and
   gives it priority over idle and movement presentation;
 - returns to the animation selected by directional intent after collection
   playback finishes;
-- draws active walls and active collectibles as game-owned rectangles, blits the
-  current player animation frame, and draws the current session score;
+- draws active walls, enemies, and collectibles as game-owned rectangles, blits
+  the current player animation frame, and draws the current session score;
 - rounds floating-point geometry only at rendering time.
 
 `game.main` composes `GameplayScene` from the shared font cache and session
-score, the player, walls, destructible obstacles, and collectibles provided by
-the demo map, idle, movement, collection, and attack animations, and explicit
-collection and destruction handlers. The collection handler applies the
-game-owned collection point rule to the same session score displayed by the
-scene. The destruction handler currently has no additional consequence.
+score, the player, walls, enemies, destructible obstacles, and collectibles
+provided by the demo map, idle, movement, collection, and attack animations,
+and explicit collection, destruction, and enemy defeat handlers. The collection
+handler applies the game-owned collection point rule to the same session score
+displayed by the scene. The destruction and defeat handlers currently have no
+additional consequence.
 
 The current idle, movement, collection, and attack animations each use two
 game-owned colored surfaces as temporary frames. This validates animation
@@ -294,6 +297,8 @@ Current tests verify:
   attack is newly pressed and delivers its event exactly once;
 - inactive destroyed obstacles are excluded from collision and rendering while
   ordinary walls remain unaffected;
+- active enemies participate in collision and rendering until a nearby attack
+  defeats them exactly once;
 - the gameplay scene loads its score font and draws the current session score;
 - the title scene requests gameplay only when confirmation is pressed;
 - the composition root connects the demo map and explicit title-to-gameplay

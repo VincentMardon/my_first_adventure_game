@@ -7,6 +7,7 @@ from my_first_adventure_game.engine.graphics import Animation
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.world import Entity
 from my_first_adventure_game.game.events import (
+    EnemyDefeated,
     ItemCollected,
     ObstacleDestroyed,
 )
@@ -15,6 +16,7 @@ from my_first_adventure_game.game.scenes import gameplay_scene
 from my_first_adventure_game.game.scenes.gameplay_scene import (
     BACKGROUND_COLOR,
     COLLECTIBLE_COLOR,
+    ENEMY_COLOR,
     PLAYER_SPEED,
     SCORE_CENTER,
     SCORE_COLOR,
@@ -41,6 +43,12 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
         position=pygame.Vector2(200.0, 80.0),
         size=pygame.Vector2(32.0, 32.0),
     )
+    enemy = Entity(
+        entity_id="enemy",
+        position=pygame.Vector2(260.0, 80.0),
+        size=pygame.Vector2(32.0, 32.0),
+    )
+    on_enemy_defeated = Mock()
     on_item_collected = Mock()
     on_obstacle_destroyed = Mock()
 
@@ -62,6 +70,8 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
         session_score=session_score,
         player=player,
         walls=(wall,),
+        enemies=(enemy,),
+        on_enemy_defeated=on_enemy_defeated,
         collectibles=(),
         on_item_collected=on_item_collected,
         destructible_obstacles=(),
@@ -88,7 +98,10 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
     move_entity.assert_called_once_with(
         player,
         pygame.Vector2(0.6, 0.8) * PLAYER_SPEED * 0.5,
-        (wall.bounds,),
+        (
+            wall.bounds,
+            enemy.bounds,
+        ),
     )
 
 
@@ -116,6 +129,17 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         size=pygame.Vector2(32.0, 48.0),
         active=False,
     )
+    active_enemy = Entity(
+        entity_id="enemy-active",
+        position=pygame.Vector2(272.0, 160.0),
+        size=pygame.Vector2(32.0, 32.0),
+    )
+    inactive_enemy = Entity(
+        entity_id="enemy-inactive",
+        position=pygame.Vector2(320.0, 160.0),
+        size=pygame.Vector2(32.0, 32.0),
+        active=False,
+    )
     active_collectible = Entity(
         entity_id="collectible-active",
         position=pygame.Vector2(120.0, 96.0),
@@ -127,6 +151,7 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         size=pygame.Vector2(12.0, 12.0),
         active=False,
     )
+    on_enemy_defeated = Mock()
     on_item_collected = Mock()
     on_obstacle_destroyed = Mock()
     score_font = Mock(spec=pygame.font.Font)
@@ -151,6 +176,8 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         session_score=session_score,
         player=player,
         walls=(wall, inactive_wall),
+        enemies=(active_enemy, inactive_enemy),
+        on_enemy_defeated=on_enemy_defeated,
         collectibles=(active_collectible, inactive_collectible),
         on_item_collected=on_item_collected,
         destructible_obstacles=(),
@@ -180,6 +207,11 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
             surface,
             WALL_COLOR,
             pygame.Rect(160, 64, 32, 48),
+        ),
+        call(
+            surface,
+            ENEMY_COLOR,
+            pygame.Rect(272, 160, 32, 32),
         ),
         call(
             surface,
@@ -215,6 +247,7 @@ def test_update_deactivates_overlapping_collectible_and_reports_event_once(
         position=pygame.Vector2(240.0, 160.0),
         size=pygame.Vector2(8.0, 8.0),
     )
+    on_enemy_defeated = Mock()
     on_item_collected = Mock()
     on_obstacle_destroyed = Mock()
     player_idle_animation = Mock(spec=Animation)
@@ -235,6 +268,8 @@ def test_update_deactivates_overlapping_collectible_and_reports_event_once(
         session_score=session_score,
         player=player,
         walls=(),
+        enemies=(),
+        on_enemy_defeated=on_enemy_defeated,
         collectibles=(overlapping, distant),
         on_item_collected=on_item_collected,
         destructible_obstacles=(),
@@ -274,6 +309,7 @@ def test_update_resets_animation_when_movement_state_changes(
         position=pygame.Vector2(100.0, 80.0),
         size=pygame.Vector2(24.0, 24.0),
     )
+    on_enemy_defeated = Mock()
     on_item_collected = Mock()
     on_obstacle_destroyed = Mock()
     player_idle_animation = Mock(spec=Animation)
@@ -298,6 +334,8 @@ def test_update_resets_animation_when_movement_state_changes(
         session_score=session_score,
         player=player,
         walls=(),
+        enemies=(),
+        on_enemy_defeated=on_enemy_defeated,
         collectibles=(),
         on_item_collected=on_item_collected,
         destructible_obstacles=(),
@@ -334,6 +372,7 @@ def test_update_returns_to_movement_after_collection_finished(
         position=pygame.Vector2(108.0, 88.0),
         size=pygame.Vector2(8.0, 8.0),
     )
+    on_enemy_defeated = Mock()
     on_item_collected = Mock()
     on_obstacle_destroyed = Mock()
     player_idle_animation = Mock(spec=Animation)
@@ -364,6 +403,8 @@ def test_update_returns_to_movement_after_collection_finished(
         session_score=session_score,
         player=player,
         walls=(),
+        enemies=(),
+        on_enemy_defeated=on_enemy_defeated,
         collectibles=(collectible,),
         on_item_collected=on_item_collected,
         destructible_obstacles=(),
@@ -407,6 +448,7 @@ def test_update_destroys_nearby_destructible_on_attack(
         position=pygame.Vector2(240.0, 160.0),
         size=pygame.Vector2(16.0, 16.0),
     )
+    on_enemy_defeated = Mock()
     on_item_collected = Mock()
     on_obstacle_destroyed = Mock()
     player_idle_animation = Mock(spec=Animation)
@@ -427,6 +469,8 @@ def test_update_destroys_nearby_destructible_on_attack(
         session_score=session_score,
         player=player,
         walls=(nearby_obstacle, distant_obstacle),
+        enemies=(),
+        on_enemy_defeated=on_enemy_defeated,
         collectibles=(),
         destructible_obstacles=(
             nearby_obstacle,
@@ -474,6 +518,79 @@ def test_update_destroys_nearby_destructible_on_attack(
     assert distant_obstacle.active
 
 
+def test_update_defeats_nearby_enemy_on_attack(
+    monkeypatch,
+) -> None:
+    input_state = Mock(spec=InputState)
+    input_state.is_pressed.side_effect = (True, False)
+    font_cache = Mock(spec=FontCache)
+    session_score = Mock(spec=SessionScore)
+    player = Entity(
+        entity_id="player",
+        position=pygame.Vector2(100.0, 80.0),
+        size=pygame.Vector2(24.0, 24.0),
+    )
+    move_entity = Mock()
+    nearby_enemy = Entity(
+        entity_id="enemy-nearby",
+        position=pygame.Vector2(124.0, 80.0),
+        size=pygame.Vector2(16.0, 16.0),
+    )
+    distant_enemy = Entity(
+        entity_id="enemy-distant",
+        position=pygame.Vector2(240.0, 160.0),
+        size=pygame.Vector2(16.0, 16.0),
+    )
+    on_enemy_defeated = Mock()
+    on_item_collected = Mock()
+    on_obstacle_destroyed = Mock()
+    player_idle_animation = Mock(spec=Animation)
+    player_movement_animation = Mock(spec=Animation)
+    player_collection_animation = Mock(spec=Animation)
+    player_collection_animation.finished = False
+    player_attack_animation = Mock(spec=Animation)
+    player_attack_animation.finished = False
+
+    monkeypatch.setattr(
+        gameplay_scene, "movement_axis", Mock(return_value=pygame.Vector2())
+    )
+    monkeypatch.setattr(gameplay_scene, "move_entity", move_entity)
+
+    scene = GameplayScene(
+        input_state=input_state,
+        font_cache=font_cache,
+        session_score=session_score,
+        player=player,
+        walls=(),
+        enemies=(nearby_enemy, distant_enemy),
+        on_enemy_defeated=on_enemy_defeated,
+        collectibles=(),
+        destructible_obstacles=(),
+        on_item_collected=on_item_collected,
+        on_obstacle_destroyed=on_obstacle_destroyed,
+        player_idle_animation=player_idle_animation,
+        player_movement_animation=player_movement_animation,
+        player_collection_animation=player_collection_animation,
+        player_attack_animation=player_attack_animation,
+    )
+
+    scene.update(0.016)
+    scene.update(0.016)
+
+    player_idle_animation.update.assert_not_called()
+    player_movement_animation.update.assert_not_called()
+    player_collection_animation.update.assert_not_called()
+    assert input_state.is_pressed.call_args_list == [
+        call(GameAction.ATTACK),
+        call(GameAction.ATTACK),
+    ]
+    on_enemy_defeated.assert_called_once_with(
+        EnemyDefeated(enemy_id=nearby_enemy.entity_id)
+    )
+    assert not nearby_enemy.active
+    assert distant_enemy.active
+
+
 def test_update_returns_to_movement_after_attack_finished(
     monkeypatch,
 ) -> None:
@@ -486,6 +603,7 @@ def test_update_returns_to_movement_after_attack_finished(
         position=pygame.Vector2(100.0, 80.0),
         size=pygame.Vector2(24.0, 24.0),
     )
+    on_enemy_defeated = Mock()
     on_item_collected = Mock()
     on_obstacle_destroyed = Mock()
     player_idle_animation = Mock(spec=Animation)
@@ -517,6 +635,8 @@ def test_update_returns_to_movement_after_attack_finished(
         session_score=session_score,
         player=player,
         walls=(),
+        enemies=(),
+        on_enemy_defeated=on_enemy_defeated,
         collectibles=(),
         on_item_collected=on_item_collected,
         destructible_obstacles=(),

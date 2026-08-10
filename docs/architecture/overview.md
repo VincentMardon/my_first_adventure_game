@@ -112,8 +112,8 @@ game.
 
 Defines immutable facts produced by concrete gameplay behavior.
 
-The current `ItemCollected` and `ObstacleDestroyed` events identify concrete
-gameplay facts without deciding their consequences.
+The current `ItemCollected`, `ObstacleDestroyed`, and `EnemyDefeated` events
+identify concrete gameplay facts without deciding their consequences.
 
 ### Scoring
 
@@ -132,8 +132,9 @@ The title scene requests an explicit transition to gameplay when the
 confirmation action is pressed.
 
 The gameplay scene converts game actions into player movement, selects active
-walls as solid obstacles, deactivates collectibles overlapping the player,
-destroys nearby destructible obstacles when attacking, emits factual events,
+walls and enemies as solid obstacles, deactivates collectibles overlapping the
+player, destroys nearby destructible obstacles and defeats nearby enemies when
+attacking, emits factual events,
 prioritizes one-shot collection and attack animations over movement and idle
 presentation, and displays the current session score.
 
@@ -142,7 +143,7 @@ presentation, and displays the current session score.
 Defines the first Python-authored game map.
 
 `GameMap` groups the reusable world representation with the concrete player,
-wall, destructible obstacle, and collectible roles owned by the game.
+wall, enemy, destructible obstacle, and collectible roles owned by the game.
 `create_demo_map()` defines their initial geometry and registration order.
 
 ## Reserved domains
@@ -179,6 +180,7 @@ flowchart TD
     Entity["Entity"]
     ItemCollected["ItemCollected"]
     ObstacleDestroyed["ObstacleDestroyed"]
+    EnemyDefeated["EnemyDefeated"]
     ItemCollectionPoints["item_collection_points"]
     SessionScore["SessionScore"]
     Animation["Animation"]
@@ -212,6 +214,7 @@ flowchart TD
     GameplayScene --> Entity
     GameplayScene --> ItemCollected
     GameplayScene --> ObstacleDestroyed
+    GameplayScene --> EnemyDefeated
     GameplayScene --> SessionScore
     GameplayScene --> Animation
     GameplayScene --> FontCache
@@ -235,7 +238,9 @@ animation, and delivers an `ItemCollected` fact when an active collectible is
 collected. A newly pressed attack deactivates a nearby active destructible
 obstacle, removes it from later collision and rendering, and delivers an
 `ObstacleDestroyed` fact. The same input starts a one-shot attack presentation
-that has priority over movement and idle animation.
+that has priority over movement and idle animation. An active enemy within the
+same attack reach is defeated, removed from later collision and rendering, and
+reported through an `EnemyDefeated` fact.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.

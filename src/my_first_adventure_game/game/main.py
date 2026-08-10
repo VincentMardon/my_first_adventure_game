@@ -6,6 +6,7 @@ from my_first_adventure_game.engine.graphics import Animation
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.scenes import SceneManager
 from my_first_adventure_game.game.events import (
+    EnemyDefeated,
     ItemCollected,
     ObstacleDestroyed,
 )
@@ -118,6 +119,11 @@ def main() -> None:
     )
     scene_manager = SceneManager(initial_scene)
 
+    def handle_enemy_defeated(
+        _event: EnemyDefeated,
+    ) -> None:
+        pass
+
     def handle_item_collected(event: ItemCollected) -> None:
         session_score.add(item_collection_points(event))
 
@@ -132,6 +138,8 @@ def main() -> None:
         session_score,
         game_map.player,
         game_map.walls,
+        game_map.enemies,
+        handle_enemy_defeated,
         game_map.collectibles,
         handle_item_collected,
         game_map.destructible_obstacles,

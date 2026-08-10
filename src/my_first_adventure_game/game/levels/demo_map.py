@@ -46,6 +46,13 @@ def create_demo_map() -> GameMap:
         ),
         *destructible_obstacles,
     )
+    enemies = (
+        Entity(
+            entity_id="enemy-1",
+            position=pygame.Vector2(960.0, 480.0),
+            size=pygame.Vector2(32.0, 32.0),
+        ),
+    )
     collectibles = (
         Entity(
             entity_id="collectible-1",
@@ -61,13 +68,14 @@ def create_demo_map() -> GameMap:
 
     world = World()
 
-    for entity in (player, *walls, *collectibles):
+    for entity in (player, *walls, *enemies, *collectibles):
         world.add(entity)
 
     return GameMap(
         world=world,
         player=player,
         walls=walls,
+        enemies=enemies,
         destructible_obstacles=destructible_obstacles,
         collectibles=collectibles,
     )

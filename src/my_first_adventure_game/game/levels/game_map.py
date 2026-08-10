@@ -13,10 +13,12 @@ class GameMap:
         walls: Entities selected as solid obstacles by the gameplay scene.
         collectibles: Entities assigned the collectible role by the game.
         destructible_obstacles: Wall entities that the game allows attacks to destroy.
+        enemies: Entities assigned the enemy role by the game.
     """
 
     world: World
     player: Entity
     walls: tuple[Entity, ...]
+    enemies: tuple[Entity, ...]
     destructible_obstacles: tuple[Entity, ...]
     collectibles: tuple[Entity, ...]

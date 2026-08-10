@@ -6,8 +6,8 @@ The game events domain defines immutable facts produced by concrete gameplay
 behavior.
 
 It currently provides `ItemCollected`, which identifies an item collected by
-the player, and `ObstacleDestroyed`, which identifies a destructible obstacle
-removed by an attack.
+the player, `ObstacleDestroyed`, which identifies a destructible obstacle
+removed by an attack, and `EnemyDefeated`, which identifies a defeated enemy.
 
 The domain does not calculate score, update session state, persist statistics,
 or provide a general event dispatcher.
@@ -36,6 +36,13 @@ Reports that a destructible obstacle was destroyed.
 
 It contains only the stable identifier of that obstacle and is immutable.
 
+### [`EnemyDefeated`](../api/game-events.md#my_first_adventure_game.game.events.EnemyDefeated)
+
+Reports that an enemy was defeated.
+
+It contains only the stable identifier of that enemy and is immutable. It does
+not define score, experience, loot, or progression consequences.
+
 ## Ownership
 
 Both events belong to `game` because collection, attacks, and destruction are
@@ -53,8 +60,10 @@ flowchart LR
     GameplayScene["game.scenes.GameplayScene"]
     ItemCollected["game.events.ItemCollected"]
     ObstacleDestroyed["game.events.ObstacleDestroyed"]
+    EnemyDefeated["game.events.EnemyDefeated"]
     Handler["injected collection handler"]
     DestructionHandler["injected destruction handler"]
+    DefeatHandler["injected enemy defeat handler"]
 
     GameMain -->|"injects"| Handler
     GameMain --> GameplayScene
@@ -65,14 +74,19 @@ flowchart LR
     GameplayScene -->|"creates after destruction"| ObstacleDestroyed
     GameplayScene -->|"delivers synchronously"| DestructionHandler
     ObstacleDestroyed --> DestructionHandler
+    GameMain -->|"injects"| DefeatHandler
+    GameplayScene -->|"creates after defeat"| EnemyDefeated
+    GameplayScene -->|"delivers synchronously"| DefeatHandler
+    EnemyDefeated --> DefeatHandler
 ```
 
 The handler composed in `game.main` converts `ItemCollected` into points through
 the game-owned scoring rule and adds them to the current `SessionScore`. The
 event itself remains independent from that consequence.
 
-The destruction handler currently has no additional consequence. The scene
-deactivates the obstacle before reporting the factual event.
+The destruction and enemy defeat handlers currently have no additional
+consequence. The scene deactivates the corresponding entity before reporting
+the factual event.
 
 ## Delivery semantics
 
@@ -84,6 +98,9 @@ deactivates the obstacle before reporting the factual event.
 - `GameplayScene` deactivates an active destructible obstacle within attack
   reach before delivering one `ObstacleDestroyed` value.
 - An inactive obstacle cannot emit the destruction event again.
+- `GameplayScene` deactivates an active enemy within attack reach before
+  delivering one `EnemyDefeated` value.
+- An inactive enemy cannot emit the defeat event again.
 
 There is no global event bus, subscription registry, or runtime event queue.
 
@@ -120,3 +137,7 @@ Current tests verify:
 - attacking near an active destructible obstacle deactivates it and delivers
   its event exactly once;
 - distant destructible obstacles remain active.
+- `EnemyDefeated` stores the defeated enemy identifier and is immutable;
+- attacking near an active enemy deactivates it and delivers its event exactly
+  once;
+- distant enemies remain active.

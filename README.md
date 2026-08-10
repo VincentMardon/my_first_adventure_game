@@ -118,6 +118,7 @@ The project now provides a minimal playable top-down loop:
    score.
 7. pressing Space near the destructible obstacle removes it and opens the
    passage it blocked.
+8. a stationary enemy blocks movement until a nearby attack defeats it.
 
 Implemented foundations include:
 
@@ -136,9 +137,11 @@ Implemented foundations include:
 - axis-separated movement against solid obstacles;
 - a game-owned Python-authored demo map with collectible objects;
 - a game-owned destructible obstacle removed by a proximity attack;
+- a game-owned stationary enemy that is solid while active and defeated by one
+  nearby attack;
 - game-owned collection behavior based on reusable entity overlap detection;
-- immutable collection and destruction facts delivered through explicit
-  callbacks;
+- immutable collection, destruction, and enemy defeat facts delivered through
+  explicit callbacks;
 - game-owned item collection scoring rules;
 - an accumulated session score displayed during gameplay;
 - automated tests, Ruff checks, strict documentation builds, package builds,
