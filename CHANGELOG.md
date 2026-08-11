@@ -59,6 +59,8 @@ and this project adheres to
 - A gameplay health display and an inactive player state after fatal damage.
 - Immutable `PlayerDefeated` facts delivered once through an explicit gameplay
   callback.
+- A game-owned defeat scene displaying the final score after an explicit
+  `PlayerDefeated` transition.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

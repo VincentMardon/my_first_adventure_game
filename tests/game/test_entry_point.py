@@ -30,6 +30,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     seventh_player_frame = Mock()
     eighth_player_frame = Mock()
     player_attack_animation = Mock()
+    defeat_scene = Mock()
 
     create_input_state = Mock(return_value=input_state)
     create_title_scene = Mock(return_value=initial_scene)
@@ -60,6 +61,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
             player_attack_animation,
         )
     )
+    create_defeat_scene = Mock(return_value=defeat_scene)
 
     monkeypatch.setattr(game_main, "TitleScene", create_title_scene)
     monkeypatch.setattr(game_main, "SceneManager", create_scene_manager)
@@ -76,6 +78,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     monkeypatch.setattr(game_main, "Application", create_application)
     monkeypatch.setattr(game_main.pygame, "Surface", create_surface)
     monkeypatch.setattr(game_main, "Animation", create_animation)
+    monkeypatch.setattr(game_main, "DefeatScene", create_defeat_scene)
 
     game_main.main()
 
@@ -83,6 +86,10 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_font_cache.assert_called_once_with(game_main.pygame)
     create_demo_map.assert_called_once_with()
     create_session_score.assert_called_once_with()
+    create_defeat_scene.assert_called_once_with(
+        font_cache,
+        session_score,
+    )
     assert create_surface.call_args_list == [
         call(game_main.PLAYER_FRAME_SIZE),
         call(game_main.PLAYER_FRAME_SIZE),
@@ -161,8 +168,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     handle_player_defeated = gameplay_args[4]
     player_event = PlayerDefeated(player_id="player")
+    handle_player_defeated(player_event)
 
-    assert handle_player_defeated(player_event) is None
+    scene_manager.change_scene.assert_called_once_with(defeat_scene)
 
     handle_enemy_defeated = gameplay_args[7]
     enemy_event = EnemyDefeated(enemy_id="enemy-1")
@@ -191,7 +199,10 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     start_game()
 
-    scene_manager.change_scene.assert_called_once_with(gameplay_scene)
+    assert scene_manager.change_scene.call_args_list == [
+        call(defeat_scene),
+        call(gameplay_scene),
+    ]
 
     create_scene_manager.assert_called_once_with(initial_scene)
     create_application.assert_called_once_with(

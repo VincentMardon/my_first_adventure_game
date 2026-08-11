@@ -135,7 +135,7 @@ that score with `GameplayScene` for display.
 
 ### Scenes
 
-Provides the concrete title and gameplay scenes.
+Provides the concrete title, gameplay, and defeat scenes.
 
 The title scene requests an explicit transition to gameplay when the
 confirmation action is pressed.
@@ -147,6 +147,9 @@ attacking, emits factual events,
 prioritizes one-shot collection and attack animations over movement and idle
 presentation, applies contact damage with temporary player invulnerability,
 and displays the current session score and player health.
+
+The defeat scene is a terminal presentation state that displays the final
+session score after player defeat.
 
 ### Levels
 
@@ -187,12 +190,14 @@ flowchart TD
     Scene["Scene"]
     TitleScene["TitleScene"]
     GameplayScene["GameplayScene"]
+    DefeatScene["DefeatScene"]
 
     GameMain --> Application
     GameMain --> InputState
     GameMain --> SceneManager
     GameMain -->|"injects transition callback"| TitleScene
     GameMain --> GameplayScene
+    GameMain --> DefeatScene
 
     Application --> WindowConfig
     Application --> InputProcessor
@@ -205,6 +210,7 @@ flowchart TD
     SceneManager --> Scene
     TitleScene -. "implements" .-> Scene
     GameplayScene -. "implements" .-> Scene
+    DefeatScene -. "implements" .-> Scene
 ```
 
 ### Gameplay map composition
@@ -238,6 +244,7 @@ flowchart LR
     GameplayScene --> ObstacleDestroyed["ObstacleDestroyed"]
     GameplayScene --> EnemyDefeated["EnemyDefeated"]
     GameplayScene --> PlayerDefeated["PlayerDefeated"]
+    PlayerDefeated --> DefeatScene["DefeatScene"]
 
     ItemCollected --> ItemCollectionPoints["item_collection_points"]
     ItemCollectionPoints --> SessionScore
@@ -263,9 +270,8 @@ and reports an `EnemyDefeated` fact.
 Contact with an active enemy removes one point of player health and starts a
 short invulnerability period that prevents immediate repeated damage. Fatal
 contact deactivates the player, stops later gameplay updates, and reports a
-`PlayerDefeated` fact. The injected handler currently has no additional
-consequence, so the inactive player remains visible until a result scene is
-implemented.
+`PlayerDefeated` fact. The injected handler explicitly replaces gameplay with
+`DefeatScene`, which displays the final value of the shared `SessionScore`.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.

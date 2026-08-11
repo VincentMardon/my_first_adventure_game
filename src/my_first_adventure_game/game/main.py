@@ -13,7 +13,11 @@ from my_first_adventure_game.game.events import (
 )
 from my_first_adventure_game.game.input import DEFAULT_KEYBOARD_BINDINGS
 from my_first_adventure_game.game.levels import create_demo_map
-from my_first_adventure_game.game.scenes import GameplayScene, TitleScene
+from my_first_adventure_game.game.scenes import (
+    DefeatScene,
+    GameplayScene,
+    TitleScene,
+)
 from my_first_adventure_game.game.scoring import (
     SessionScore,
     item_collection_points,
@@ -119,11 +123,15 @@ def main() -> None:
         start_game,
     )
     scene_manager = SceneManager(initial_scene)
+    defeat_scene = DefeatScene(
+        font_cache,
+        session_score,
+    )
 
     def handle_player_defeated(
         _event: PlayerDefeated,
     ) -> None:
-        pass
+        scene_manager.change_scene(defeat_scene)
 
     def handle_enemy_defeated(
         _event: EnemyDefeated,

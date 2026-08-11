@@ -123,8 +123,8 @@ The project now provides a minimal playable top-down loop:
 10. a second nearby attack defeats it and opens its former position.
 11. touching an active enemy damages the player, with a short invulnerability
    period between hits;
-12. reaching zero health stops further player actions while keeping the player
-   visible until a result scene is implemented.
+12. reaching zero health transitions to a defeat screen that displays the final
+   score.
 
 Implemented foundations include:
 
@@ -152,6 +152,8 @@ Implemented foundations include:
   mutable health;
 - enemy contact damage, temporary player invulnerability, and a health display;
 - an immutable player defeat fact delivered through an explicit callback;
+- a game-owned defeat scene reached through an explicit transition and showing
+  the final session score;
 - game-owned collection behavior based on reusable entity overlap detection;
 - immutable collection, destruction, and enemy defeat facts delivered through
   explicit callbacks;

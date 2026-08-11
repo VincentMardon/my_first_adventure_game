@@ -103,9 +103,16 @@ classDiagram
         +draw(surface)
     }
 
+    class DefeatScene {
+        +handle_event(event)
+        +update(delta_time)
+        +draw(surface)
+    }
+
     SceneManager o-- Scene : active scene
     Scene <|-- GameplayScene
     Scene <|-- TitleScene
+    Scene <|-- DefeatScene
     Application --> SceneManager : delegates frame work
 ```
 
@@ -162,6 +169,8 @@ The current game provides
 [`TitleScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.TitleScene)
 and
 [`GameplayScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.GameplayScene).
+The game also provides
+[`DefeatScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.DefeatScene).
 
 `TitleScene`:
 
@@ -211,13 +220,20 @@ and
   player health;
 - rounds floating-point geometry only at rendering time.
 
+`DefeatScene`:
+
+- receives the shared font cache and session score;
+- draws a game-owned defeat message and the final score;
+- currently ignores events and updates, making it a terminal scene.
+
 `game.main` composes `GameplayScene` from the shared font cache and session
 score, the player, walls, enemies, destructible obstacles, and collectibles
 provided by the demo map, idle, movement, collection, and attack animations,
 and explicit collection, destruction, enemy defeat, and player defeat handlers.
 The collection handler applies the game-owned collection point rule to the same
-session score displayed by the scene. The destruction and defeat handlers
-currently have no additional consequence.
+session score displayed by the scene. The destruction and enemy defeat handlers
+currently have no additional consequence. The player defeat handler explicitly
+replaces gameplay with the preconstructed `DefeatScene`.
 
 The current idle, movement, collection, and attack animations each use two
 game-owned colored surfaces as temporary frames. This validates animation
@@ -310,10 +326,12 @@ Current tests verify:
   frame delta time;
 - enemy contact damages the player at most once during each invulnerability
   period and fatal damage reports player defeat once;
-- an inactive player no longer moves or performs gameplay actions but remains
-  rendered until a later scene owns the result presentation;
+- fatal player damage explicitly replaces gameplay with the defeat scene;
 - the gameplay scene loads its score font and draws the current session score
   and player health;
 - the title scene requests gameplay only when confirmation is pressed;
 - the composition root connects the demo map and explicit title-to-gameplay
+  transition;
+- the defeat scene draws its background, message, and final session score;
+- the composition root connects `PlayerDefeated` to the explicit defeat
   transition.

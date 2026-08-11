@@ -97,9 +97,10 @@ The handler composed in `game.main` converts `ItemCollected` into points through
 the game-owned scoring rule and adds them to the current `SessionScore`. The
 event itself remains independent from that consequence.
 
-The destruction, enemy defeat, and player defeat handlers currently have no
-additional consequence. The scene deactivates the corresponding entity before
-reporting the factual event.
+The destruction and enemy defeat handlers currently have no additional
+consequence. The player defeat handler explicitly replaces gameplay with
+`DefeatScene`. The gameplay scene deactivates the corresponding entity before
+reporting each factual event.
 
 ## Delivery semantics
 
