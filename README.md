@@ -125,6 +125,8 @@ The project now provides a minimal playable top-down loop:
    period between hits;
 12. reaching zero health transitions to a defeat screen that displays the final
    score.
+13. pressing Enter on the defeat screen returns to the title;
+14. starting again creates a fresh map, score, animations, and gameplay state.
 
 Implemented foundations include:
 
@@ -154,6 +156,8 @@ Implemented foundations include:
 - an immutable player defeat fact delivered through an explicit callback;
 - a game-owned defeat scene reached through an explicit transition and showing
   the final session score;
+- an explicit return to the title followed by fresh session construction for
+  every new game;
 - game-owned collection behavior based on reusable entity overlap detection;
 - immutable collection, destruction, and enemy defeat facts delivered through
   explicit callbacks;

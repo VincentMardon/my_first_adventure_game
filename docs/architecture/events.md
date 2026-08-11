@@ -99,8 +99,8 @@ event itself remains independent from that consequence.
 
 The destruction and enemy defeat handlers currently have no additional
 consequence. The player defeat handler explicitly replaces gameplay with
-`DefeatScene`. The gameplay scene deactivates the corresponding entity before
-reporting each factual event.
+the current session's `DefeatScene`. The gameplay scene deactivates the
+corresponding entity before reporting each factual event.
 
 ## Delivery semantics
 

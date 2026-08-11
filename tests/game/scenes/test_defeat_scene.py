@@ -3,6 +3,8 @@ from unittest.mock import Mock, call
 import pygame
 
 from my_first_adventure_game.engine.assets import FontCache
+from my_first_adventure_game.engine.input import InputState
+from my_first_adventure_game.game.input import GameAction
 from my_first_adventure_game.game.scenes import defeat_scene
 from my_first_adventure_game.game.scenes.defeat_scene import (
     BACKGROUND_COLOR,
@@ -11,6 +13,9 @@ from my_first_adventure_game.game.scenes.defeat_scene import (
     DEFEAT_FONT_PATH,
     DEFEAT_FONT_SIZE,
     DEFEAT_TEXT,
+    RETURN_CENTER_Y,
+    RETURN_COLOR,
+    RETURN_TEXT,
     SCORE_CENTER_Y,
     SCORE_COLOR,
     DefeatScene,
@@ -23,7 +28,14 @@ def test_defeat_scene_draws_background() -> None:
     surface.get_width.return_value = 1280
     font_cache = Mock(spec=FontCache)
     session_score = Mock(spec=SessionScore)
-    scene = DefeatScene(font_cache, session_score)
+    input_state = Mock(spec=InputState)
+    return_to_title = Mock()
+    scene = DefeatScene(
+        font_cache,
+        session_score,
+        input_state,
+        return_to_title,
+    )
 
     scene.draw(surface)
 
@@ -36,13 +48,20 @@ def test_defeat_scene_draws_message_and_final_score(monkeypatch) -> None:
     font_cache = Mock(spec=FontCache)
     session_score = Mock(spec=SessionScore)
     session_score.value = 300
+    input_state = Mock(spec=InputState)
+    return_to_title = Mock()
     font = Mock(spec=pygame.font.Font)
     font_cache.load.return_value = font
     draw_text = Mock()
 
     monkeypatch.setattr(defeat_scene, "draw_text", draw_text)
 
-    scene = DefeatScene(font_cache, session_score)
+    scene = DefeatScene(
+        font_cache,
+        session_score,
+        input_state,
+        return_to_title,
+    )
 
     scene.draw(surface)
 
@@ -65,4 +84,49 @@ def test_defeat_scene_draws_message_and_final_score(monkeypatch) -> None:
             SCORE_COLOR,
             center=(640, SCORE_CENTER_Y),
         ),
+        call(
+            surface,
+            RETURN_TEXT,
+            font,
+            RETURN_COLOR,
+            center=(640, RETURN_CENTER_Y),
+        ),
     ]
+
+
+def test_defeat_scene_returns_to_title_when_confirm_is_pressed() -> None:
+    font_cache = Mock(spec=FontCache)
+    session_score = Mock(spec=SessionScore)
+    input_state = Mock(spec=InputState)
+    input_state.is_pressed.return_value = True
+    return_to_title = Mock()
+    scene = DefeatScene(
+        font_cache,
+        session_score,
+        input_state,
+        return_to_title,
+    )
+
+    scene.update(0.016)
+
+    input_state.is_pressed.assert_called_once_with(GameAction.CONFIRM)
+    return_to_title.assert_called_once_with()
+
+
+def test_defeat_scene_does_not_return_without_confirmation() -> None:
+    font_cache = Mock(spec=FontCache)
+    session_score = Mock(spec=SessionScore)
+    input_state = Mock(spec=InputState)
+    input_state.is_pressed.return_value = False
+    return_to_title = Mock()
+    scene = DefeatScene(
+        font_cache,
+        session_score,
+        input_state,
+        return_to_title,
+    )
+
+    scene.update(0.016)
+
+    input_state.is_pressed.assert_called_once_with(GameAction.CONFIRM)
+    return_to_title.assert_not_called()

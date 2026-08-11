@@ -61,6 +61,8 @@ and this project adheres to
   callback.
 - A game-owned defeat scene displaying the final score after an explicit
   `PlayerDefeated` transition.
+- Confirmation-driven navigation from defeat back to the title.
+- Fresh map, score, animation, gameplay, and defeat state for every new game.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

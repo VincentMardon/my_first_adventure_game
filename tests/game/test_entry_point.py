@@ -84,12 +84,35 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     create_input_state.assert_called_once_with(game_main.DEFAULT_KEYBOARD_BINDINGS)
     create_font_cache.assert_called_once_with(game_main.pygame)
+    create_demo_map.assert_not_called()
+    create_session_score.assert_not_called()
+    create_gameplay_scene.assert_not_called()
+    create_defeat_scene.assert_not_called()
+    create_surface.assert_not_called()
+    create_animation.assert_not_called()
+
+    create_title_scene.assert_called_once()
+    assert create_title_scene.call_args.args[:2] == (
+        font_cache,
+        input_state,
+    )
+    start_game = create_title_scene.call_args.args[2]
+
+    start_game()
+
     create_demo_map.assert_called_once_with()
     create_session_score.assert_called_once_with()
-    create_defeat_scene.assert_called_once_with(
+    create_defeat_scene.assert_called_once()
+
+    defeat_args = create_defeat_scene.call_args.args
+
+    assert defeat_args[:3] == (
         font_cache,
         session_score,
+        input_state,
     )
+    assert callable(defeat_args[3])
+
     assert create_surface.call_args_list == [
         call(game_main.PLAYER_FRAME_SIZE),
         call(game_main.PLAYER_FRAME_SIZE),
@@ -170,7 +193,11 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     player_event = PlayerDefeated(player_id="player")
     handle_player_defeated(player_event)
 
-    scene_manager.change_scene.assert_called_once_with(defeat_scene)
+    scene_manager.change_scene.assert_called_with(defeat_scene)
+
+    return_to_title = defeat_args[3]
+
+    return_to_title()
 
     handle_enemy_defeated = gameplay_args[7]
     enemy_event = EnemyDefeated(enemy_id="enemy-1")
@@ -190,18 +217,56 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     score_item_collection.assert_called_once_with(event)
     session_score.add.assert_called_once_with(100)
 
-    create_title_scene.assert_called_once()
-    assert create_title_scene.call_args.args[:2] == (
-        font_cache,
-        input_state,
-    )
-    start_game = create_title_scene.call_args.args[2]
+    second_game_map = Mock()
+    second_session_score = Mock()
+    second_gameplay_scene = Mock()
+    second_defeat_scene = Mock()
+    second_player_frames = tuple(Mock() for _ in range(8))
+    second_player_animations = tuple(Mock() for _ in range(4))
+
+    create_demo_map.return_value = second_game_map
+    create_session_score.return_value = second_session_score
+    create_gameplay_scene.return_value = second_gameplay_scene
+    create_defeat_scene.return_value = second_defeat_scene
+    create_surface.side_effect = second_player_frames
+    create_animation.side_effect = second_player_animations
 
     start_game()
 
+    assert create_demo_map.call_count == 2
+    assert create_session_score.call_count == 2
+    assert create_gameplay_scene.call_count == 2
+    assert create_defeat_scene.call_count == 2
+
+    second_gameplay_args = create_gameplay_scene.call_args.args
+
+    assert second_gameplay_args[:4] == (
+        input_state,
+        font_cache,
+        second_session_score,
+        second_game_map.player,
+    )
+    assert second_gameplay_args[4] is not handle_player_defeated
+    assert second_gameplay_args[5] is second_game_map.walls
+    assert second_gameplay_args[6] is second_game_map.enemies
+    assert second_gameplay_args[8] is second_game_map.collectibles
+    assert second_gameplay_args[10] is second_game_map.destructible_obstacles
+    assert second_gameplay_args[12:] == second_player_animations
+
+    second_defeat_args = create_defeat_scene.call_args.args
+
+    assert second_defeat_args[:3] == (
+        font_cache,
+        second_session_score,
+        input_state,
+    )
+    assert second_defeat_args[3] is not return_to_title
+
     assert scene_manager.change_scene.call_args_list == [
-        call(defeat_scene),
         call(gameplay_scene),
+        call(defeat_scene),
+        call(initial_scene),
+        call(second_gameplay_scene),
     ]
 
     create_scene_manager.assert_called_once_with(initial_scene)

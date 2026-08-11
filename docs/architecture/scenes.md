@@ -222,9 +222,11 @@ The game also provides
 
 `DefeatScene`:
 
-- receives the shared font cache and session score;
-- draws a game-owned defeat message and the final score;
-- currently ignores events and updates, making it a terminal scene.
+- receives the shared font cache, session score, action input state, and an
+  explicit return callback;
+- draws a game-owned defeat message, the final score, and a return instruction;
+- requests a return to the title when `CONFIRM` is pressed;
+- ignores raw events.
 
 `game.main` composes `GameplayScene` from the shared font cache and session
 score, the player, walls, enemies, destructible obstacles, and collectibles
@@ -233,7 +235,13 @@ and explicit collection, destruction, enemy defeat, and player defeat handlers.
 The collection handler applies the game-owned collection point rule to the same
 session score displayed by the scene. The destruction and enemy defeat handlers
 currently have no additional consequence. The player defeat handler explicitly
-replaces gameplay with the preconstructed `DefeatScene`.
+replaces gameplay with the current session's `DefeatScene`.
+
+`game.main` retains the title scene and shared application services across the
+application lifetime. Each start request creates a fresh map, score, animation
+set, gameplay scene, defeat scene, and session-local callbacks. Returning from
+defeat does not mutate the completed session back to its initial state; the next
+start replaces it with new objects.
 
 The current idle, movement, collection, and attack animations each use two
 game-owned colored surfaces as temporary frames. This validates animation
@@ -333,5 +341,8 @@ Current tests verify:
 - the composition root connects the demo map and explicit title-to-gameplay
   transition;
 - the defeat scene draws its background, message, and final session score;
+- confirmation on the defeat scene explicitly returns to the title;
+- consecutive start requests construct distinct maps, scores, animations,
+  gameplay scenes, defeat scenes, and callbacks;
 - the composition root connects `PlayerDefeated` to the explicit defeat
   transition.

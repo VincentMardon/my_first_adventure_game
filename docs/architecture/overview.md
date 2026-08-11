@@ -148,8 +148,9 @@ prioritizes one-shot collection and attack animations over movement and idle
 presentation, applies contact damage with temporary player invulnerability,
 and displays the current session score and player health.
 
-The defeat scene is a terminal presentation state that displays the final
-session score after player defeat.
+The defeat scene displays the final session score after player defeat and
+requests an explicit return to the title when confirmation is pressed. Starting
+again constructs a fresh session rather than resetting the previous objects.
 
 ### Levels
 
@@ -196,14 +197,16 @@ flowchart TD
     GameMain --> InputState
     GameMain --> SceneManager
     GameMain -->|"injects transition callback"| TitleScene
-    GameMain --> GameplayScene
-    GameMain --> DefeatScene
+    GameMain -->|"creates per session"| GameplayScene
+    GameMain -->|"creates per session"| DefeatScene
 
     Application --> WindowConfig
     Application --> InputProcessor
     Application --> SceneManager
 
     TitleScene --> InputState
+    DefeatScene --> InputState
+    DefeatScene -->|"requests return"| TitleScene
 
     InputState -. "implements structurally" .-> InputProcessor
     InputState --> KeyboardBindings
@@ -251,7 +254,8 @@ flowchart LR
 ```
 
 `game.main` creates the demo map, current `SessionScore`, and temporary
-two-frame idle, movement, collection, and attack animations, then composes
+two-frame idle, movement, collection, and attack animations only after the
+title scene requests a new game, then composes
 `GameplayScene` from its gameplay entities, shared rendering services, score,
 animations, and explicit collection and destruction handlers. `GameplayScene`
 selects idle or
@@ -272,6 +276,11 @@ short invulnerability period that prevents immediate repeated damage. Fatal
 contact deactivates the player, stops later gameplay updates, and reports a
 `PlayerDefeated` fact. The injected handler explicitly replaces gameplay with
 `DefeatScene`, which displays the final value of the shared `SessionScore`.
+
+Confirmation on `DefeatScene` explicitly returns to the existing title scene.
+The next start request constructs a new map, session score, animation set,
+gameplay scene, defeat scene, and session-local callbacks. Shared application
+services such as input state, font cache, and scene manager remain alive.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.
