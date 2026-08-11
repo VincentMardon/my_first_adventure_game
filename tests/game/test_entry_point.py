@@ -5,6 +5,7 @@ from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
     ObstacleDestroyed,
+    PlayerDefeated,
 )
 
 
@@ -139,35 +140,41 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_gameplay_scene.assert_called_once()
     gameplay_args = create_gameplay_scene.call_args.args
 
-    assert gameplay_args[:6] == (
+    assert gameplay_args[:4] == (
         input_state,
         font_cache,
         session_score,
         game_map.player,
-        game_map.walls,
-        game_map.enemies,
     )
-    assert callable(gameplay_args[6])
-    assert gameplay_args[7] is game_map.collectibles
-    assert callable(gameplay_args[8])
-    assert gameplay_args[9] is game_map.destructible_obstacles
-    assert callable(gameplay_args[10])
-    assert gameplay_args[11] is player_idle_animation
-    assert gameplay_args[12] is player_movement_animation
-    assert gameplay_args[13] is player_collection_animation
-    assert gameplay_args[14] is player_attack_animation
+    assert callable(gameplay_args[4])
+    assert gameplay_args[5] is game_map.walls
+    assert gameplay_args[6] is game_map.enemies
+    assert callable(gameplay_args[7])
+    assert gameplay_args[8] is game_map.collectibles
+    assert callable(gameplay_args[9])
+    assert gameplay_args[10] is game_map.destructible_obstacles
+    assert callable(gameplay_args[11])
+    assert gameplay_args[12] is player_idle_animation
+    assert gameplay_args[13] is player_movement_animation
+    assert gameplay_args[14] is player_collection_animation
+    assert gameplay_args[15] is player_attack_animation
 
-    handle_enemy_defeated = gameplay_args[6]
+    handle_player_defeated = gameplay_args[4]
+    player_event = PlayerDefeated(player_id="player")
+
+    assert handle_player_defeated(player_event) is None
+
+    handle_enemy_defeated = gameplay_args[7]
     enemy_event = EnemyDefeated(enemy_id="enemy-1")
 
     assert handle_enemy_defeated(enemy_event) is None
 
-    handle_item_collected = gameplay_args[8]
+    handle_item_collected = gameplay_args[9]
     event = ItemCollected(item_id="collectible-1")
 
     handle_item_collected(event)
 
-    handle_obstacle_destroyed = gameplay_args[10]
+    handle_obstacle_destroyed = gameplay_args[11]
     obstacle_event = ObstacleDestroyed(obstacle_id="destructible-1")
 
     assert handle_obstacle_destroyed(obstacle_event) is None

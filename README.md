@@ -121,6 +121,10 @@ The project now provides a minimal playable top-down loop:
 8. a stationary enemy blocks movement and survives the first nearby attack;
 9. non-fatal damage briefly changes the enemy's color;
 10. a second nearby attack defeats it and opens its former position.
+11. touching an active enemy damages the player, with a short invulnerability
+   period between hits;
+12. reaching zero health stops further player actions while keeping the player
+   visible until a result scene is implemented.
 
 Implemented foundations include:
 
@@ -144,6 +148,10 @@ Implemented foundations include:
 - game-owned damage behavior requiring two nearby attacks to defeat the current
   enemy;
 - brief game-owned color feedback after non-fatal enemy damage;
+- a game-owned player that composes reusable spatial state with validated,
+  mutable health;
+- enemy contact damage, temporary player invulnerability, and a health display;
+- an immutable player defeat fact delivered through an explicit callback;
 - game-owned collection behavior based on reusable entity overlap detection;
 - immutable collection, destruction, and enemy defeat facts delivered through
   explicit callbacks;
@@ -152,7 +160,7 @@ Implemented foundations include:
 - automated tests, Ruff checks, strict documentation builds, package builds,
   and GitHub Actions CI.
 
-Persistence, profiles, localization, combat, and broader interaction systems
+Persistence, profiles, localization, and broader combat and interaction systems
 have not been implemented yet.
 
 ## Documentation

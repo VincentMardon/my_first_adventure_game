@@ -1,16 +1,19 @@
 import pygame
 
 from my_first_adventure_game.engine.world import Entity, World
-from my_first_adventure_game.game.entities import Enemy
+from my_first_adventure_game.game.entities import Enemy, Player
 from my_first_adventure_game.game.levels.game_map import GameMap
 
 
 def create_demo_map() -> GameMap:
     """Create the first Python-authored gameplay map."""
-    player = Entity(
-        entity_id="player",
-        position=pygame.Vector2(128.0, 128.0),
-        size=pygame.Vector2(32.0, 32.0),
+    player = Player(
+        entity=Entity(
+            entity_id="player",
+            position=pygame.Vector2(128.0, 128.0),
+            size=pygame.Vector2(32.0, 32.0),
+        ),
+        health=3,
     )
     destructible_obstacles = (
         Entity(
@@ -72,7 +75,12 @@ def create_demo_map() -> GameMap:
 
     world = World()
 
-    for entity in (player, *walls, *(enemy.entity for enemy in enemies), *collectibles):
+    for entity in (
+        player.entity,
+        *walls,
+        *(enemy.entity for enemy in enemies),
+        *collectibles,
+    ):
         world.add(entity)
 
     return GameMap(

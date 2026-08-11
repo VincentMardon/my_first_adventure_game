@@ -26,7 +26,7 @@ scene behavior while preserving the distinction between scenes and maps.
 Groups:
 
 - the `World` containing all registered entities;
-- the player entity;
+- the game-owned `Player`, including its reusable spatial entity;
 - the wall entities used as solid obstacles;
 - the `Enemy` objects assigned the enemy role by the game;
 - the wall entities assigned the destructible obstacle role by the game;
@@ -39,10 +39,11 @@ mutable.
 
 Creates the current demonstration map entirely in Python.
 
-It registers the player, walls, enemy spatial entities, and collectibles in deterministic
-order. One wall is also assigned the destructible obstacle role. Their initial
-geometry keeps the player, enemies, and collectibles outside the walls and
-prevents collectibles from overlapping the player.
+It registers the player's spatial entity, walls, enemy spatial entities, and
+collectibles in deterministic order. One wall is also assigned the destructible
+obstacle role. Their initial geometry keeps the player, enemies, and
+collectibles outside the walls and prevents collectibles from overlapping the
+player.
 
 The concrete identifiers, positions, sizes, and entity roles belong to the game.
 
@@ -70,14 +71,17 @@ flowchart TD
     World["engine.world.World"]
     Entity["engine.world.Entity"]
     Enemy["game.entities.Enemy"]
+    Player["game.entities.Player"]
 
     DemoMap --> GameMap
     DemoMap --> World
     DemoMap --> Entity
     DemoMap --> Enemy
+    DemoMap --> Player
     GameMap --> World
     GameMap --> Entity
     GameMap --> Enemy
+    GameMap --> Player
     GameMain --> DemoMap
     GameMain -->|"reads entity roles"| GameMap
     GameMain --> GameplayScene
@@ -99,6 +103,7 @@ managed by `SceneManager`.
 - The map contains at least one wall and one collectible.
 - The map contains at least one active enemy.
 - The current demo enemy starts with two health points.
+- The current demo player starts with three health points.
 - Enemies are not registered as walls.
 - The map contains at least one active destructible obstacle.
 - Every destructible obstacle is also registered as a wall.

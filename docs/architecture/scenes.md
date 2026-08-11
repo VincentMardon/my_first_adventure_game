@@ -173,10 +173,10 @@ and
 
 `GameplayScene`:
 
-- receives the action input state, font cache, session score, player entity,
+- receives the action input state, font cache, session score, game-owned player,
   wall entities, game-owned enemies, destructible obstacles, collectible entities,
   idle, movement, collection, and attack animations, and explicit collection,
-  destruction, and enemy defeat handlers;
+  destruction, enemy defeat, and player defeat handlers;
 - converts directional actions into normalized movement;
 - selects the movement animation while the directional axis is non-zero and
   the idle animation otherwise;
@@ -194,6 +194,10 @@ and
   and delivers immutable `EnemyDefeated` facts only after fatal hits;
 - displays a brief game-owned color flash after non-fatal enemy damage and
   restores the normal enemy color when its scene-owned timer expires;
+- applies one point of damage when the player contacts an active enemy and
+  prevents repeated contact damage during a short invulnerability period;
+- delivers an immutable `PlayerDefeated` fact after fatal contact damage and
+  stops later gameplay updates while the player remains inactive;
 - detects player overlap with active collectibles after movement;
 - applies the game-owned collection rule by deactivating overlapping
   collectibles;
@@ -203,16 +207,17 @@ and
 - returns to the animation selected by directional intent after collection
   playback finishes;
 - draws active walls, enemies, and collectibles as game-owned rectangles, blits
-  the current player animation frame, and draws the current session score;
+  the current player animation frame, and draws the current session score and
+  player health;
 - rounds floating-point geometry only at rendering time.
 
 `game.main` composes `GameplayScene` from the shared font cache and session
 score, the player, walls, enemies, destructible obstacles, and collectibles
 provided by the demo map, idle, movement, collection, and attack animations,
-and explicit collection, destruction, and enemy defeat handlers. The collection
-handler applies the game-owned collection point rule to the same session score
-displayed by the scene. The destruction and defeat handlers currently have no
-additional consequence.
+and explicit collection, destruction, enemy defeat, and player defeat handlers.
+The collection handler applies the game-owned collection point rule to the same
+session score displayed by the scene. The destruction and defeat handlers
+currently have no additional consequence.
 
 The current idle, movement, collection, and attack animations each use two
 game-owned colored surfaces as temporary frames. This validates animation
@@ -303,7 +308,12 @@ Current tests verify:
   attacks, and are removed only after a fatal hit reported exactly once;
 - non-fatal enemy damage starts temporary visual feedback that expires using
   frame delta time;
-- the gameplay scene loads its score font and draws the current session score;
+- enemy contact damages the player at most once during each invulnerability
+  period and fatal damage reports player defeat once;
+- an inactive player no longer moves or performs gameplay actions but remains
+  rendered until a later scene owns the result presentation;
+- the gameplay scene loads its score font and draws the current session score
+  and player health;
 - the title scene requests gameplay only when confirmation is pressed;
 - the composition root connects the demo map and explicit title-to-gameplay
   transition.

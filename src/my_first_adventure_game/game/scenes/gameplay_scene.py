@@ -8,28 +8,34 @@ from my_first_adventure_game.engine.graphics import Animation, draw_text
 from my_first_adventure_game.engine.input import InputState, movement_axis
 from my_first_adventure_game.engine.scenes import Scene
 from my_first_adventure_game.engine.world import Entity, move_entity
-from my_first_adventure_game.game.entities import Enemy
+from my_first_adventure_game.game.entities import Enemy, Player
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
     ObstacleDestroyed,
+    PlayerDefeated,
 )
 from my_first_adventure_game.game.input import GameAction
 from my_first_adventure_game.game.scoring import SessionScore
 
-PLAYER_SPEED = 160.0
-PLAYER_ATTACK_DAMAGE = 1
-WALL_COLOR = (84, 104, 92)
+ATTACK_REACH = 16.0
+BACKGROUND_COLOR = (18, 32, 24)
+COLLECTIBLE_COLOR = (112, 200, 224)
 ENEMY_COLOR = (200, 72, 96)
+ENEMY_CONTACT_DAMAGE = 1
+ENEMY_CONTACT_REACH = 1.0
 ENEMY_HIT_COLOR = (255, 224, 224)
 ENEMY_HIT_DURATION = 0.15
-COLLECTIBLE_COLOR = (112, 200, 224)
-BACKGROUND_COLOR = (18, 32, 24)
+HEALTH_COLOR = (248, 112, 112)
+HEALTH_CENTER = (80, 52)
+PLAYER_ATTACK_DAMAGE = 1
+PLAYER_SPEED = 160.0
+PLAYER_INVULNERABILITY_DURATION = 1.0
 SCORE_COLOR = (240, 240, 240)
 SCORE_CENTER = (80, 24)
 SCORE_FONT_PATH = pygame.font.get_default_font()
 SCORE_FONT_SIZE = 24
-ATTACK_REACH = 16.0
+WALL_COLOR = (84, 104, 92)
 
 
 class GameplayScene(Scene):
@@ -40,7 +46,8 @@ class GameplayScene(Scene):
         input_state: InputState[GameAction],
         font_cache: FontCache,
         session_score: SessionScore,
-        player: Entity,
+        player: Player,
+        on_player_defeated: Callable[[PlayerDefeated], None],
         walls: tuple[Entity, ...],
         enemies: tuple[Enemy, ...],
         on_enemy_defeated: Callable[[EnemyDefeated], None],
@@ -57,6 +64,8 @@ class GameplayScene(Scene):
         self._font_cache = font_cache
         self._session_score = session_score
         self._player = player
+        self._player_invulnerability_remaining = 0.0
+        self._on_player_defeated = on_player_defeated
         self._walls = walls
         self._enemies = enemies
         self._enemy_hit_time_remaining = {
@@ -79,11 +88,20 @@ class GameplayScene(Scene):
         return None
 
     def update(self, delta_time: float) -> None:
+        if not self._player.entity.active:
+            return
+
+        self._player_invulnerability_remaining = max(
+            0.0,
+            self._player_invulnerability_remaining - delta_time,
+        )
+
         for enemy_id, time_remaining in self._enemy_hit_time_remaining.items():
             self._enemy_hit_time_remaining[enemy_id] = max(
                 0.0,
                 time_remaining - delta_time,
             )
+
         axis = movement_axis(
             self._input_state,
             left=GameAction.MOVE_LEFT,
@@ -97,9 +115,32 @@ class GameplayScene(Scene):
             *(enemy.entity.bounds for enemy in self._enemies if enemy.entity.active),
         )
 
-        move_entity(self._player, movement, solid_bounds)
+        move_entity(self._player.entity, movement, solid_bounds)
 
-        player_bounds = self._player.bounds
+        player_bounds = self._player.entity.bounds
+
+        if self._player.entity.active and self._player_invulnerability_remaining <= 0.0:
+            contact_bounds = AABB(
+                x=player_bounds.x - ENEMY_CONTACT_REACH,
+                y=player_bounds.y - ENEMY_CONTACT_REACH,
+                width=player_bounds.width + ENEMY_CONTACT_REACH * 2.0,
+                height=player_bounds.height + ENEMY_CONTACT_REACH * 2.0,
+            )
+
+            for enemy in self._enemies:
+                if enemy.entity.active and contact_bounds.overlaps(enemy.entity.bounds):
+                    player_defeated = self._player.take_damage(ENEMY_CONTACT_DAMAGE)
+
+                    if player_defeated:
+                        self._on_player_defeated(
+                            PlayerDefeated(player_id=self._player.entity.entity_id)
+                        )
+                        return
+
+                    self._player_invulnerability_remaining = (
+                        PLAYER_INVULNERABILITY_DURATION
+                    )
+                    break
 
         attack_started = self._input_state.is_pressed(GameAction.ATTACK)
 
@@ -201,7 +242,7 @@ class GameplayScene(Scene):
 
         surface.blit(
             self._player_animation.current_frame,
-            _entity_rect(self._player),
+            _entity_rect(self._player.entity),
         )
 
         score_font = self._font_cache.load(
@@ -214,6 +255,14 @@ class GameplayScene(Scene):
             score_font,
             SCORE_COLOR,
             center=SCORE_CENTER,
+        )
+
+        draw_text(
+            surface,
+            f"Health: {self._player.health}",
+            score_font,
+            HEALTH_COLOR,
+            center=HEALTH_CENTER,
         )
 
 

@@ -53,6 +53,12 @@ and this project adheres to
   mutable health.
 - One-point player attack damage requiring two hits to defeat the demo enemy.
 - Brief color feedback after non-fatal enemy damage.
+- A game-owned `Player` that composes reusable spatial state with validated,
+  mutable health.
+- Enemy contact damage with temporary player invulnerability between hits.
+- A gameplay health display and an inactive player state after fatal damage.
+- Immutable `PlayerDefeated` facts delivered once through an explicit gameplay
+  callback.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

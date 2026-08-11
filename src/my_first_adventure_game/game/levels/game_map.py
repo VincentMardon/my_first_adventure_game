@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from my_first_adventure_game.engine.world import Entity, World
-from my_first_adventure_game.game.entities import Enemy
+from my_first_adventure_game.game.entities import Enemy, Player
 
 
 @dataclass(frozen=True, slots=True)
@@ -18,7 +18,7 @@ class GameMap:
     """
 
     world: World
-    player: Entity
+    player: Player
     walls: tuple[Entity, ...]
     enemies: tuple[Enemy, ...]
     destructible_obstacles: tuple[Entity, ...]

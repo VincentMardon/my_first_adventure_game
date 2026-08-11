@@ -7,12 +7,14 @@ def test_demo_map_registers_all_entities_in_world() -> None:
     game_map = create_demo_map()
 
     assert game_map.world.entities == (
-        game_map.player,
+        game_map.player.entity,
         *game_map.walls,
         *(enemy.entity for enemy in game_map.enemies),
         *game_map.collectibles,
     )
-    assert game_map.world.get(game_map.player.entity_id) is game_map.player
+    assert (
+        game_map.world.get(game_map.player.entity.entity_id) is game_map.player.entity
+    )
 
     for entity in (*game_map.walls, *game_map.collectibles):
         assert game_map.world.get(entity.entity_id) is entity
@@ -31,7 +33,8 @@ def test_demo_map_has_active_collectibles() -> None:
 def test_demo_map_has_active_player_and_solid_walls() -> None:
     game_map = create_demo_map()
 
-    assert game_map.player.active
+    assert game_map.player.entity.active
+    assert game_map.player.health == 3
     assert game_map.walls
     assert all(wall.active for wall in game_map.walls)
 
@@ -40,7 +43,7 @@ def test_demo_map_player_starts_outside_walls() -> None:
     game_map = create_demo_map()
 
     assert not any(
-        game_map.player.bounds.overlaps(wall.bounds) for wall in game_map.walls
+        game_map.player.entity.bounds.overlaps(wall.bounds) for wall in game_map.walls
     )
 
 
@@ -48,7 +51,7 @@ def test_demo_map_collectibles_start_outside_player_and_walls() -> None:
     game_map = create_demo_map()
 
     for collectible in game_map.collectibles:
-        assert not collectible.bounds.overlaps(game_map.player.bounds)
+        assert not collectible.bounds.overlaps(game_map.player.entity.bounds)
         assert not any(
             collectible.bounds.overlaps(wall.bounds) for wall in game_map.walls
         )
@@ -57,8 +60,8 @@ def test_demo_map_collectibles_start_outside_player_and_walls() -> None:
 def test_demo_map_uses_floating_point_entity_geometry() -> None:
     game_map = create_demo_map()
 
-    assert isinstance(game_map.player.position, pygame.Vector2)
-    assert isinstance(game_map.player.size, pygame.Vector2)
+    assert isinstance(game_map.player.entity.position, pygame.Vector2)
+    assert isinstance(game_map.player.entity.size, pygame.Vector2)
     assert all(
         isinstance(wall.position, pygame.Vector2)
         and isinstance(wall.size, pygame.Vector2)

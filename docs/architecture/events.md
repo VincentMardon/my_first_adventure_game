@@ -7,7 +7,8 @@ behavior.
 
 It currently provides `ItemCollected`, which identifies an item collected by
 the player, `ObstacleDestroyed`, which identifies a destructible obstacle
-removed by an attack, and `EnemyDefeated`, which identifies a defeated enemy.
+removed by an attack, `EnemyDefeated`, which identifies a defeated enemy, and
+`PlayerDefeated`, which identifies the defeated player.
 
 The domain does not calculate score, update session state, persist statistics,
 or provide a general event dispatcher.
@@ -43,10 +44,16 @@ Reports that an enemy was defeated.
 It contains only the stable identifier of that enemy and is immutable. It does
 not define score, experience, loot, or progression consequences.
 
+### [`PlayerDefeated`](../api/game-events.md#my_first_adventure_game.game.events.PlayerDefeated)
+
+Reports that the player was defeated. It contains only the stable player
+identifier and does not decide navigation, retry, or session consequences.
+
 ## Ownership
 
-Both events belong to `game` because collection, attacks, and destruction are
-concrete game vocabulary rather than reusable engine mechanisms.
+These events belong to `game` because collection, attacks, destruction, and
+player defeat are concrete game vocabulary rather than reusable engine
+mechanisms.
 
 The engine provides entity identity and overlap detection. The game decides
 that a particular overlap represents collection and emits the corresponding
@@ -61,9 +68,11 @@ flowchart LR
     ItemCollected["game.events.ItemCollected"]
     ObstacleDestroyed["game.events.ObstacleDestroyed"]
     EnemyDefeated["game.events.EnemyDefeated"]
+    PlayerDefeated["game.events.PlayerDefeated"]
     Handler["injected collection handler"]
     DestructionHandler["injected destruction handler"]
     DefeatHandler["injected enemy defeat handler"]
+    PlayerDefeatHandler["injected player defeat handler"]
 
     GameMain -->|"injects"| Handler
     GameMain --> GameplayScene
@@ -78,15 +87,19 @@ flowchart LR
     GameplayScene -->|"creates after defeat"| EnemyDefeated
     GameplayScene -->|"delivers synchronously"| DefeatHandler
     EnemyDefeated --> DefeatHandler
+    GameMain -->|"injects"| PlayerDefeatHandler
+    GameplayScene -->|"creates after fatal contact"| PlayerDefeated
+    GameplayScene -->|"delivers synchronously"| PlayerDefeatHandler
+    PlayerDefeated --> PlayerDefeatHandler
 ```
 
 The handler composed in `game.main` converts `ItemCollected` into points through
 the game-owned scoring rule and adds them to the current `SessionScore`. The
 event itself remains independent from that consequence.
 
-The destruction and enemy defeat handlers currently have no additional
-consequence. The scene deactivates the corresponding entity before reporting
-the factual event.
+The destruction, enemy defeat, and player defeat handlers currently have no
+additional consequence. The scene deactivates the corresponding entity before
+reporting the factual event.
 
 ## Delivery semantics
 
@@ -101,6 +114,9 @@ the factual event.
 - `GameplayScene` deactivates an active enemy within attack reach before
   delivering one `EnemyDefeated` value.
 - An inactive enemy cannot emit the defeat event again.
+- Fatal enemy contact deactivates the player before one `PlayerDefeated` value
+  is delivered.
+- An inactive player cannot emit another defeat event on later frames.
 
 There is no global event bus, subscription registry, or runtime event queue.
 
@@ -141,3 +157,5 @@ Current tests verify:
 - attacking near an active enemy deactivates it and delivers its event exactly
   once;
 - distant enemies remain active.
+- `PlayerDefeated` stores the defeated player identifier and is immutable;
+- fatal enemy contact delivers player defeat exactly once.

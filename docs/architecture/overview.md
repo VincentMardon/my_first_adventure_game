@@ -112,16 +112,17 @@ game.
 
 Defines concrete gameplay objects that compose reusable engine entities.
 
-The current `Enemy` owns mutable integer health, applies positive damage,
-deactivates its spatial entity on the fatal hit, and reports whether that hit
-caused the defeat.
+The current `Enemy` and `Player` own mutable integer health, apply positive
+damage, deactivate their spatial entities on the fatal hit, and report whether
+that hit caused the defeat.
 
 ### Events
 
 Defines immutable facts produced by concrete gameplay behavior.
 
-The current `ItemCollected`, `ObstacleDestroyed`, and `EnemyDefeated` events
-identify concrete gameplay facts without deciding their consequences.
+The current `ItemCollected`, `ObstacleDestroyed`, `EnemyDefeated`, and
+`PlayerDefeated` events identify concrete gameplay facts without deciding their
+consequences.
 
 ### Scoring
 
@@ -144,7 +145,8 @@ walls and enemies as solid obstacles, deactivates collectibles overlapping the
 player, destroys nearby destructible obstacles and defeats nearby enemies when
 attacking, emits factual events,
 prioritizes one-shot collection and attack animations over movement and idle
-presentation, and displays the current session score.
+presentation, applies contact damage with temporary player invulnerability,
+and displays the current session score and player health.
 
 ### Levels
 
@@ -168,6 +170,10 @@ Reserved packages communicate intended organization, not completed features.
 ## Runtime composition
 
 The game entry point creates the concrete objects and connects them together.
+The composition is split below into three focused views so that each diagram
+answers one architectural question.
+
+### Application and scene composition
 
 ```mermaid
 flowchart TD
@@ -181,61 +187,60 @@ flowchart TD
     Scene["Scene"]
     TitleScene["TitleScene"]
     GameplayScene["GameplayScene"]
-    DemoMap["create_demo_map"]
-    GameMap["GameMap"]
-    World["World"]
-    Entity["Entity"]
-    Enemy["Enemy"]
-    ItemCollected["ItemCollected"]
-    ObstacleDestroyed["ObstacleDestroyed"]
-    EnemyDefeated["EnemyDefeated"]
-    ItemCollectionPoints["item_collection_points"]
-    SessionScore["SessionScore"]
-    Animation["Animation"]
-    FontCache["FontCache"]
-    DrawText["draw_text"]
 
     GameMain --> Application
     GameMain --> InputState
     GameMain --> SceneManager
     GameMain -->|"injects transition callback"| TitleScene
     GameMain --> GameplayScene
-    GameMain --> DemoMap
-    GameMain --> ItemCollectionPoints
-    GameMain --> SessionScore
-    GameMain --> Animation
-    GameMain --> FontCache
-
-    DemoMap --> GameMap
-    GameMap --> World
-    GameMap --> Entity
-    GameMap --> Enemy
-    Enemy --> Entity
 
     Application --> WindowConfig
     Application --> InputProcessor
     Application --> SceneManager
 
-    TitleScene --> FontCache
-    TitleScene --> DrawText
     TitleScene --> InputState
-
-    GameplayScene --> InputState
-    GameplayScene --> Entity
-    GameplayScene --> Enemy
-    GameplayScene --> ItemCollected
-    GameplayScene --> ObstacleDestroyed
-    GameplayScene --> EnemyDefeated
-    GameplayScene --> SessionScore
-    GameplayScene --> Animation
-    GameplayScene --> FontCache
-    GameplayScene --> DrawText
 
     InputState -. "implements structurally" .-> InputProcessor
     InputState --> KeyboardBindings
     SceneManager --> Scene
     TitleScene -. "implements" .-> Scene
     GameplayScene -. "implements" .-> Scene
+```
+
+### Gameplay map composition
+
+```mermaid
+flowchart LR
+    GameMain["game.main"] --> DemoMap["create_demo_map"]
+    DemoMap --> GameMap["GameMap"]
+    GameMap --> World["World"]
+    GameMap --> Player["Player"]
+    GameMap --> Enemy["Enemy"]
+    Player -->|"composes"| Entity["Entity"]
+    Enemy -->|"composes"| Entity
+    World -->|"stores"| Entity
+    GameMain -->|"injects map roles"| GameplayScene["GameplayScene"]
+```
+
+### Gameplay collaborators and facts
+
+```mermaid
+flowchart LR
+    GameMain["game.main"] --> GameplayScene["GameplayScene"]
+
+    InputState["InputState"] --> GameplayScene
+    SessionScore["SessionScore"] --> GameplayScene
+    Animation["Animation"] --> GameplayScene
+    FontCache["FontCache"] --> GameplayScene
+    GameplayScene --> DrawText["draw_text"]
+
+    GameplayScene --> ItemCollected["ItemCollected"]
+    GameplayScene --> ObstacleDestroyed["ObstacleDestroyed"]
+    GameplayScene --> EnemyDefeated["EnemyDefeated"]
+    GameplayScene --> PlayerDefeated["PlayerDefeated"]
+
+    ItemCollected --> ItemCollectionPoints["item_collection_points"]
+    ItemCollectionPoints --> SessionScore
 ```
 
 `game.main` creates the demo map, current `SessionScore`, and temporary
@@ -254,6 +259,13 @@ same attack reach takes one point of damage. The current enemy survives the
 first hit and briefly flashes with a game-owned feedback color. The second hit
 deactivates its spatial entity, removes it from later collision and rendering,
 and reports an `EnemyDefeated` fact.
+
+Contact with an active enemy removes one point of player health and starts a
+short invulnerability period that prevents immediate repeated damage. Fatal
+contact deactivates the player, stops later gameplay updates, and reports a
+`PlayerDefeated` fact. The injected handler currently has no additional
+consequence, so the inactive player remains visible until a result scene is
+implemented.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.
