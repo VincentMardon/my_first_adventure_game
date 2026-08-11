@@ -109,10 +109,17 @@ classDiagram
         +draw(surface)
     }
 
+    class VictoryScene {
+        +handle_event(event)
+        +update(delta_time)
+        +draw(surface)
+    }
+
     SceneManager o-- Scene : active scene
     Scene <|-- GameplayScene
     Scene <|-- TitleScene
     Scene <|-- DefeatScene
+    Scene <|-- VictoryScene
     Application --> SceneManager : delegates frame work
 ```
 
@@ -171,6 +178,8 @@ and
 [`GameplayScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.GameplayScene).
 The game also provides
 [`DefeatScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.DefeatScene).
+The game also provides
+[`VictoryScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.VictoryScene).
 
 `TitleScene`:
 
@@ -228,20 +237,29 @@ The game also provides
 - requests a return to the title when `CONFIRM` is pressed;
 - ignores raw events.
 
+`VictoryScene`:
+
+- receives the same collaborators as `DefeatScene`;
+- draws a game-owned victory message, the final score, and a return instruction;
+- requests a return to the title when `CONFIRM` is pressed;
+- ignores raw events.
+
 `game.main` composes `GameplayScene` from the shared font cache and session
 score, the player, walls, enemies, destructible obstacles, and collectibles
 provided by the demo map, idle, movement, collection, and attack animations,
 and explicit collection, destruction, enemy defeat, and player defeat handlers.
 The collection handler applies the game-owned collection point rule to the same
-session score displayed by the scene. The destruction and enemy defeat handlers
-currently have no additional consequence. The player defeat handler explicitly
-replaces gameplay with the current session's `DefeatScene`.
+session score displayed by the scene. The destruction handler currently has no
+additional consequence. The enemy defeat handler replaces gameplay with the
+current session's `VictoryScene` only after all map enemies become inactive.
+The player defeat handler explicitly replaces gameplay with the current
+session's `DefeatScene`.
 
 `game.main` retains the title scene and shared application services across the
 application lifetime. Each start request creates a fresh map, score, animation
-set, gameplay scene, defeat scene, and session-local callbacks. Returning from
-defeat does not mutate the completed session back to its initial state; the next
-start replaces it with new objects.
+set, gameplay scene, defeat scene, victory scene, and session-local callbacks.
+Returning from either result does not mutate the completed session back to its
+initial state; the next start replaces it with new objects.
 
 The current idle, movement, collection, and attack animations each use two
 game-owned colored surfaces as temporary frames. This validates animation
@@ -342,7 +360,10 @@ Current tests verify:
   transition;
 - the defeat scene draws its background, message, and final session score;
 - confirmation on the defeat scene explicitly returns to the title;
+- the victory scene draws its background, message, and final session score;
+- victory waits until every map enemy is inactive and confirmation explicitly
+  returns to the title;
 - consecutive start requests construct distinct maps, scores, animations,
-  gameplay scenes, defeat scenes, and callbacks;
+  gameplay scenes, result scenes, and callbacks;
 - the composition root connects `PlayerDefeated` to the explicit defeat
   transition.

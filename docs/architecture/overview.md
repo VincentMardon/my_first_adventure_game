@@ -135,7 +135,7 @@ that score with `GameplayScene` for display.
 
 ### Scenes
 
-Provides the concrete title, gameplay, and defeat scenes.
+Provides the concrete title, gameplay, defeat, and victory scenes.
 
 The title scene requests an explicit transition to gameplay when the
 confirmation action is pressed.
@@ -151,6 +151,9 @@ and displays the current session score and player health.
 The defeat scene displays the final session score after player defeat and
 requests an explicit return to the title when confirmation is pressed. Starting
 again constructs a fresh session rather than resetting the previous objects.
+
+The victory scene displays the final session score after every enemy on the
+current map is inactive and provides the same explicit return to the title.
 
 ### Levels
 
@@ -192,6 +195,7 @@ flowchart TD
     TitleScene["TitleScene"]
     GameplayScene["GameplayScene"]
     DefeatScene["DefeatScene"]
+    VictoryScene["VictoryScene"]
 
     GameMain --> Application
     GameMain --> InputState
@@ -199,6 +203,7 @@ flowchart TD
     GameMain -->|"injects transition callback"| TitleScene
     GameMain -->|"creates per session"| GameplayScene
     GameMain -->|"creates per session"| DefeatScene
+    GameMain -->|"creates per session"| VictoryScene
 
     Application --> WindowConfig
     Application --> InputProcessor
@@ -207,6 +212,8 @@ flowchart TD
     TitleScene --> InputState
     DefeatScene --> InputState
     DefeatScene -->|"requests return"| TitleScene
+    VictoryScene --> InputState
+    VictoryScene -->|"requests return"| TitleScene
 
     InputState -. "implements structurally" .-> InputProcessor
     InputState --> KeyboardBindings
@@ -214,6 +221,7 @@ flowchart TD
     TitleScene -. "implements" .-> Scene
     GameplayScene -. "implements" .-> Scene
     DefeatScene -. "implements" .-> Scene
+    VictoryScene -. "implements" .-> Scene
 ```
 
 ### Gameplay map composition
@@ -248,6 +256,7 @@ flowchart LR
     GameplayScene --> EnemyDefeated["EnemyDefeated"]
     GameplayScene --> PlayerDefeated["PlayerDefeated"]
     PlayerDefeated --> DefeatScene["DefeatScene"]
+    EnemyDefeated -->|"when all enemies are inactive"| VictoryScene["VictoryScene"]
 
     ItemCollected --> ItemCollectionPoints["item_collection_points"]
     ItemCollectionPoints --> SessionScore
@@ -271,6 +280,11 @@ first hit and briefly flashes with a game-owned feedback color. The second hit
 deactivates its spatial entity, removes it from later collision and rendering,
 and reports an `EnemyDefeated` fact.
 
+The enemy defeat handler inspects the remaining map enemies after each factual
+event. It explicitly replaces gameplay with `VictoryScene` only when all of
+them are inactive. This completion rule belongs to the concrete game and may be
+replaced by a different objective in a cloned project.
+
 Contact with an active enemy removes one point of player health and starts a
 short invulnerability period that prevents immediate repeated damage. Fatal
 contact deactivates the player, stops later gameplay updates, and reports a
@@ -279,8 +293,9 @@ contact deactivates the player, stops later gameplay updates, and reports a
 
 Confirmation on `DefeatScene` explicitly returns to the existing title scene.
 The next start request constructs a new map, session score, animation set,
-gameplay scene, defeat scene, and session-local callbacks. Shared application
-services such as input state, font cache, and scene manager remain alive.
+gameplay scene, defeat scene, victory scene, and session-local callbacks. Shared
+application services such as input state, font cache, and scene manager remain
+alive.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.

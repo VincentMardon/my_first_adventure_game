@@ -63,6 +63,10 @@ and this project adheres to
   `PlayerDefeated` transition.
 - Confirmation-driven navigation from defeat back to the title.
 - Fresh map, score, animation, gameplay, and defeat state for every new game.
+- A game-owned victory scene displayed after every enemy on the current map is
+  defeated.
+- Final score display and confirmation-driven return to the title after
+  victory.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

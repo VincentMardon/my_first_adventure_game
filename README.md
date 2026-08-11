@@ -121,12 +121,13 @@ The project now provides a minimal playable top-down loop:
 8. a stationary enemy blocks movement and survives the first nearby attack;
 9. non-fatal damage briefly changes the enemy's color;
 10. a second nearby attack defeats it and opens its former position.
-11. touching an active enemy damages the player, with a short invulnerability
+11. defeating every enemy transitions to a victory screen with the final score;
+12. touching an active enemy damages the player, with a short invulnerability
    period between hits;
-12. reaching zero health transitions to a defeat screen that displays the final
+13. reaching zero health transitions to a defeat screen that displays the final
    score.
-13. pressing Enter on the defeat screen returns to the title;
-14. starting again creates a fresh map, score, animations, and gameplay state.
+14. pressing Enter on either result screen returns to the title;
+15. starting again creates a fresh map, score, animations, and gameplay state.
 
 Implemented foundations include:
 
@@ -156,6 +157,8 @@ Implemented foundations include:
 - an immutable player defeat fact delivered through an explicit callback;
 - a game-owned defeat scene reached through an explicit transition and showing
   the final session score;
+- a game-owned victory scene reached after every map enemy is defeated and
+  showing the final session score;
 - an explicit return to the title followed by fresh session construction for
   every new game;
 - game-owned collection behavior based on reusable entity overlap detection;

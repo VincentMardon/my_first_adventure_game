@@ -1,5 +1,11 @@
 from my_first_adventure_game.game.scenes.defeat_scene import DefeatScene
 from my_first_adventure_game.game.scenes.gameplay_scene import GameplayScene
 from my_first_adventure_game.game.scenes.title_scene import TitleScene
+from my_first_adventure_game.game.scenes.victory_scene import VictoryScene
 
-__all__ = ["DefeatScene", "GameplayScene", "TitleScene"]
+__all__ = [
+    "DefeatScene",
+    "GameplayScene",
+    "TitleScene",
+    "VictoryScene",
+]

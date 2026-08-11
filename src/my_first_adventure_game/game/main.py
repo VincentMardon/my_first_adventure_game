@@ -17,6 +17,7 @@ from my_first_adventure_game.game.scenes import (
     DefeatScene,
     GameplayScene,
     TitleScene,
+    VictoryScene,
 )
 from my_first_adventure_game.game.scoring import (
     SessionScore,
@@ -126,6 +127,13 @@ def main() -> None:
             return_to_title,
         )
 
+        victory_scene = VictoryScene(
+            font_cache,
+            session_score,
+            input_state,
+            return_to_title,
+        )
+
         def handle_player_defeated(
             _event: PlayerDefeated,
         ) -> None:
@@ -134,7 +142,8 @@ def main() -> None:
         def handle_enemy_defeated(
             _event: EnemyDefeated,
         ) -> None:
-            pass
+            if all(not enemy.entity.active for enemy in game_map.enemies):
+                scene_manager.change_scene(victory_scene)
 
         def handle_item_collected(event: ItemCollected) -> None:
             session_score.add(item_collection_points(event))

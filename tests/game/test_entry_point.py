@@ -15,6 +15,11 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     scene_manager = Mock()
     font_cache = Mock()
     game_map = Mock()
+    first_enemy = Mock()
+    first_enemy.entity.active = False
+    second_enemy = Mock()
+    second_enemy.entity.active = True
+    game_map.enemies = (first_enemy, second_enemy)
     session_score = Mock()
     gameplay_scene = Mock()
     application = Mock()
@@ -31,6 +36,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     eighth_player_frame = Mock()
     player_attack_animation = Mock()
     defeat_scene = Mock()
+    victory_scene = Mock()
 
     create_input_state = Mock(return_value=input_state)
     create_title_scene = Mock(return_value=initial_scene)
@@ -62,6 +68,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         )
     )
     create_defeat_scene = Mock(return_value=defeat_scene)
+    create_victory_scene = Mock(return_value=victory_scene)
 
     monkeypatch.setattr(game_main, "TitleScene", create_title_scene)
     monkeypatch.setattr(game_main, "SceneManager", create_scene_manager)
@@ -79,6 +86,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     monkeypatch.setattr(game_main.pygame, "Surface", create_surface)
     monkeypatch.setattr(game_main, "Animation", create_animation)
     monkeypatch.setattr(game_main, "DefeatScene", create_defeat_scene)
+    monkeypatch.setattr(game_main, "VictoryScene", create_victory_scene)
 
     game_main.main()
 
@@ -98,6 +106,8 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     )
     start_game = create_title_scene.call_args.args[2]
 
+    create_victory_scene.assert_not_called()
+
     start_game()
 
     create_demo_map.assert_called_once_with()
@@ -112,6 +122,18 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         input_state,
     )
     assert callable(defeat_args[3])
+
+    return_to_title = defeat_args[3]
+
+    create_victory_scene.assert_called_once()
+    victory_args = create_victory_scene.call_args.args
+
+    assert victory_args[:3] == (
+        font_cache,
+        session_score,
+        input_state,
+    )
+    assert victory_args[3] is return_to_title
 
     assert create_surface.call_args_list == [
         call(game_main.PLAYER_FRAME_SIZE),
@@ -193,16 +215,21 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     player_event = PlayerDefeated(player_id="player")
     handle_player_defeated(player_event)
 
-    scene_manager.change_scene.assert_called_with(defeat_scene)
-
-    return_to_title = defeat_args[3]
-
     return_to_title()
 
     handle_enemy_defeated = gameplay_args[7]
-    enemy_event = EnemyDefeated(enemy_id="enemy-1")
+    first_enemy_event = EnemyDefeated(enemy_id="enemy-1")
 
-    assert handle_enemy_defeated(enemy_event) is None
+    handle_enemy_defeated(first_enemy_event)
+
+    assert call(victory_scene) not in scene_manager.change_scene.call_args_list
+
+    second_enemy.entity.active = False
+    second_enemy_event = EnemyDefeated(enemy_id="enemy-2")
+
+    handle_enemy_defeated(second_enemy_event)
+
+    scene_manager.change_scene.assert_called_with(victory_scene)
 
     handle_item_collected = gameplay_args[9]
     event = ItemCollected(item_id="collectible-1")
@@ -221,6 +248,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     second_session_score = Mock()
     second_gameplay_scene = Mock()
     second_defeat_scene = Mock()
+    second_victory_scene = Mock()
     second_player_frames = tuple(Mock() for _ in range(8))
     second_player_animations = tuple(Mock() for _ in range(4))
 
@@ -228,6 +256,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_session_score.return_value = second_session_score
     create_gameplay_scene.return_value = second_gameplay_scene
     create_defeat_scene.return_value = second_defeat_scene
+    create_victory_scene.return_value = second_victory_scene
     create_surface.side_effect = second_player_frames
     create_animation.side_effect = second_player_animations
 
@@ -237,6 +266,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert create_session_score.call_count == 2
     assert create_gameplay_scene.call_count == 2
     assert create_defeat_scene.call_count == 2
+    assert create_victory_scene.call_count == 2
 
     second_gameplay_args = create_gameplay_scene.call_args.args
 
@@ -262,10 +292,21 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     )
     assert second_defeat_args[3] is not return_to_title
 
+    second_victory_args = create_victory_scene.call_args.args
+
+    assert second_victory_args[:3] == (
+        font_cache,
+        second_session_score,
+        input_state,
+    )
+    assert second_victory_args[3] is second_defeat_args[3]
+    assert second_victory_args[3] is not return_to_title
+
     assert scene_manager.change_scene.call_args_list == [
         call(gameplay_scene),
         call(defeat_scene),
         call(initial_scene),
+        call(victory_scene),
         call(second_gameplay_scene),
     ]
 
