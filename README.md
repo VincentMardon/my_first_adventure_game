@@ -65,7 +65,8 @@ my-first-adventure-game
 
 - press Enter on the title screen to start;
 - use the arrow keys to move the player;
-- press Space near a destructible obstacle to destroy it.
+- press Space near a destructible obstacle or enemy to attack;
+- press Escape during gameplay to pause or resume.
 
 ## Development checks
 
@@ -128,6 +129,8 @@ The project now provides a minimal playable top-down loop:
    score.
 14. pressing Enter on either result screen returns to the title;
 15. starting again creates a fresh map, score, animations, and gameplay state.
+16. pressing Escape temporarily replaces gameplay with an opaque pause screen
+   and resumes the same session on a second press.
 
 Implemented foundations include:
 
@@ -161,6 +164,8 @@ Implemented foundations include:
   showing the final session score;
 - an explicit return to the title followed by fresh session construction for
   every new game;
+- a game-owned pause action and opaque pause scene that suspend gameplay and
+  resume the same session explicitly;
 - game-owned collection behavior based on reusable entity overlap detection;
 - immutable collection, destruction, and enemy defeat facts delivered through
   explicit callbacks;

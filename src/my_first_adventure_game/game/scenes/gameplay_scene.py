@@ -47,6 +47,7 @@ class GameplayScene(Scene):
         font_cache: FontCache,
         session_score: SessionScore,
         player: Player,
+        on_pause_requested: Callable[[], None],
         on_player_defeated: Callable[[PlayerDefeated], None],
         walls: tuple[Entity, ...],
         enemies: tuple[Enemy, ...],
@@ -64,6 +65,7 @@ class GameplayScene(Scene):
         self._font_cache = font_cache
         self._session_score = session_score
         self._player = player
+        self._on_pause_requested = on_pause_requested
         self._player_invulnerability_remaining = 0.0
         self._on_player_defeated = on_player_defeated
         self._walls = walls
@@ -88,6 +90,10 @@ class GameplayScene(Scene):
         return None
 
     def update(self, delta_time: float) -> None:
+        if self._input_state.is_pressed(GameAction.PAUSE):
+            self._on_pause_requested()
+            return
+
         if not self._player.entity.active:
             return
 

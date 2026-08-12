@@ -135,7 +135,7 @@ that score with `GameplayScene` for display.
 
 ### Scenes
 
-Provides the concrete title, gameplay, defeat, and victory scenes.
+Provides the concrete title, gameplay, pause, defeat, and victory scenes.
 
 The title scene requests an explicit transition to gameplay when the
 confirmation action is pressed.
@@ -154,6 +154,10 @@ again constructs a fresh session rather than resetting the previous objects.
 
 The victory scene displays the final session score after every enemy on the
 current map is inactive and provides the same explicit return to the title.
+
+The opaque pause scene temporarily replaces gameplay when Escape is pressed.
+Because only the active scene is updated, gameplay time and animation stop. A
+second press explicitly restores the same gameplay scene and session state.
 
 ### Levels
 
@@ -194,6 +198,7 @@ flowchart TD
     Scene["Scene"]
     TitleScene["TitleScene"]
     GameplayScene["GameplayScene"]
+    PauseScene["PauseScene"]
     DefeatScene["DefeatScene"]
     VictoryScene["VictoryScene"]
 
@@ -202,6 +207,7 @@ flowchart TD
     GameMain --> SceneManager
     GameMain -->|"injects transition callback"| TitleScene
     GameMain -->|"creates per session"| GameplayScene
+    GameMain -->|"creates per session"| PauseScene
     GameMain -->|"creates per session"| DefeatScene
     GameMain -->|"creates per session"| VictoryScene
 
@@ -210,6 +216,9 @@ flowchart TD
     Application --> SceneManager
 
     TitleScene --> InputState
+    GameplayScene -->|"requests pause"| PauseScene
+    PauseScene --> InputState
+    PauseScene -->|"requests resume"| GameplayScene
     DefeatScene --> InputState
     DefeatScene -->|"requests return"| TitleScene
     VictoryScene --> InputState
@@ -220,6 +229,7 @@ flowchart TD
     SceneManager --> Scene
     TitleScene -. "implements" .-> Scene
     GameplayScene -. "implements" .-> Scene
+    PauseScene -. "implements" .-> Scene
     DefeatScene -. "implements" .-> Scene
     VictoryScene -. "implements" .-> Scene
 ```
@@ -293,9 +303,9 @@ contact deactivates the player, stops later gameplay updates, and reports a
 
 Confirmation on `DefeatScene` explicitly returns to the existing title scene.
 The next start request constructs a new map, session score, animation set,
-gameplay scene, defeat scene, victory scene, and session-local callbacks. Shared
-application services such as input state, font cache, and scene manager remain
-alive.
+gameplay scene, pause scene, defeat scene, victory scene, and session-local
+callbacks. Shared application services such as input state, font cache, and
+scene manager remain alive.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.

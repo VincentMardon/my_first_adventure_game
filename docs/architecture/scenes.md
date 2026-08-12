@@ -97,6 +97,12 @@ classDiagram
         +draw(surface)
     }
 
+    class PauseScene {
+        +handle_event(event)
+        +update(delta_time)
+        +draw(surface)
+    }
+
     class TitleScene {
         +handle_event(event)
         +update(delta_time)
@@ -117,14 +123,15 @@ classDiagram
 
     SceneManager o-- Scene : active scene
     Scene <|-- GameplayScene
+    Scene <|-- PauseScene
     Scene <|-- TitleScene
     Scene <|-- DefeatScene
     Scene <|-- VictoryScene
     Application --> SceneManager : delegates frame work
 ```
 
-`TitleScene` and `GameplayScene` belong to `game`, even though they implement
-the engine-owned `Scene` contract.
+The concrete title, gameplay, pause, and result scenes belong to `game`, even
+though they implement the engine-owned `Scene` contract.
 
 ## Transition semantics
 
@@ -148,8 +155,10 @@ cannot be expressed clearly through its existing collaborators.
 If lifecycle methods are introduced later, their ordering and failure behavior
 must be documented and tested.
 
-The current manager also has no scene stack. Pause behavior must provide a real
-requirement before stack operations such as push and pop are considered.
+The current manager has no scene stack. The concrete pause requirement is met
+by explicitly replacing gameplay with a session-owned opaque `PauseScene`, then
+restoring that same gameplay scene. Stack operations such as push and pop remain
+unnecessary until another requirement needs nested or overlaid scenes.
 
 ## Scenes versus maps
 
@@ -180,6 +189,8 @@ The game also provides
 [`DefeatScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.DefeatScene).
 The game also provides
 [`VictoryScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.VictoryScene).
+It also provides
+[`PauseScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.PauseScene).
 
 `TitleScene`:
 
@@ -195,6 +206,8 @@ The game also provides
   wall entities, game-owned enemies, destructible obstacles, collectible entities,
   idle, movement, collection, and attack animations, and explicit collection,
   destruction, enemy defeat, and player defeat handlers;
+- requests pause and returns immediately when `PAUSE` is pressed, before any
+  gameplay timer, movement, attack, damage, collection, or animation advances;
 - converts directional actions into normalized movement;
 - selects the movement animation while the directional axis is non-zero and
   the idle animation otherwise;
@@ -237,6 +250,14 @@ The game also provides
 - requests a return to the title when `CONFIRM` is pressed;
 - ignores raw events.
 
+`PauseScene`:
+
+- receives the shared font cache, action input state, and an explicit resume
+  callback;
+- draws an opaque game-owned pause message and resume instruction;
+- requests resumption when `PAUSE` is pressed;
+- ignores raw events.
+
 `VictoryScene`:
 
 - receives the same collaborators as `DefeatScene`;
@@ -257,9 +278,10 @@ session's `DefeatScene`.
 
 `game.main` retains the title scene and shared application services across the
 application lifetime. Each start request creates a fresh map, score, animation
-set, gameplay scene, defeat scene, victory scene, and session-local callbacks.
-Returning from either result does not mutate the completed session back to its
-initial state; the next start replaces it with new objects.
+set, gameplay scene, pause scene, defeat scene, victory scene, and session-local
+callbacks. Pause and resume preserve the same session objects. Returning from
+either result does not mutate the completed session back to its initial state;
+the next start replaces it with new objects.
 
 The current idle, movement, collection, and attack animations each use two
 game-owned colored surfaces as temporary frames. This validates animation
@@ -299,7 +321,7 @@ Future requirements may justify:
 
 - scene entry and exit lifecycle methods;
 - transition effects;
-- a pause-oriented scene stack;
+- a scene stack if a future requirement needs nested or overlaid scenes;
 - deferred transitions at frame boundaries;
 - scene factories when construction requires several services.
 
@@ -360,10 +382,12 @@ Current tests verify:
   transition;
 - the defeat scene draws its background, message, and final session score;
 - confirmation on the defeat scene explicitly returns to the title;
+- pause requests stop the current gameplay update immediately, replace gameplay
+  with an opaque pause scene, and resume the same gameplay scene explicitly;
 - the victory scene draws its background, message, and final session score;
 - victory waits until every map enemy is inactive and confirmation explicitly
   returns to the title;
 - consecutive start requests construct distinct maps, scores, animations,
-  gameplay scenes, result scenes, and callbacks;
+  gameplay scenes, pause scenes, result scenes, and callbacks;
 - the composition root connects `PlayerDefeated` to the explicit defeat
   transition.

@@ -43,6 +43,7 @@ def _create_gameplay_scene(
     font_cache: FontCache | None = None,
     session_score: SessionScore | None = None,
     player: Player | None = None,
+    on_pause_requested: Callable[[], None] | None = None,
     on_player_defeated: Callable[[PlayerDefeated], None] | None = None,
     walls: tuple[Entity, ...] = (),
     enemies: tuple[Enemy, ...] = (),
@@ -76,6 +77,7 @@ def _create_gameplay_scene(
         font_cache=font_cache or Mock(spec=FontCache),
         session_score=session_score or Mock(spec=SessionScore),
         player=player,
+        on_pause_requested=on_pause_requested or Mock(),
         on_player_defeated=on_player_defeated or Mock(),
         walls=walls,
         enemies=enemies,
@@ -276,7 +278,12 @@ def test_draw_flashes_enemy_after_non_fatal_damage(
 ) -> None:
     surface = Mock(spec=pygame.Surface)
     input_state = Mock(spec=InputState)
-    input_state.is_pressed.side_effect = (True, False)
+    input_state.is_pressed.side_effect = (
+        False,
+        True,
+        False,
+        False,
+    )
     enemy = Enemy(
         entity=Entity(
             entity_id="enemy",
@@ -469,7 +476,12 @@ def test_update_destroys_nearby_destructible_on_attack(
     monkeypatch,
 ) -> None:
     input_state = Mock(spec=InputState)
-    input_state.is_pressed.side_effect = (True, False)
+    input_state.is_pressed.side_effect = (
+        False,
+        True,
+        False,
+        False,
+    )
     player = Player(
         entity=Entity(
             entity_id="player",
@@ -529,7 +541,9 @@ def test_update_destroys_nearby_destructible_on_attack(
     player_movement_animation.update.assert_not_called()
     player_collection_animation.update.assert_not_called()
     assert input_state.is_pressed.call_args_list == [
+        call(GameAction.PAUSE),
         call(GameAction.ATTACK),
+        call(GameAction.PAUSE),
         call(GameAction.ATTACK),
     ]
     assert move_entity.call_args_list == [
@@ -555,7 +569,16 @@ def test_update_damages_and_defeats_nearby_enemy_on_attack(
     monkeypatch,
 ) -> None:
     input_state = Mock(spec=InputState)
-    input_state.is_pressed.side_effect = (True, False, True, False)
+    input_state.is_pressed.side_effect = (
+        False,
+        True,
+        False,
+        False,
+        False,
+        True,
+        False,
+        False,
+    )
     move_entity = Mock()
     nearby_enemy = Enemy(
         Entity(
@@ -611,9 +634,13 @@ def test_update_damages_and_defeats_nearby_enemy_on_attack(
     player_movement_animation.update.assert_not_called()
     player_collection_animation.update.assert_not_called()
     assert input_state.is_pressed.call_args_list == [
+        call(GameAction.PAUSE),
         call(GameAction.ATTACK),
+        call(GameAction.PAUSE),
         call(GameAction.ATTACK),
+        call(GameAction.PAUSE),
         call(GameAction.ATTACK),
+        call(GameAction.PAUSE),
         call(GameAction.ATTACK),
     ]
     on_enemy_defeated.assert_called_once_with(
@@ -629,7 +656,12 @@ def test_update_returns_to_movement_after_attack_finished(
     monkeypatch,
 ) -> None:
     input_state = Mock(spec=InputState)
-    input_state.is_pressed.side_effect = (True, False)
+    input_state.is_pressed.side_effect = (
+        False,
+        True,
+        False,
+        False,
+    )
     player_idle_animation = Mock(spec=Animation)
     player_movement_animation = Mock(spec=Animation)
     player_collection_animation = Mock(spec=Animation)
@@ -770,3 +802,29 @@ def test_update_reports_player_defeat_once_on_fatal_contact(monkeypatch) -> None
     on_player_defeated.assert_called_once_with(
         PlayerDefeated(player_id=player.entity.entity_id)
     )
+
+
+def test_update_requests_pause_without_advancing_gameplay(monkeypatch) -> None:
+    input_state = Mock(spec=InputState)
+    input_state.is_pressed.side_effect = lambda action: action is GameAction.PAUSE
+    on_pause_requested = Mock()
+    movement_axis = Mock()
+    move_entity = Mock()
+    player_idle_animation = Mock(spec=Animation)
+
+    monkeypatch.setattr(gameplay_scene, "movement_axis", movement_axis)
+    monkeypatch.setattr(gameplay_scene, "move_entity", move_entity)
+
+    scene = _create_gameplay_scene(
+        input_state=input_state,
+        on_pause_requested=on_pause_requested,
+        player_idle_animation=player_idle_animation,
+    )
+
+    scene.update(0.5)
+
+    input_state.is_pressed.assert_called_once_with(GameAction.PAUSE)
+    on_pause_requested.assert_called_once_with()
+    movement_axis.assert_not_called()
+    move_entity.assert_not_called()
+    player_idle_animation.update.assert_not_called()

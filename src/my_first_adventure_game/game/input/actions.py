@@ -11,6 +11,7 @@ class GameAction(Enum):
         MOVE_DOWN: Request movement along the positive vertical screen axis.
         CONFIRM: Confirm the current selection or requested transition.
         ATTACK: Request the player's current attack action.
+        PAUSE: Pause or resume the current gameplay session.
     """
 
     MOVE_LEFT = auto()
@@ -19,3 +20,4 @@ class GameAction(Enum):
     MOVE_DOWN = auto()
     CONFIRM = auto()
     ATTACK = auto()
+    PAUSE = auto()

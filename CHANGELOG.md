@@ -67,6 +67,9 @@ and this project adheres to
   defeated.
 - Final score display and confirmation-driven return to the title after
   victory.
+- A game-owned pause action bound to Escape.
+- An opaque pause scene that suspends gameplay and explicitly resumes the same
+  session without a scene stack.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

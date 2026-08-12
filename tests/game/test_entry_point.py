@@ -37,6 +37,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     player_attack_animation = Mock()
     defeat_scene = Mock()
     victory_scene = Mock()
+    pause_scene = Mock()
 
     create_input_state = Mock(return_value=input_state)
     create_title_scene = Mock(return_value=initial_scene)
@@ -69,6 +70,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     )
     create_defeat_scene = Mock(return_value=defeat_scene)
     create_victory_scene = Mock(return_value=victory_scene)
+    create_pause_scene = Mock(return_value=pause_scene)
 
     monkeypatch.setattr(game_main, "TitleScene", create_title_scene)
     monkeypatch.setattr(game_main, "SceneManager", create_scene_manager)
@@ -87,6 +89,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     monkeypatch.setattr(game_main, "Animation", create_animation)
     monkeypatch.setattr(game_main, "DefeatScene", create_defeat_scene)
     monkeypatch.setattr(game_main, "VictoryScene", create_victory_scene)
+    monkeypatch.setattr(game_main, "PauseScene", create_pause_scene)
 
     game_main.main()
 
@@ -109,6 +112,15 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_victory_scene.assert_not_called()
 
     start_game()
+
+    create_pause_scene.assert_called_once()
+    pause_args = create_pause_scene.call_args.args
+
+    assert pause_args[:2] == (
+        font_cache,
+        input_state,
+    )
+    assert callable(pause_args[2])
 
     create_demo_map.assert_called_once_with()
     create_session_score.assert_called_once_with()
@@ -199,25 +211,35 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         game_map.player,
     )
     assert callable(gameplay_args[4])
-    assert gameplay_args[5] is game_map.walls
-    assert gameplay_args[6] is game_map.enemies
-    assert callable(gameplay_args[7])
-    assert gameplay_args[8] is game_map.collectibles
-    assert callable(gameplay_args[9])
-    assert gameplay_args[10] is game_map.destructible_obstacles
-    assert callable(gameplay_args[11])
-    assert gameplay_args[12] is player_idle_animation
-    assert gameplay_args[13] is player_movement_animation
-    assert gameplay_args[14] is player_collection_animation
-    assert gameplay_args[15] is player_attack_animation
+    assert callable(gameplay_args[5])
+    assert gameplay_args[6] is game_map.walls
+    assert gameplay_args[7] is game_map.enemies
+    assert callable(gameplay_args[8])
+    assert gameplay_args[9] is game_map.collectibles
+    assert callable(gameplay_args[10])
+    assert gameplay_args[11] is game_map.destructible_obstacles
+    assert callable(gameplay_args[12])
+    assert gameplay_args[13] is player_idle_animation
+    assert gameplay_args[14] is player_movement_animation
+    assert gameplay_args[15] is player_collection_animation
+    assert gameplay_args[16] is player_attack_animation
 
-    handle_player_defeated = gameplay_args[4]
+    request_pause = gameplay_args[4]
+    handle_player_defeated = gameplay_args[5]
+    resume_game = pause_args[2]
+
+    request_pause()
+    scene_manager.change_scene.assert_called_with(pause_scene)
+
+    resume_game()
+    scene_manager.change_scene.assert_called_with(gameplay_scene)
+
     player_event = PlayerDefeated(player_id="player")
     handle_player_defeated(player_event)
 
     return_to_title()
 
-    handle_enemy_defeated = gameplay_args[7]
+    handle_enemy_defeated = gameplay_args[8]
     first_enemy_event = EnemyDefeated(enemy_id="enemy-1")
 
     handle_enemy_defeated(first_enemy_event)
@@ -231,12 +253,12 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     scene_manager.change_scene.assert_called_with(victory_scene)
 
-    handle_item_collected = gameplay_args[9]
+    handle_item_collected = gameplay_args[10]
     event = ItemCollected(item_id="collectible-1")
 
     handle_item_collected(event)
 
-    handle_obstacle_destroyed = gameplay_args[11]
+    handle_obstacle_destroyed = gameplay_args[12]
     obstacle_event = ObstacleDestroyed(obstacle_id="destructible-1")
 
     assert handle_obstacle_destroyed(obstacle_event) is None
@@ -249,6 +271,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     second_gameplay_scene = Mock()
     second_defeat_scene = Mock()
     second_victory_scene = Mock()
+    second_pause_scene = Mock()
     second_player_frames = tuple(Mock() for _ in range(8))
     second_player_animations = tuple(Mock() for _ in range(4))
 
@@ -257,6 +280,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_gameplay_scene.return_value = second_gameplay_scene
     create_defeat_scene.return_value = second_defeat_scene
     create_victory_scene.return_value = second_victory_scene
+    create_pause_scene.return_value = second_pause_scene
     create_surface.side_effect = second_player_frames
     create_animation.side_effect = second_player_animations
 
@@ -267,6 +291,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert create_gameplay_scene.call_count == 2
     assert create_defeat_scene.call_count == 2
     assert create_victory_scene.call_count == 2
+    assert create_pause_scene.call_count == 2
 
     second_gameplay_args = create_gameplay_scene.call_args.args
 
@@ -276,12 +301,13 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         second_session_score,
         second_game_map.player,
     )
-    assert second_gameplay_args[4] is not handle_player_defeated
-    assert second_gameplay_args[5] is second_game_map.walls
-    assert second_gameplay_args[6] is second_game_map.enemies
-    assert second_gameplay_args[8] is second_game_map.collectibles
-    assert second_gameplay_args[10] is second_game_map.destructible_obstacles
-    assert second_gameplay_args[12:] == second_player_animations
+    assert second_gameplay_args[4] is not request_pause
+    assert second_gameplay_args[5] is not handle_player_defeated
+    assert second_gameplay_args[6] is second_game_map.walls
+    assert second_gameplay_args[7] is second_game_map.enemies
+    assert second_gameplay_args[9] is second_game_map.collectibles
+    assert second_gameplay_args[11] is second_game_map.destructible_obstacles
+    assert second_gameplay_args[13:] == second_player_animations
 
     second_defeat_args = create_defeat_scene.call_args.args
 
@@ -302,7 +328,17 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert second_victory_args[3] is second_defeat_args[3]
     assert second_victory_args[3] is not return_to_title
 
+    second_pause_args = create_pause_scene.call_args.args
+
+    assert second_pause_args[:2] == (
+        font_cache,
+        input_state,
+    )
+    assert second_pause_args[2] is not resume_game
+
     assert scene_manager.change_scene.call_args_list == [
+        call(gameplay_scene),
+        call(pause_scene),
         call(gameplay_scene),
         call(defeat_scene),
         call(initial_scene),

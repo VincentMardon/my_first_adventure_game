@@ -16,6 +16,7 @@ from my_first_adventure_game.game.levels import create_demo_map
 from my_first_adventure_game.game.scenes import (
     DefeatScene,
     GameplayScene,
+    PauseScene,
     TitleScene,
     VictoryScene,
 )
@@ -134,6 +135,18 @@ def main() -> None:
             return_to_title,
         )
 
+        def request_pause() -> None:
+            scene_manager.change_scene(pause_scene)
+
+        def resume_game() -> None:
+            scene_manager.change_scene(gameplay_scene)
+
+        pause_scene = PauseScene(
+            font_cache,
+            input_state,
+            resume_game,
+        )
+
         def handle_player_defeated(
             _event: PlayerDefeated,
         ) -> None:
@@ -158,6 +171,7 @@ def main() -> None:
             font_cache,
             session_score,
             game_map.player,
+            request_pause,
             handle_player_defeated,
             game_map.walls,
             game_map.enemies,
