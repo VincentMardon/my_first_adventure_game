@@ -5,6 +5,7 @@ from my_first_adventure_game.engine.assets import FontCache
 from my_first_adventure_game.engine.graphics import Animation
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.scenes import SceneManager
+from my_first_adventure_game.game.entities import NPC
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
@@ -15,6 +16,7 @@ from my_first_adventure_game.game.input import DEFAULT_KEYBOARD_BINDINGS
 from my_first_adventure_game.game.levels import create_demo_map
 from my_first_adventure_game.game.scenes import (
     DefeatScene,
+    DialogueScene,
     GameplayScene,
     PauseScene,
     TitleScene,
@@ -141,6 +143,15 @@ def main() -> None:
         def resume_game() -> None:
             scene_manager.change_scene(gameplay_scene)
 
+        def handle_npc_interacted(npc: NPC) -> None:
+            dialogue_scene = DialogueScene(
+                font_cache,
+                input_state,
+                npc.dialogue_text,
+                resume_game,
+            )
+            scene_manager.change_scene(dialogue_scene)
+
         pause_scene = PauseScene(
             font_cache,
             input_state,
@@ -175,6 +186,8 @@ def main() -> None:
             handle_player_defeated,
             game_map.walls,
             game_map.enemies,
+            game_map.npcs,
+            handle_npc_interacted,
             handle_enemy_defeated,
             game_map.collectibles,
             handle_item_collected,

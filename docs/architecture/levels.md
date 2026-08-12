@@ -29,6 +29,7 @@ Groups:
 - the game-owned `Player`, including its reusable spatial entity;
 - the wall entities used as solid obstacles;
 - the `Enemy` objects assigned the enemy role by the game;
+- the `NPC` objects assigned the interaction role by the game;
 - the wall entities assigned the destructible obstacle role by the game;
 - the entities assigned the collectible role by the game.
 
@@ -39,11 +40,11 @@ mutable.
 
 Creates the current demonstration map entirely in Python.
 
-It registers the player's spatial entity, walls, enemy spatial entities, and
-collectibles in deterministic order. One wall is also assigned the destructible
-obstacle role. Their initial geometry keeps the player, enemies, and
-collectibles outside the walls and prevents collectibles from overlapping the
-player.
+It registers the player's spatial entity, walls, enemy and NPC spatial
+entities, and collectibles in deterministic order. One wall is also assigned
+the destructible obstacle role. Their initial geometry keeps the player,
+enemies, NPCs, and collectibles outside the walls and prevents collectibles
+from overlapping the player.
 
 The concrete identifiers, positions, sizes, and entity roles belong to the game.
 
@@ -55,7 +56,7 @@ resolution.
 The game levels domain owns:
 
 - concrete map layouts;
-- player, wall, enemy, destructible obstacle, and collectible roles;
+- player, wall, enemy, NPC, destructible obstacle, and collectible roles;
 - entity identifiers;
 - initial positions and sizes;
 - the selection and ordering of map content.
@@ -71,37 +72,41 @@ flowchart TD
     World["engine.world.World"]
     Entity["engine.world.Entity"]
     Enemy["game.entities.Enemy"]
+    NPC["game.entities.NPC"]
     Player["game.entities.Player"]
 
     DemoMap --> GameMap
     DemoMap --> World
     DemoMap --> Entity
     DemoMap --> Enemy
+    DemoMap --> NPC
     DemoMap --> Player
     GameMap --> World
     GameMap --> Entity
     GameMap --> Enemy
+    GameMap --> NPC
     GameMap --> Player
     GameMain --> DemoMap
     GameMain -->|"reads entity roles"| GameMap
     GameMain --> GameplayScene
 ```
 
-`game.main` creates the demo map and passes its player, walls, enemies,
-destructible obstacles, and collectibles to `GameplayScene`. The scene consumes these
-concrete roles without depending on the `GameMap` container itself.
+`game.main` creates the demo map and passes its player, walls, enemies, NPCs,
+destructible obstacles, and collectibles to `GameplayScene`. The scene consumes
+these concrete roles without depending on the `GameMap` container itself.
 
 A map is spatial content managed during gameplay. It is not a scene and is not
 managed by `SceneManager`.
 
 ## Invariants
 
-- The player, every wall, enemy, and collectible are registered in the same
-  world.
+- The player, every wall, enemy, NPC, and collectible are registered in the
+  same world.
 - Entity identifiers are unique within the map.
 - Registration order is deterministic.
 - The map contains at least one wall and one collectible.
 - The map contains at least one active enemy.
+- The map contains at least one active NPC with non-blank dialogue text.
 - The current demo enemy starts with two health points.
 - The current demo player starts with three health points.
 - Enemies are not registered as walls.
@@ -121,7 +126,7 @@ the need.
 
 ## Change risks
 
-Moving `GameMap` into the engine would leak concrete player, wall, enemy,
+Moving `GameMap` into the engine would leak concrete player, wall, enemy, NPC,
 destructible obstacle, and collectible roles into a reusable mechanism.
 
 Treating maps as scenes would couple spatial navigation to global application

@@ -1,7 +1,7 @@
 import pygame
 
 from my_first_adventure_game.engine.world import Entity, World
-from my_first_adventure_game.game.entities import Enemy, Player
+from my_first_adventure_game.game.entities import NPC, Enemy, Player
 from my_first_adventure_game.game.levels.game_map import GameMap
 
 
@@ -60,6 +60,16 @@ def create_demo_map() -> GameMap:
             health=2,
         ),
     )
+    npcs = (
+        NPC(
+            entity=Entity(
+                entity_id="npc-1",
+                position=pygame.Vector2(576.0, 160.0),
+                size=pygame.Vector2(24.0, 32.0),
+            ),
+            dialogue_text="Welcome, traveler!",
+        ),
+    )
     collectibles = (
         Entity(
             entity_id="collectible-1",
@@ -79,6 +89,7 @@ def create_demo_map() -> GameMap:
         player.entity,
         *walls,
         *(enemy.entity for enemy in enemies),
+        *(npc.entity for npc in npcs),
         *collectibles,
     ):
         world.add(entity)
@@ -88,6 +99,7 @@ def create_demo_map() -> GameMap:
         player=player,
         walls=walls,
         enemies=enemies,
+        npcs=npcs,
         destructible_obstacles=destructible_obstacles,
         collectibles=collectibles,
     )

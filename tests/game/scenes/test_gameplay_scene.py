@@ -7,7 +7,7 @@ from my_first_adventure_game.engine.assets import FontCache
 from my_first_adventure_game.engine.graphics import Animation
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.world import Entity
-from my_first_adventure_game.game.entities import Enemy, Player
+from my_first_adventure_game.game.entities import NPC, Enemy, Player
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
@@ -25,6 +25,7 @@ from my_first_adventure_game.game.scenes.gameplay_scene import (
     ENEMY_HIT_DURATION,
     HEALTH_CENTER,
     HEALTH_COLOR,
+    NPC_COLOR,
     PLAYER_INVULNERABILITY_DURATION,
     PLAYER_SPEED,
     SCORE_CENTER,
@@ -47,6 +48,8 @@ def _create_gameplay_scene(
     on_player_defeated: Callable[[PlayerDefeated], None] | None = None,
     walls: tuple[Entity, ...] = (),
     enemies: tuple[Enemy, ...] = (),
+    npcs: tuple[NPC, ...] = (),
+    on_npc_interacted: Callable[[NPC], None] | None = None,
     on_enemy_defeated: Callable[[EnemyDefeated], None] | None = None,
     collectibles: tuple[Entity, ...] = (),
     on_item_collected: Callable[[ItemCollected], None] | None = None,
@@ -81,6 +84,8 @@ def _create_gameplay_scene(
         on_player_defeated=on_player_defeated or Mock(),
         walls=walls,
         enemies=enemies,
+        npcs=npcs,
+        on_npc_interacted=on_npc_interacted or Mock(),
         on_enemy_defeated=on_enemy_defeated or Mock(),
         collectibles=collectibles,
         on_item_collected=on_item_collected or Mock(),
@@ -119,6 +124,14 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
         ),
         health=2,
     )
+    npc = NPC(
+        entity=Entity(
+            entity_id="npc",
+            position=pygame.Vector2(320.0, 80.0),
+            size=pygame.Vector2(24.0, 32.0),
+        ),
+        dialogue_text="Welcome, traveler!",
+    )
 
     movement_axis = Mock(return_value=pygame.Vector2(0.6, 0.8))
     move_entity = Mock()
@@ -134,6 +147,7 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
         player=player,
         walls=(wall,),
         enemies=(enemy,),
+        npcs=(npc,),
         player_idle_animation=player_idle_animation,
         player_movement_animation=player_movement_animation,
     )
@@ -157,6 +171,7 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
         (
             wall.bounds,
             enemy.entity.bounds,
+            npc.entity.bounds,
         ),
     )
 
@@ -195,6 +210,23 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         ),
         health=2,
     )
+    active_npc = NPC(
+        entity=Entity(
+            entity_id="npc-active",
+            position=pygame.Vector2(352.0, 160.0),
+            size=pygame.Vector2(24.0, 32.0),
+        ),
+        dialogue_text="Welcome, traveler!",
+    )
+    inactive_npc = NPC(
+        entity=Entity(
+            entity_id="npc-inactive",
+            position=pygame.Vector2(384.0, 160.0),
+            size=pygame.Vector2(24.0, 32.0),
+            active=False,
+        ),
+        dialogue_text="You should not see this.",
+    )
     active_collectible = Entity(
         entity_id="collectible-active",
         position=pygame.Vector2(120.0, 96.0),
@@ -223,6 +255,7 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         session_score=session_score,
         walls=(wall, inactive_wall),
         enemies=(active_enemy, inactive_enemy),
+        npcs=(active_npc, inactive_npc),
         collectibles=(active_collectible, inactive_collectible),
         player_idle_animation=player_idle_animation,
     )
@@ -263,6 +296,11 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         ),
         call(
             surface,
+            NPC_COLOR,
+            pygame.Rect(352, 160, 24, 32),
+        ),
+        call(
+            surface,
             COLLECTIBLE_COLOR,
             pygame.Rect(120, 96, 12, 12),
         ),
@@ -280,7 +318,9 @@ def test_draw_flashes_enemy_after_non_fatal_damage(
     input_state = Mock(spec=InputState)
     input_state.is_pressed.side_effect = (
         False,
+        False,
         True,
+        False,
         False,
         False,
     )
@@ -478,7 +518,9 @@ def test_update_destroys_nearby_destructible_on_attack(
     input_state = Mock(spec=InputState)
     input_state.is_pressed.side_effect = (
         False,
+        False,
         True,
+        False,
         False,
         False,
     )
@@ -542,8 +584,10 @@ def test_update_destroys_nearby_destructible_on_attack(
     player_collection_animation.update.assert_not_called()
     assert input_state.is_pressed.call_args_list == [
         call(GameAction.PAUSE),
+        call(GameAction.INTERACT),
         call(GameAction.ATTACK),
         call(GameAction.PAUSE),
+        call(GameAction.INTERACT),
         call(GameAction.ATTACK),
     ]
     assert move_entity.call_args_list == [
@@ -571,13 +615,17 @@ def test_update_damages_and_defeats_nearby_enemy_on_attack(
     input_state = Mock(spec=InputState)
     input_state.is_pressed.side_effect = (
         False,
-        True,
-        False,
-        False,
         False,
         True,
         False,
         False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        True,
     )
     move_entity = Mock()
     nearby_enemy = Enemy(
@@ -635,12 +683,16 @@ def test_update_damages_and_defeats_nearby_enemy_on_attack(
     player_collection_animation.update.assert_not_called()
     assert input_state.is_pressed.call_args_list == [
         call(GameAction.PAUSE),
+        call(GameAction.INTERACT),
         call(GameAction.ATTACK),
         call(GameAction.PAUSE),
+        call(GameAction.INTERACT),
         call(GameAction.ATTACK),
         call(GameAction.PAUSE),
+        call(GameAction.INTERACT),
         call(GameAction.ATTACK),
         call(GameAction.PAUSE),
+        call(GameAction.INTERACT),
         call(GameAction.ATTACK),
     ]
     on_enemy_defeated.assert_called_once_with(
@@ -658,7 +710,9 @@ def test_update_returns_to_movement_after_attack_finished(
     input_state = Mock(spec=InputState)
     input_state.is_pressed.side_effect = (
         False,
+        False,
         True,
+        False,
         False,
         False,
     )
@@ -828,3 +882,82 @@ def test_update_requests_pause_without_advancing_gameplay(monkeypatch) -> None:
     movement_axis.assert_not_called()
     move_entity.assert_not_called()
     player_idle_animation.update.assert_not_called()
+
+
+def test_update_interacts_with_nearby_active_npc_without_advancing_gameplay(
+    monkeypatch,
+) -> None:
+    input_state = Mock(spec=InputState)
+    input_state.is_pressed.side_effect = lambda action: action is GameAction.INTERACT
+    nearby_npc = NPC(
+        entity=Entity(
+            entity_id="npc-nearby",
+            position=pygame.Vector2(124.0, 80.0),
+            size=pygame.Vector2(24.0, 32.0),
+        ),
+        dialogue_text="Welcome, traveler!",
+    )
+    distant_npc = NPC(
+        entity=Entity(
+            entity_id="npc-distant",
+            position=pygame.Vector2(320.0, 240.0),
+            size=pygame.Vector2(24.0, 32.0),
+        ),
+        dialogue_text="Too far away.",
+    )
+    on_npc_interacted = Mock()
+    movement_axis = Mock()
+    move_entity = Mock()
+    player_idle_animation = Mock(spec=Animation)
+
+    monkeypatch.setattr(gameplay_scene, "movement_axis", movement_axis)
+    monkeypatch.setattr(gameplay_scene, "move_entity", move_entity)
+
+    scene = _create_gameplay_scene(
+        input_state=input_state,
+        npcs=(nearby_npc, distant_npc),
+        on_npc_interacted=on_npc_interacted,
+        player_idle_animation=player_idle_animation,
+    )
+
+    scene.update(0.5)
+
+    assert input_state.is_pressed.call_args_list == [
+        call(GameAction.PAUSE),
+        call(GameAction.INTERACT),
+    ]
+    on_npc_interacted.assert_called_once_with(nearby_npc)
+    movement_axis.assert_not_called()
+    move_entity.assert_not_called()
+    player_idle_animation.assert_not_called()
+
+
+def test_update_does_not_interact_with_distant_npc(monkeypatch) -> None:
+    input_state = Mock(spec=InputState)
+    input_state.is_pressed.side_effect = lambda action: action is GameAction.INTERACT
+    distant_npc = NPC(
+        entity=Entity(
+            entity_id="npc-distant",
+            position=pygame.Vector2(320.0, 240.0),
+            size=pygame.Vector2(24.0, 32.0),
+        ),
+        dialogue_text="Too far away.",
+    )
+    on_npc_interacted = Mock()
+
+    monkeypatch.setattr(
+        gameplay_scene,
+        "movement_axis",
+        Mock(return_value=pygame.Vector2()),
+    )
+    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+
+    scene = _create_gameplay_scene(
+        input_state=input_state,
+        npcs=(distant_npc,),
+        on_npc_interacted=on_npc_interacted,
+    )
+
+    scene.update(0.016)
+
+    on_npc_interacted.assert_not_called()

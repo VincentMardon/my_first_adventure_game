@@ -12,6 +12,7 @@ class GameAction(Enum):
         CONFIRM: Confirm the current selection or requested transition.
         ATTACK: Request the player's current attack action.
         PAUSE: Pause or resume the current gameplay session.
+        INTERACT: Request interaction with nearby game content.
     """
 
     MOVE_LEFT = auto()
@@ -21,3 +22,4 @@ class GameAction(Enum):
     CONFIRM = auto()
     ATTACK = auto()
     PAUSE = auto()
+    INTERACT = auto()

@@ -212,10 +212,11 @@ Current concrete actions are:
 - `MOVE_DOWN`;
 - `ATTACK`;
 - `PAUSE`;
+- `INTERACT`;
 - `CONFIRM`.
 
 Directional actions are bound to the arrow keys. `ATTACK` is bound to Space and
-`PAUSE` to Escape. `CONFIRM` is bound to Enter.
+`PAUSE` to Escape. `INTERACT` is bound to E and `CONFIRM` to Enter.
 
 `game.main` creates the concrete `InputState` and passes it to `Application` as
 an `InputProcessor`.
@@ -224,8 +225,10 @@ an `InputProcessor`.
 gameplay. `GameplayScene` queries held directional actions to move the player
 and the pressed state of `ATTACK` to apply the game-owned proximity attack. It
 queries `PAUSE` before advancing gameplay and requests an immediate transition
-when that action is pressed. `PauseScene` queries the same action to request
-resumption.
+when that action is pressed. It queries `INTERACT` to find a nearby active NPC
+and request a game-owned dialogue transition. `PauseScene` queries `PAUSE` to
+request resumption, while `DialogueScene` queries `CONFIRM` to close the current
+dialogue.
 
 ## Device extensibility
 
@@ -295,6 +298,7 @@ Current tests verify:
 - cardinal direction conventions;
 - cancellation of opposite directions;
 - diagonal normalization;
-- concrete default arrow-key, attack, pause, and confirmation bindings;
+- concrete default arrow-key, attack, pause, interaction, and confirmation
+  bindings;
 - title navigation triggered only by a newly pressed confirmation action;
 - integration of the input lifecycle into `Application`.

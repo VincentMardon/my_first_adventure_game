@@ -8,7 +8,7 @@ from my_first_adventure_game.engine.graphics import Animation, draw_text
 from my_first_adventure_game.engine.input import InputState, movement_axis
 from my_first_adventure_game.engine.scenes import Scene
 from my_first_adventure_game.engine.world import Entity, move_entity
-from my_first_adventure_game.game.entities import Enemy, Player
+from my_first_adventure_game.game.entities import NPC, Enemy, Player
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
@@ -28,6 +28,8 @@ ENEMY_HIT_COLOR = (255, 224, 224)
 ENEMY_HIT_DURATION = 0.15
 HEALTH_COLOR = (248, 112, 112)
 HEALTH_CENTER = (80, 52)
+INTERACTION_REACH = 16.0
+NPC_COLOR = (112, 160, 240)
 PLAYER_ATTACK_DAMAGE = 1
 PLAYER_SPEED = 160.0
 PLAYER_INVULNERABILITY_DURATION = 1.0
@@ -51,6 +53,8 @@ class GameplayScene(Scene):
         on_player_defeated: Callable[[PlayerDefeated], None],
         walls: tuple[Entity, ...],
         enemies: tuple[Enemy, ...],
+        npcs: tuple[NPC, ...],
+        on_npc_interacted: Callable[[NPC], None],
         on_enemy_defeated: Callable[[EnemyDefeated], None],
         collectibles: tuple[Entity, ...],
         on_item_collected: Callable[[ItemCollected], None],
@@ -70,6 +74,8 @@ class GameplayScene(Scene):
         self._on_player_defeated = on_player_defeated
         self._walls = walls
         self._enemies = enemies
+        self._npcs = npcs
+        self._on_npc_interacted = on_npc_interacted
         self._enemy_hit_time_remaining = {
             enemy.entity.entity_id: 0.0 for enemy in enemies
         }
@@ -97,6 +103,20 @@ class GameplayScene(Scene):
         if not self._player.entity.active:
             return
 
+        if self._input_state.is_pressed(GameAction.INTERACT):
+            player_bounds = self._player.entity.bounds
+            interaction_bounds = AABB(
+                x=player_bounds.x - INTERACTION_REACH,
+                y=player_bounds.y - INTERACTION_REACH,
+                width=player_bounds.width + INTERACTION_REACH * 2.0,
+                height=player_bounds.height + INTERACTION_REACH * 2.0,
+            )
+
+            for npc in self._npcs:
+                if npc.entity.active and interaction_bounds.overlaps(npc.entity.bounds):
+                    self._on_npc_interacted(npc)
+                    return
+
         self._player_invulnerability_remaining = max(
             0.0,
             self._player_invulnerability_remaining - delta_time,
@@ -119,6 +139,7 @@ class GameplayScene(Scene):
         solid_bounds = (
             *(wall.bounds for wall in self._walls if wall.active),
             *(enemy.entity.bounds for enemy in self._enemies if enemy.entity.active),
+            *(npc.entity.bounds for npc in self._npcs if npc.entity.active),
         )
 
         move_entity(self._player.entity, movement, solid_bounds)
@@ -237,6 +258,14 @@ class GameplayScene(Scene):
                     else ENEMY_COLOR
                 )
                 pygame.draw.rect(surface, color, _entity_rect(enemy.entity))
+
+        for npc in self._npcs:
+            if npc.entity.active:
+                pygame.draw.rect(
+                    surface,
+                    NPC_COLOR,
+                    _entity_rect(npc.entity),
+                )
 
         for collectible in self._collectibles:
             if collectible.active:

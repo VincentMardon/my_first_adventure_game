@@ -114,7 +114,8 @@ Defines concrete gameplay objects that compose reusable engine entities.
 
 The current `Enemy` and `Player` own mutable integer health, apply positive
 damage, deactivate their spatial entities on the fatal hit, and report whether
-that hit caused the defeat.
+that hit caused the defeat. `NPC` composes the same reusable spatial state with
+one game-owned non-blank dialogue line.
 
 ### Events
 
@@ -135,13 +136,15 @@ that score with `GameplayScene` for display.
 
 ### Scenes
 
-Provides the concrete title, gameplay, pause, defeat, and victory scenes.
+Provides the concrete title, gameplay, pause, dialogue, defeat, and victory
+scenes.
 
 The title scene requests an explicit transition to gameplay when the
 confirmation action is pressed.
 
 The gameplay scene converts game actions into player movement, selects active
-walls and enemies as solid obstacles, deactivates collectibles overlapping the
+walls, enemies, and NPCs as solid obstacles, opens dialogue for a nearby active
+NPC when interaction is requested, deactivates collectibles overlapping the
 player, destroys nearby destructible obstacles and defeats nearby enemies when
 attacking, emits factual events,
 prioritizes one-shot collection and attack animations over movement and idle
@@ -159,12 +162,16 @@ The opaque pause scene temporarily replaces gameplay when Escape is pressed.
 Because only the active scene is updated, gameplay time and animation stop. A
 second press explicitly restores the same gameplay scene and session state.
 
+The opaque dialogue scene displays one line owned by the selected NPC.
+Confirmation explicitly restores the same gameplay scene and session state.
+
 ### Levels
 
 Defines the first Python-authored game map.
 
 `GameMap` groups the reusable world representation with the concrete player,
-wall, enemy, destructible obstacle, and collectible roles owned by the game.
+wall, enemy, NPC, destructible obstacle, and collectible roles owned by the
+game.
 `create_demo_map()` defines their initial geometry and registration order.
 
 ## Reserved domains
@@ -199,6 +206,7 @@ flowchart TD
     TitleScene["TitleScene"]
     GameplayScene["GameplayScene"]
     PauseScene["PauseScene"]
+    DialogueScene["DialogueScene"]
     DefeatScene["DefeatScene"]
     VictoryScene["VictoryScene"]
 
@@ -208,6 +216,7 @@ flowchart TD
     GameMain -->|"injects transition callback"| TitleScene
     GameMain -->|"creates per session"| GameplayScene
     GameMain -->|"creates per session"| PauseScene
+    GameMain -->|"creates on interaction"| DialogueScene
     GameMain -->|"creates per session"| DefeatScene
     GameMain -->|"creates per session"| VictoryScene
 
@@ -219,6 +228,9 @@ flowchart TD
     GameplayScene -->|"requests pause"| PauseScene
     PauseScene --> InputState
     PauseScene -->|"requests resume"| GameplayScene
+    GameplayScene -->|"requests dialogue"| DialogueScene
+    DialogueScene --> InputState
+    DialogueScene -->|"requests resume"| GameplayScene
     DefeatScene --> InputState
     DefeatScene -->|"requests return"| TitleScene
     VictoryScene --> InputState
@@ -230,6 +242,7 @@ flowchart TD
     TitleScene -. "implements" .-> Scene
     GameplayScene -. "implements" .-> Scene
     PauseScene -. "implements" .-> Scene
+    DialogueScene -. "implements" .-> Scene
     DefeatScene -. "implements" .-> Scene
     VictoryScene -. "implements" .-> Scene
 ```
@@ -243,8 +256,10 @@ flowchart LR
     GameMap --> World["World"]
     GameMap --> Player["Player"]
     GameMap --> Enemy["Enemy"]
+    GameMap --> NPC["NPC"]
     Player -->|"composes"| Entity["Entity"]
     Enemy -->|"composes"| Entity
+    NPC -->|"composes"| Entity
     World -->|"stores"| Entity
     GameMain -->|"injects map roles"| GameplayScene["GameplayScene"]
 ```
@@ -300,6 +315,13 @@ short invulnerability period that prevents immediate repeated damage. Fatal
 contact deactivates the player, stops later gameplay updates, and reports a
 `PlayerDefeated` fact. The injected handler explicitly replaces gameplay with
 `DefeatScene`, which displays the final value of the shared `SessionScore`.
+
+When `INTERACT` is newly pressed, `GameplayScene` searches a small game-owned
+area around the player for the first active NPC. A match stops the rest of that
+gameplay update and passes the selected NPC to the composition root. The root
+creates a `DialogueScene` from its text; confirmation restores the same
+gameplay scene. This is a concrete one-line interaction flow, not an engine
+dialogue system.
 
 Confirmation on `DefeatScene` explicitly returns to the existing title scene.
 The next start request constructs a new map, session score, animation set,

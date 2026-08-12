@@ -5,8 +5,8 @@
 The game entities domain defines concrete objects whose gameplay state extends
 the reusable spatial state provided by the engine.
 
-It currently provides `Enemy` and `Player`. Each composes an engine `Entity`
-with mutable health and concrete damage behavior.
+It currently provides `Enemy`, `NPC`, and `Player`. Each composes an engine
+`Entity` with the additional state required by its concrete game role.
 
 ## Why this domain exists
 
@@ -14,8 +14,9 @@ The engine `Entity` deliberately contains only reusable identity, geometry, and
 active state. Walls, collectibles, players, and enemies do not all require
 health or share the same gameplay rules.
 
-Keeping enemy and player health in `game` prevents combat vocabulary from
-leaking into the generic world representation.
+Keeping enemy and player health, NPC dialogue content, and their concrete rules
+in `game` prevents combat and interaction vocabulary from leaking into the
+generic world representation.
 
 ## Public components
 
@@ -39,6 +40,14 @@ Its damage contract matches the current enemy contract: positive damage is
 required, health is clamped to zero, the spatial entity is deactivated by the
 fatal hit, and only that hit reports a new defeat. The player does not decide
 scene transitions or session consequences.
+
+### [`NPC`](../api/game-entities.md#my_first_adventure_game.game.entities.NPC)
+
+Composes an engine-owned `Entity` with one non-blank dialogue line.
+
+The NPC owns concrete game content but does not detect interaction, display its
+text, or decide scene transitions. Those responsibilities remain with the
+gameplay scene and the composition root.
 
 ## Relationships
 
@@ -64,11 +73,19 @@ classDiagram
         +take_damage(damage) bool
     }
 
+    class NPC {
+        +entity
+        +dialogue_text
+    }
+
     Enemy *-- Entity : spatial state
     Player *-- Entity : spatial state
+    NPC *-- Entity : spatial state
     GameMap o-- Enemy : enemy role
+    GameMap o-- NPC : interaction role
     GameMap o-- Player : player role
     GameplayScene --> Enemy : collision, damage, rendering
+    GameplayScene --> NPC : collision, interaction, rendering
     GameplayScene --> Player : movement, damage, rendering
 ```
 
@@ -94,6 +111,8 @@ invulnerability period. The scene displays current health and emits
 - A fatal hit sets health to zero and deactivates the spatial entity.
 - Only the fatal hit reports a new defeat.
 - The engine never imports or constructs `Enemy` or `Player`.
+- NPC dialogue text is not blank.
+- The engine never imports or constructs `NPC`.
 
 ## Extension points
 
@@ -127,3 +146,5 @@ Current tests verify:
 - one player defeat report across later damage attempts;
 - enemy contact damage, temporary invulnerability, and fatal player
   deactivation.
+- storage of NPC spatial state and dialogue text;
+- rejection of blank NPC dialogue text.

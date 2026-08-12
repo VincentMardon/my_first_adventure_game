@@ -103,6 +103,12 @@ classDiagram
         +draw(surface)
     }
 
+    class DialogueScene {
+        +handle_event(event)
+        +update(delta_time)
+        +draw(surface)
+    }
+
     class TitleScene {
         +handle_event(event)
         +update(delta_time)
@@ -124,6 +130,7 @@ classDiagram
     SceneManager o-- Scene : active scene
     Scene <|-- GameplayScene
     Scene <|-- PauseScene
+    Scene <|-- DialogueScene
     Scene <|-- TitleScene
     Scene <|-- DefeatScene
     Scene <|-- VictoryScene
@@ -190,7 +197,9 @@ The game also provides
 The game also provides
 [`VictoryScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.VictoryScene).
 It also provides
-[`PauseScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.PauseScene).
+[`PauseScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.PauseScene)
+and
+[`DialogueScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.DialogueScene).
 
 `TitleScene`:
 
@@ -203,9 +212,10 @@ It also provides
 `GameplayScene`:
 
 - receives the action input state, font cache, session score, game-owned player,
-  wall entities, game-owned enemies, destructible obstacles, collectible entities,
-  idle, movement, collection, and attack animations, and explicit collection,
-  destruction, enemy defeat, and player defeat handlers;
+  wall entities, game-owned enemies and NPCs, destructible obstacles,
+  collectible entities, idle, movement, collection, and attack animations, and
+  explicit interaction, collection, destruction, enemy defeat, and player
+  defeat handlers;
 - requests pause and returns immediately when `PAUSE` is pressed, before any
   gameplay timer, movement, attack, damage, collection, or animation advances;
 - converts directional actions into normalized movement;
@@ -214,8 +224,11 @@ It also provides
 - resets the newly selected animation when the movement state changes;
 - advances only the selected player animation using frame delta time;
 - applies the game-owned movement speed using delta time;
-- selects active wall and enemy bounds as solid obstacles;
+- selects active wall, enemy, and NPC bounds as solid obstacles;
 - delegates collision-aware movement to the engine;
+- finds the first active NPC within game-owned interaction reach when
+  `INTERACT` is pressed, requests dialogue through an injected callback, and
+  returns before the rest of that gameplay frame advances;
 - applies a game-owned proximity attack when `ATTACK` is pressed;
 - restarts a one-shot attack animation when the attack begins and gives it
   priority over idle and movement presentation;
@@ -237,9 +250,9 @@ It also provides
   gives it priority over idle and movement presentation;
 - returns to the animation selected by directional intent after collection
   playback finishes;
-- draws active walls, enemies, and collectibles as game-owned rectangles, blits
-  the current player animation frame, and draws the current session score and
-  player health;
+- draws active walls, enemies, NPCs, and collectibles as game-owned rectangles,
+  blits the current player animation frame, and draws the current session score
+  and player health;
 - rounds floating-point geometry only at rendering time.
 
 `DefeatScene`:
@@ -258,6 +271,15 @@ It also provides
 - requests resumption when `PAUSE` is pressed;
 - ignores raw events.
 
+`DialogueScene`:
+
+- receives the shared font cache, action input state, one game-owned dialogue
+  line, and an explicit close callback;
+- draws an opaque background, the dialogue line, and a continuation
+  instruction;
+- requests closure when `CONFIRM` is pressed;
+- ignores raw events.
+
 `VictoryScene`:
 
 - receives the same collaborators as `DefeatScene`;
@@ -266,15 +288,20 @@ It also provides
 - ignores raw events.
 
 `game.main` composes `GameplayScene` from the shared font cache and session
-score, the player, walls, enemies, destructible obstacles, and collectibles
-provided by the demo map, idle, movement, collection, and attack animations,
-and explicit collection, destruction, enemy defeat, and player defeat handlers.
+score, the player, walls, enemies, NPCs, destructible obstacles, and
+collectibles provided by the demo map, idle, movement, collection, and attack
+animations, and explicit interaction, collection, destruction, enemy defeat,
+and player defeat handlers.
 The collection handler applies the game-owned collection point rule to the same
 session score displayed by the scene. The destruction handler currently has no
 additional consequence. The enemy defeat handler replaces gameplay with the
 current session's `VictoryScene` only after all map enemies become inactive.
 The player defeat handler explicitly replaces gameplay with the current
 session's `DefeatScene`.
+
+The NPC interaction handler creates a `DialogueScene` from the selected NPC's
+text and explicitly replaces gameplay with it. Confirmation restores the same
+gameplay scene, preserving the current session without requiring a scene stack.
 
 `game.main` retains the title scene and shared application services across the
 application lifetime. Each start request creates a fresh map, score, animation
@@ -359,8 +386,8 @@ Current tests verify:
   the state selected by directional input;
 - the attack animation starts on a newly pressed attack, remains selected until
   completion, and then returns to the state selected by directional input;
-- the gameplay scene draws its background, walls, active collectibles, and
-  animated player in order;
+- the gameplay scene draws its background, walls, active enemies, NPCs,
+  collectibles, and animated player in order;
 - the gameplay scene deactivates an active overlapping collectible and delivers
   its event exactly once across subsequent updates while leaving distant
   collectibles active;
@@ -384,6 +411,9 @@ Current tests verify:
 - confirmation on the defeat scene explicitly returns to the title;
 - pause requests stop the current gameplay update immediately, replace gameplay
   with an opaque pause scene, and resume the same gameplay scene explicitly;
+- interaction requests target only active NPCs within reach, stop the current
+  gameplay update, open a dialogue scene with the selected NPC text, and resume
+  the same gameplay scene after confirmation;
 - the victory scene draws its background, message, and final session score;
 - victory waits until every map enemy is inactive and confirmation explicitly
   returns to the title;
