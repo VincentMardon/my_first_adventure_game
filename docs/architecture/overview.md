@@ -163,7 +163,9 @@ Because only the active scene is updated, gameplay time and animation stop. A
 second press explicitly restores the same gameplay scene and session state.
 
 The opaque dialogue scene presents the selected NPC's name and ordered lines
-one at a time inside a game-owned bordered panel. Confirmation advances the
+one at a time inside a game-owned bordered panel. Long content is measured with
+the selected font, wrapped at word boundaries, and given additional panel
+height without changing the original NPC line. Confirmation advances the
 dialogue, then explicitly restores the same gameplay scene and session state
 after the final line.
 

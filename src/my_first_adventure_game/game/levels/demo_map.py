@@ -70,7 +70,10 @@ def create_demo_map() -> GameMap:
             ),
             dialogue_lines=(
                 "Welcome, traveler!",
-                "The road ahead is dangerous.",
+                (
+                    "The road ahead is dangerous, so keep your weapon ready "
+                    "and watch every shadow along the way."
+                ),
             ),
         ),
     )

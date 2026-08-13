@@ -280,6 +280,10 @@ and
   to the target surface while retaining fixed horizontal margins;
 - renders the panel with a distinct fill, border, and rounded corners without
   introducing a reusable engine UI component;
+- measures the current dialogue line with the injected Pygame font and wraps it
+  at word boundaries within the panel's internal horizontal padding;
+- derives the speaker, visual-line, and instruction positions from explicit
+  game-owned gaps, then derives the panel height from the resulting content;
 - draws the speaker name with a distinct game-owned color, the current dialogue
   line, and a continuation instruction inside the panel;
 - advances exactly one line when `CONFIRM` is pressed before the last line;
@@ -376,6 +380,8 @@ High-risk modifications include:
 - changing transitions from immediate to deferred without updating callers;
 - introducing lifecycle hooks without defining their order;
 - forwarding work to more than one scene unintentionally.
+- moving concrete dialogue wrapping or panel presentation into the engine
+  before another real consumer demonstrates a reusable contract.
 
 ## Verification
 
@@ -426,6 +432,11 @@ Current tests verify:
 - the dialogue scene renders the same injected speaker name for every line.
 - the dialogue panel is rendered from game-owned dimensions and colors before
   its text content.
+- a dialogue line that fits remains one visual line;
+- a long dialogue line is split only at word boundaries, without mutating the
+  original NPC content;
+- the panel height grows with the number of visual lines while preserving the
+  configured speaker, line, instruction, and lower-edge spacing;
 - the victory scene draws its background, message, and final session score;
 - victory waits until every map enemy is inactive and confirmation explicitly
   returns to the title;

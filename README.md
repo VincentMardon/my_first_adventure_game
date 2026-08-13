@@ -177,6 +177,8 @@ Implemented foundations include:
   session explicitly;
 - a game-owned dialogue panel with a distinct background, border, and balanced
   spacing around the speaker, current line, and continuation instruction;
+- word-boundary wrapping based on the selected font's measured width, with a
+  dialogue panel whose height adapts to the resulting visual lines;
 - game-owned collection behavior based on reusable entity overlap detection;
 - immutable collection, destruction, and enemy defeat facts delivered through
   explicit callbacks;
