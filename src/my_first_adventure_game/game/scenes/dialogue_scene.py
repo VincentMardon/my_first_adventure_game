@@ -16,6 +16,8 @@ DIALOGUE_FONT_SIZE = 40
 INSTRUCTION_CENTER_Y = 380
 INSTRUCTION_COLOR = (184, 192, 208)
 INSTRUCTION_TEXT = "Press Enter to continue"
+SPEAKER_CENTER_Y = 200
+SPEAKER_COLOR = (112, 200, 240)
 
 
 class DialogueScene(Scene):
@@ -25,11 +27,13 @@ class DialogueScene(Scene):
         self,
         font_cache: FontCache,
         input_state: InputState[GameAction],
+        speaker_name: str,
         dialogue_lines: tuple[str, ...],
         close_dialogue: Callable[[], None],
     ) -> None:
         self._font_cache = font_cache
         self._input_state = input_state
+        self._speaker_name = speaker_name
         self._dialogue_lines = dialogue_lines
         self._close_dialogue = close_dialogue
         self._current_line_index = 0
@@ -54,6 +58,14 @@ class DialogueScene(Scene):
             DIALOGUE_FONT_SIZE,
         )
         center_x = surface.get_width() // 2
+
+        draw_text(
+            surface,
+            self._speaker_name,
+            font,
+            SPEAKER_COLOR,
+            center=(center_x, SPEAKER_CENTER_Y),
+        )
 
         draw_text(
             surface,

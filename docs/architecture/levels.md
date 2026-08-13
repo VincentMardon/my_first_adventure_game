@@ -106,8 +106,8 @@ managed by `SceneManager`.
 - Registration order is deterministic.
 - The map contains at least one wall and one collectible.
 - The map contains at least one active enemy.
-- The map contains at least one active NPC with ordered, non-blank dialogue
-  lines.
+- The map contains at least one active NPC with a non-blank display name and
+  ordered, non-blank dialogue lines.
 - At least one demo NPC provides multiple lines so the map exercises dialogue
   advancement.
 - The current demo enemy starts with two health points.

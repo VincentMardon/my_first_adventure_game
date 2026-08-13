@@ -115,7 +115,7 @@ Defines concrete gameplay objects that compose reusable engine entities.
 The current `Enemy` and `Player` own mutable integer health, apply positive
 damage, deactivate their spatial entities on the fatal hit, and report whether
 that hit caused the defeat. `NPC` composes the same reusable spatial state with
-ordered game-owned dialogue lines.
+a game-owned display name and ordered dialogue lines.
 
 ### Events
 
@@ -162,9 +162,9 @@ The opaque pause scene temporarily replaces gameplay when Escape is pressed.
 Because only the active scene is updated, gameplay time and animation stop. A
 second press explicitly restores the same gameplay scene and session state.
 
-The opaque dialogue scene displays the selected NPC's ordered lines one at a
-time. Confirmation advances the dialogue, then explicitly restores the same
-gameplay scene and session state after the final line.
+The opaque dialogue scene displays the selected NPC's name and ordered lines
+one at a time. Confirmation advances the dialogue, then explicitly restores
+the same gameplay scene and session state after the final line.
 
 ### Levels
 
@@ -320,11 +320,12 @@ contact deactivates the player, stops later gameplay updates, and reports a
 When `INTERACT` is newly pressed, `GameplayScene` searches a small game-owned
 area around the player for the first active NPC. A match stops the rest of that
 gameplay update and passes the selected NPC to the composition root. The root
-creates a fresh `DialogueScene` from its ordered lines. Confirmation advances
-one line at a time and restores the same gameplay scene after the final line.
-Reopening the dialogue starts again from the first line because the temporary
-index belongs to the scene instance. This remains a concrete linear interaction
-flow, not an engine dialogue system.
+creates a fresh `DialogueScene` from its name and ordered lines. The name
+remains visible as the speaker while confirmation advances one line at a time
+and restores the same gameplay scene after the final line. Reopening the
+dialogue starts again from the first line because the temporary index belongs
+to the scene instance. This remains a concrete linear interaction flow, not an
+engine dialogue system.
 
 Confirmation on `DefeatScene` explicitly returns to the existing title scene.
 The next start request constructs a new map, session score, animation set,

@@ -125,6 +125,7 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
         health=2,
     )
     npc = NPC(
+        name="Guide",
         entity=Entity(
             entity_id="npc",
             position=pygame.Vector2(320.0, 80.0),
@@ -211,6 +212,7 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         health=2,
     )
     active_npc = NPC(
+        name="Guide",
         entity=Entity(
             entity_id="npc-active",
             position=pygame.Vector2(352.0, 160.0),
@@ -219,6 +221,7 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         dialogue_lines=("Welcome, traveler!",),
     )
     inactive_npc = NPC(
+        name="Inactive Guide",
         entity=Entity(
             entity_id="npc-inactive",
             position=pygame.Vector2(384.0, 160.0),
@@ -890,6 +893,7 @@ def test_update_interacts_with_nearby_active_npc_without_advancing_gameplay(
     input_state = Mock(spec=InputState)
     input_state.is_pressed.side_effect = lambda action: action is GameAction.INTERACT
     nearby_npc = NPC(
+        name="Guide",
         entity=Entity(
             entity_id="npc-nearby",
             position=pygame.Vector2(124.0, 80.0),
@@ -898,6 +902,7 @@ def test_update_interacts_with_nearby_active_npc_without_advancing_gameplay(
         dialogue_lines=("Welcome, traveler!",),
     )
     distant_npc = NPC(
+        name="Distant guide",
         entity=Entity(
             entity_id="npc-distant",
             position=pygame.Vector2(320.0, 240.0),
@@ -936,6 +941,7 @@ def test_update_does_not_interact_with_distant_npc(monkeypatch) -> None:
     input_state = Mock(spec=InputState)
     input_state.is_pressed.side_effect = lambda action: action is GameAction.INTERACT
     distant_npc = NPC(
+        name="Distant guide",
         entity=Entity(
             entity_id="npc-distant",
             position=pygame.Vector2(320.0, 240.0),

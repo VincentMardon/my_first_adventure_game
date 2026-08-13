@@ -273,11 +273,11 @@ and
 
 `DialogueScene`:
 
-- receives the shared font cache, action input state, ordered game-owned
-  dialogue lines, and an explicit close callback;
+- receives the shared font cache, action input state, a game-owned speaker
+  name, ordered dialogue lines, and an explicit close callback;
 - owns a temporary index starting at the first line for each scene instance;
-- draws an opaque background, the current dialogue line, and a continuation
-  instruction;
+- draws an opaque background, the speaker name with a distinct game-owned
+  color, the current dialogue line, and a continuation instruction;
 - advances exactly one line when `CONFIRM` is pressed before the last line;
 - requests closure when `CONFIRM` is pressed on the last line;
 - ignores raw events.
@@ -302,10 +302,10 @@ The player defeat handler explicitly replaces gameplay with the current
 session's `DefeatScene`.
 
 The NPC interaction handler creates a new `DialogueScene` from the selected
-NPC's ordered lines and explicitly replaces gameplay with it. Each interaction
-therefore starts at the first line. Confirmation after the final line restores
-the same gameplay scene, preserving the current session without requiring a
-scene stack.
+NPC's name and ordered lines and explicitly replaces gameplay with it. Each
+interaction therefore starts at the first line. Confirmation after the final
+line restores the same gameplay scene, preserving the current session without
+requiring a scene stack.
 
 `game.main` retains the title scene and shared application services across the
 application lifetime. Each start request creates a fresh map, score, animation
@@ -419,6 +419,7 @@ Current tests verify:
   gameplay update, and open a dialogue scene with the selected NPC lines;
 - dialogue confirmation advances one line at a time, closes only after the
   final line, and a new interaction restarts from the first line;
+- the dialogue scene renders the same injected speaker name for every line.
 - the victory scene draws its background, message, and final session score;
 - victory waits until every map enemy is inactive and confirmation explicitly
   returns to the title;

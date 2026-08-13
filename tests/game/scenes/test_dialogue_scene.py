@@ -15,6 +15,8 @@ from my_first_adventure_game.game.scenes.dialogue_scene import (
     INSTRUCTION_CENTER_Y,
     INSTRUCTION_COLOR,
     INSTRUCTION_TEXT,
+    SPEAKER_CENTER_Y,
+    SPEAKER_COLOR,
     DialogueScene,
 )
 
@@ -28,6 +30,7 @@ def test_dialogue_scene_draws_background() -> None:
     scene = DialogueScene(
         font_cache,
         input_state,
+        "Guide",
         ("Welcome, traveler!",),
         close_dialogue,
     )
@@ -52,6 +55,7 @@ def test_dialogue_scene_draws_dialogue_and_instruction(monkeypatch) -> None:
     scene = DialogueScene(
         font_cache,
         input_state,
+        "Guide",
         ("Welcome, traveler!",),
         close_dialogue,
     )
@@ -63,6 +67,13 @@ def test_dialogue_scene_draws_dialogue_and_instruction(monkeypatch) -> None:
         DIALOGUE_FONT_SIZE,
     )
     assert draw_text.call_args_list == [
+        call(
+            surface,
+            "Guide",
+            font,
+            SPEAKER_COLOR,
+            center=(640, SPEAKER_CENTER_Y),
+        ),
         call(
             surface,
             "Welcome, traveler!",
@@ -88,6 +99,7 @@ def test_dialogue_scene_closes_when_confirm_is_pressed() -> None:
     scene = DialogueScene(
         font_cache,
         input_state,
+        "Guide",
         ("Welcome, traveler!",),
         close_dialogue,
     )
@@ -106,6 +118,7 @@ def test_dialogue_scene_remains_open_without_confirm_action() -> None:
     scene = DialogueScene(
         font_cache,
         input_state,
+        "Guide",
         ("Welcome, traveler!",),
         close_dialogue,
     )
@@ -134,6 +147,7 @@ def test_dialogue_scene_advances_to_next_line_before_closing(
     scene = DialogueScene(
         font_cache,
         input_state,
+        "Guide",
         (
             "Welcome, traveler!",
             "The road ahead is dangerous.",
@@ -146,6 +160,13 @@ def test_dialogue_scene_advances_to_next_line_before_closing(
 
     close_dialogue.assert_not_called()
     assert draw_text.call_args_list == [
+        call(
+            surface,
+            "Guide",
+            font,
+            SPEAKER_COLOR,
+            center=(640, SPEAKER_CENTER_Y),
+        ),
         call(
             surface,
             "The road ahead is dangerous.",
@@ -171,6 +192,7 @@ def test_dialogue_scene_closes_after_last_line() -> None:
     scene = DialogueScene(
         font_cache,
         input_state,
+        "Guide",
         (
             "Welcome, traveler!",
             "The road ahead is dangerous.",

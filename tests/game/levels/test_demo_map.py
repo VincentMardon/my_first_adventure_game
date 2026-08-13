@@ -119,6 +119,7 @@ def test_demo_map_has_active_npcs_with_dialogue() -> None:
     game_map = create_demo_map()
 
     assert game_map.npcs
+    assert all(npc.name.strip() for npc in game_map.npcs)
     assert all(npc.entity.active for npc in game_map.npcs)
     assert all(npc.dialogue_lines for npc in game_map.npcs)
     assert all(line.strip() for npc in game_map.npcs for line in npc.dialogue_lines)

@@ -62,6 +62,7 @@ def create_demo_map() -> GameMap:
     )
     npcs = (
         NPC(
+            name="Guide",
             entity=Entity(
                 entity_id="npc-1",
                 position=pygame.Vector2(576.0, 160.0),
