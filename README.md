@@ -175,6 +175,8 @@ Implemented foundations include:
   proximity interaction action, and a minimal dialogue scene that displays its
   speaker and advances one line per confirmation before resuming the same
   session explicitly;
+- a game-owned dialogue panel with a distinct background, border, and balanced
+  spacing around the speaker, current line, and continuation instruction;
 - game-owned collection behavior based on reusable entity overlap detection;
 - immutable collection, destruction, and enemy defeat facts delivered through
   explicit callbacks;

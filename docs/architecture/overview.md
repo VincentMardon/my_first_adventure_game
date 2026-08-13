@@ -162,9 +162,10 @@ The opaque pause scene temporarily replaces gameplay when Escape is pressed.
 Because only the active scene is updated, gameplay time and animation stop. A
 second press explicitly restores the same gameplay scene and session state.
 
-The opaque dialogue scene displays the selected NPC's name and ordered lines
-one at a time. Confirmation advances the dialogue, then explicitly restores
-the same gameplay scene and session state after the final line.
+The opaque dialogue scene presents the selected NPC's name and ordered lines
+one at a time inside a game-owned bordered panel. Confirmation advances the
+dialogue, then explicitly restores the same gameplay scene and session state
+after the final line.
 
 ### Levels
 

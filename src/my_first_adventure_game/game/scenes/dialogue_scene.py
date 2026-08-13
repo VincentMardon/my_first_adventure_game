@@ -16,6 +16,13 @@ DIALOGUE_FONT_SIZE = 40
 INSTRUCTION_CENTER_Y = 380
 INSTRUCTION_COLOR = (184, 192, 208)
 INSTRUCTION_TEXT = "Press Enter to continue"
+PANEL_BORDER_COLOR = (112, 128, 152)
+PANEL_BORDER_RADIUS = 12
+PANEL_BORDER_WIDTH = 3
+PANEL_COLOR = (36, 44, 56)
+PANEL_HEIGHT = 300
+PANEL_MARGIN_X = 120
+PANEL_TOP = 140
 SPEAKER_CENTER_Y = 200
 SPEAKER_COLOR = (112, 200, 240)
 
@@ -53,6 +60,25 @@ class DialogueScene(Scene):
 
     def draw(self, surface: pygame.Surface) -> None:
         surface.fill(BACKGROUND_COLOR)
+        panel_rect = pygame.Rect(
+            PANEL_MARGIN_X,
+            PANEL_TOP,
+            surface.get_width() - PANEL_MARGIN_X * 2,
+            PANEL_HEIGHT,
+        )
+        pygame.draw.rect(
+            surface,
+            PANEL_COLOR,
+            panel_rect,
+            border_radius=PANEL_BORDER_RADIUS,
+        )
+        pygame.draw.rect(
+            surface,
+            PANEL_BORDER_COLOR,
+            panel_rect,
+            width=PANEL_BORDER_WIDTH,
+            border_radius=PANEL_BORDER_RADIUS,
+        )
         font = self._font_cache.load(
             DIALOGUE_FONT_PATH,
             DIALOGUE_FONT_SIZE,

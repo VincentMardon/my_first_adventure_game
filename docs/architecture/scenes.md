@@ -276,8 +276,12 @@ and
 - receives the shared font cache, action input state, a game-owned speaker
   name, ordered dialogue lines, and an explicit close callback;
 - owns a temporary index starting at the first line for each scene instance;
-- draws an opaque background, the speaker name with a distinct game-owned
-  color, the current dialogue line, and a continuation instruction;
+- draws an opaque background and a game-owned dialogue panel whose width adapts
+  to the target surface while retaining fixed horizontal margins;
+- renders the panel with a distinct fill, border, and rounded corners without
+  introducing a reusable engine UI component;
+- draws the speaker name with a distinct game-owned color, the current dialogue
+  line, and a continuation instruction inside the panel;
 - advances exactly one line when `CONFIRM` is pressed before the last line;
 - requests closure when `CONFIRM` is pressed on the last line;
 - ignores raw events.
@@ -420,6 +424,8 @@ Current tests verify:
 - dialogue confirmation advances one line at a time, closes only after the
   final line, and a new interaction restarts from the first line;
 - the dialogue scene renders the same injected speaker name for every line.
+- the dialogue panel is rendered from game-owned dimensions and colors before
+  its text content.
 - the victory scene draws its background, message, and final session score;
 - victory waits until every map enemy is inactive and confirmation explicitly
   returns to the title;

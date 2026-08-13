@@ -15,18 +15,28 @@ from my_first_adventure_game.game.scenes.dialogue_scene import (
     INSTRUCTION_CENTER_Y,
     INSTRUCTION_COLOR,
     INSTRUCTION_TEXT,
+    PANEL_BORDER_COLOR,
+    PANEL_BORDER_RADIUS,
+    PANEL_BORDER_WIDTH,
+    PANEL_COLOR,
+    PANEL_HEIGHT,
+    PANEL_MARGIN_X,
+    PANEL_TOP,
     SPEAKER_CENTER_Y,
     SPEAKER_COLOR,
     DialogueScene,
 )
 
 
-def test_dialogue_scene_draws_background() -> None:
+def test_dialogue_scene_draws_background(monkeypatch) -> None:
     surface = Mock()
     surface.get_width.return_value = 1280
     font_cache = Mock(spec=FontCache)
     input_state = Mock(spec=InputState)
     close_dialogue = Mock()
+
+    monkeypatch.setattr(pygame.draw, "rect", Mock())
+
     scene = DialogueScene(
         font_cache,
         input_state,
@@ -51,6 +61,7 @@ def test_dialogue_scene_draws_dialogue_and_instruction(monkeypatch) -> None:
     draw_text = Mock()
 
     monkeypatch.setattr(dialogue_scene, "draw_text", draw_text)
+    monkeypatch.setattr(pygame.draw, "rect", Mock())
 
     scene = DialogueScene(
         font_cache,
@@ -143,6 +154,7 @@ def test_dialogue_scene_advances_to_next_line_before_closing(
     draw_text = Mock()
 
     monkeypatch.setattr(dialogue_scene, "draw_text", draw_text)
+    monkeypatch.setattr(pygame.draw, "rect", Mock())
 
     scene = DialogueScene(
         font_cache,
@@ -208,3 +220,46 @@ def test_dialogue_scene_closes_after_last_line() -> None:
 
     assert input_state.is_pressed.call_count == 2
     close_dialogue.assert_called_once_with()
+
+
+def test_dialogue_scene_draws_panel(monkeypatch) -> None:
+    surface = Mock()
+    surface.get_width.return_value = 1280
+    font_cache = Mock(spec=FontCache)
+    input_state = Mock(spec=InputState)
+    close_dialogue = Mock()
+    draw_rect = Mock()
+
+    monkeypatch.setattr(pygame.draw, "rect", draw_rect)
+
+    scene = DialogueScene(
+        font_cache,
+        input_state,
+        "Guide",
+        ("Welcome, traveler!",),
+        close_dialogue,
+    )
+
+    scene.draw(surface)
+
+    panel_rect = pygame.Rect(
+        PANEL_MARGIN_X,
+        PANEL_TOP,
+        1280 - PANEL_MARGIN_X * 2,
+        PANEL_HEIGHT,
+    )
+    assert draw_rect.call_args_list == [
+        call(
+            surface,
+            PANEL_COLOR,
+            panel_rect,
+            border_radius=PANEL_BORDER_RADIUS,
+        ),
+        call(
+            surface,
+            PANEL_BORDER_COLOR,
+            panel_rect,
+            width=PANEL_BORDER_WIDTH,
+            border_radius=PANEL_BORDER_RADIUS,
+        ),
+    ]
