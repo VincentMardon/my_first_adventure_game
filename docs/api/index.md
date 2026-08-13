@@ -28,3 +28,4 @@ design decisions, and change risks.
 - [Levels](game-levels.md)
 - [Scenes](game-scenes.md)
 - [Scoring](game-scoring.md)
+- [Progression](game-progression.md)

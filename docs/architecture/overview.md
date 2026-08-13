@@ -134,6 +134,15 @@ An item collection currently awards 100 points. `game.main` converts each
 `ItemCollected` fact into points, accumulates them in `SessionScore`, and shares
 that score with `GameplayScene` for display.
 
+### Progression
+
+Names the session-local states of the Guide's concrete collection objective.
+
+The objective starts before activation, becomes active after the first Guide
+interaction, becomes ready after every requested item is collected, and is
+completed when the player returns to the Guide. The transitions remain
+game-owned orchestration in `game.main`, not a generic engine quest system.
+
 ### Scenes
 
 Provides the concrete title, gameplay, pause, dialogue, defeat, and victory
@@ -289,6 +298,8 @@ flowchart LR
 
     ItemCollected --> ItemCollectionPoints["item_collection_points"]
     ItemCollectionPoints --> SessionScore
+    ItemCollected --> GuideObjectiveState["GuideObjectiveState"]
+    GuideObjectiveState -->|"selects Guide dialogue"| DialogueScene["DialogueScene"]
 ```
 
 `game.main` creates the demo map, current `SessionScore`, and temporary
@@ -338,10 +349,15 @@ scene manager remain alive.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.
-The inactive collectible state also provides one concrete dialogue condition:
-once every map collectible is inactive, the composition root substitutes a
-game-owned completion message when the Guide is next selected for interaction.
-Before completion, it continues to pass the NPC's normal lines.
+It also advances the session-local Guide objective from active to ready once
+every collectible is inactive.
+
+Objective collectibles initially remain inactive. The first Guide interaction
+activates them and presents the NPC's introductory lines. Further interactions
+before collection finishes use a game-owned reminder. Returning after every
+item is collected selects a completion message and makes the completed result
+stable for later interactions. This is a concrete progression rule assembled
+in `game.main`, not a reusable quest or dialogue-condition system.
 
 `game.main` also injects a callback into `TitleScene` that explicitly replaces
 the active scene when confirmation is pressed. It configures the shared

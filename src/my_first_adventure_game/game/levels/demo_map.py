@@ -82,11 +82,13 @@ def create_demo_map() -> GameMap:
             entity_id="collectible-1",
             position=pygame.Vector2(256.0, 160.0),
             size=pygame.Vector2(16.0, 16.0),
+            active=False,
         ),
         Entity(
             entity_id="collectible-2",
             position=pygame.Vector2(640.0, 360.0),
             size=pygame.Vector2(16.0, 16.0),
+            active=False,
         ),
     )
 

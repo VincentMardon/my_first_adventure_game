@@ -44,7 +44,8 @@ It registers the player's spatial entity, walls, enemy and NPC spatial
 entities, and collectibles in deterministic order. One wall is also assigned
 the destructible obstacle role. Their initial geometry keeps the player,
 enemies, NPCs, and collectibles outside the walls and prevents collectibles
-from overlapping the player.
+from overlapping the player. Objective collectibles start inactive and are
+activated by the concrete progression rule after the first Guide interaction.
 
 The concrete identifiers, positions, sizes, and entity roles belong to the game.
 
@@ -105,6 +106,7 @@ managed by `SceneManager`.
 - Entity identifiers are unique within the map.
 - Registration order is deterministic.
 - The map contains at least one wall and one collectible.
+- Every objective collectible starts inactive.
 - The map contains at least one active enemy.
 - The map contains at least one active NPC with a non-blank display name and
   ordered, non-blank dialogue lines.

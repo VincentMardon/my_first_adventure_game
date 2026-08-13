@@ -27,11 +27,11 @@ def test_demo_map_registers_all_entities_in_world() -> None:
         assert game_map.world.get(npc.entity.entity_id) is npc.entity
 
 
-def test_demo_map_has_active_collectibles() -> None:
+def test_demo_map_has_inactive_objective_collectibles() -> None:
     game_map = create_demo_map()
 
     assert game_map.collectibles
-    assert all(collectible.active for collectible in game_map.collectibles)
+    assert all(not collectible.active for collectible in game_map.collectibles)
 
 
 def test_demo_map_has_active_player_and_solid_walls() -> None:

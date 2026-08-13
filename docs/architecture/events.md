@@ -98,11 +98,12 @@ the game-owned scoring rule and adds them to the current `SessionScore`. The
 event itself remains independent from that consequence.
 
 Collection also leaves the corresponding entity inactive before delivery.
-Later NPC interaction observes the complete set of map collectibles: while any
-remain active, the Guide keeps its normal dialogue; once all are inactive, the
-composition root selects a collection-completion message. This rule consumes
-existing game state rather than adding data to `ItemCollected` or introducing a
-global event system.
+The collection handler also observes the complete set of map collectibles. If
+the Guide objective is active and every collectible is inactive, it marks the
+objective ready for completion. A later Guide interaction validates that state
+and selects the completion message. This rule consumes existing game state
+rather than adding progression data to `ItemCollected` or introducing a global
+event system.
 
 The destruction handler currently has no additional consequence. The enemy
 defeat handler replaces gameplay with `VictoryScene` only when every enemy on

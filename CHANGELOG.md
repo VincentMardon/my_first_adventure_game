@@ -70,6 +70,14 @@ and this project adheres to
 - A game-owned pause action bound to Escape.
 - An opaque pause scene that suspends gameplay and explicitly resumes the same
   session without a scene stack.
+- A named game-owned NPC and a proximity interaction action bound to E.
+- A dialogue scene that displays the speaker and advances ordered lines through
+  confirmation before resuming the same gameplay session.
+- A bordered dialogue panel with word-boundary wrapping and content-driven
+  height.
+- A session-local four-state Guide collection objective that starts by
+  activating its items, provides an active reminder, validates return after
+  collection, and preserves completion across later interactions.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

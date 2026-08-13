@@ -115,29 +115,30 @@ The project now provides a minimal playable top-down loop:
 2. pressing Enter explicitly transitions to gameplay;
 3. the arrow keys move the player through a Python-authored map;
 4. axis-aligned collisions prevent the player from crossing walls.
-5. overlapping a collectible deactivates it and removes it from view.
-6. each collected object awards 100 points and updates the displayed session
+5. speaking to the Guide starts a collection objective and reveals its items;
+6. overlapping an active collectible deactivates it and removes it from view.
+7. each collected object awards 100 points and updates the displayed session
    score.
-7. pressing Space near the destructible obstacle removes it and opens the
+8. pressing Space near the destructible obstacle removes it and opens the
    passage it blocked.
-8. a stationary enemy blocks movement and survives the first nearby attack;
-9. non-fatal damage briefly changes the enemy's color;
-10. a second nearby attack defeats it and opens its former position.
-11. defeating every enemy transitions to a victory screen with the final score;
-12. touching an active enemy damages the player, with a short invulnerability
+9. a stationary enemy blocks movement and survives the first nearby attack;
+10. non-fatal damage briefly changes the enemy's color;
+11. a second nearby attack defeats it and opens its former position.
+12. defeating every enemy transitions to a victory screen with the final score;
+13. touching an active enemy damages the player, with a short invulnerability
    period between hits;
-13. reaching zero health transitions to a defeat screen that displays the final
+14. reaching zero health transitions to a defeat screen that displays the final
    score.
-14. pressing Enter on either result screen returns to the title;
-15. starting again creates a fresh map, score, animations, and gameplay state.
-16. pressing Escape temporarily replaces gameplay with an opaque pause screen
+15. pressing Enter on either result screen returns to the title;
+16. starting again creates a fresh map, score, animations, and gameplay state.
+17. pressing Escape temporarily replaces gameplay with an opaque pause screen
    and resumes the same session on a second press.
-17. pressing E near the non-player character opens an ordered dialogue and
+18. pressing E near the non-player character opens an ordered dialogue and
    identifies its speaker as the Guide;
-18. pressing Enter advances through its lines, then resumes the same gameplay
+19. pressing Enter advances through its lines, then resumes the same gameplay
    session after the last one.
-19. after every collectible is inactive, the Guide replaces its normal lines
-   with a collection-completion message.
+20. the Guide gives a reminder while collection remains active, validates the
+   objective after every item is collected, and preserves that completed state.
 
 Implemented foundations include:
 
@@ -181,8 +182,10 @@ Implemented foundations include:
   spacing around the speaker, current line, and continuation instruction;
 - word-boundary wrapping based on the selected font's measured width, with a
   dialogue panel whose height adapts to the resulting visual lines;
-- a concrete dialogue variation selected from the current collectible state,
-  without a generic condition or dialogue scripting system;
+- a concrete four-state Guide collection objective that activates its items,
+  selects reminder and completion dialogue, and resets with each new session;
+- explicit game-owned progression without a generic quest, condition, or
+  dialogue scripting system;
 - game-owned collection behavior based on reusable entity overlap detection;
 - immutable collection, destruction, and enemy defeat facts delivered through
   explicit callbacks;

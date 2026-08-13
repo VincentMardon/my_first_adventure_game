@@ -27,7 +27,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         "The road ahead is dangerous.",
     )
     collectible = Mock()
-    collectible.active = True
+    collectible.active = False
     game_map.collectibles = (collectible,)
     game_map.npcs = (npc,)
     session_score = Mock()
@@ -268,27 +268,31 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     close_dialogue = dialogue_args[4]
     close_dialogue()
 
-    scene_manager.change_scene.assert_called_with(gameplay_scene)
+    assert collectible.active
 
-    collectible.active = False
+    scene_manager.change_scene.assert_called_with(gameplay_scene)
 
     handle_npc_interacted(npc)
 
     assert create_dialogue_scene.call_count == 2
-    completed_dialogue_args = create_dialogue_scene.call_args.args
+    active_dialogue_args = create_dialogue_scene.call_args.args
 
-    assert completed_dialogue_args[:4] == (
+    assert active_dialogue_args[:4] == (
         font_cache,
         input_state,
         npc.name,
-        game_main.COLLECTION_COMPLETE_DIALOGUE_LINES,
+        game_main.COLLECTION_ACTIVE_DIALOGUE_LINES,
     )
-    assert callable(completed_dialogue_args[4])
-    scene_manager.change_scene.assert_called_with(dialogue_scene)
 
-    completed_dialogue_args[4]()
+    active_dialogue_args[4]()
 
     scene_manager.change_scene.assert_called_with(gameplay_scene)
+
+    handle_item_collected = gameplay_args[12]
+    event = ItemCollected(item_id="collectible-1")
+
+    collectible.active = False
+    handle_item_collected(event)
 
     player_event = PlayerDefeated(player_id="player")
     handle_player_defeated(player_event)
@@ -309,10 +313,37 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     scene_manager.change_scene.assert_called_with(victory_scene)
 
-    handle_item_collected = gameplay_args[12]
-    event = ItemCollected(item_id="collectible-1")
+    handle_npc_interacted(npc)
 
-    handle_item_collected(event)
+    assert create_dialogue_scene.call_count == 3
+    completed_dialogue_args = create_dialogue_scene.call_args.args
+
+    assert completed_dialogue_args[:4] == (
+        font_cache,
+        input_state,
+        npc.name,
+        game_main.COLLECTION_COMPLETE_DIALOGUE_LINES,
+    )
+    assert callable(completed_dialogue_args[4])
+    scene_manager.change_scene.assert_called_with(dialogue_scene)
+
+    completed_dialogue_args[4]()
+
+    scene_manager.change_scene.assert_called_with(gameplay_scene)
+
+    handle_npc_interacted(npc)
+
+    assert create_dialogue_scene.call_count == 4
+    completed_again_dialogue_args = create_dialogue_scene.call_args.args
+
+    assert completed_again_dialogue_args[:4] == (
+        font_cache,
+        input_state,
+        npc.name,
+        game_main.COLLECTION_COMPLETE_DIALOGUE_LINES,
+    )
+
+    completed_again_dialogue_args[4]()
 
     handle_obstacle_destroyed = gameplay_args[14]
     obstacle_event = ObstacleDestroyed(obstacle_id="destructible-1")
@@ -404,6 +435,10 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         call(defeat_scene),
         call(initial_scene),
         call(victory_scene),
+        call(dialogue_scene),
+        call(gameplay_scene),
+        call(dialogue_scene),
+        call(gameplay_scene),
         call(second_gameplay_scene),
     ]
 

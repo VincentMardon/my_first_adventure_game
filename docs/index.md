@@ -53,6 +53,7 @@ proposing changes.
 - [Levels](architecture/levels.md)
 - [Events](architecture/events.md)
 - [Scoring](architecture/scoring.md)
+- [Progression](architecture/progression.md)
 
 ### Architectural decisions
 
@@ -73,6 +74,7 @@ proposing changes.
 - [Game entities](api/game-entities.md)
 - [Game events](api/game-events.md)
 - [Game scoring](api/game-scoring.md)
+- [Game progression](api/game-progression.md)
 - [Game input](api/game-input.md)
 - [Game levels](api/game-levels.md)
 - [Game scenes](api/game-scenes.md)
