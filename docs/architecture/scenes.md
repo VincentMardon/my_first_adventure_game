@@ -310,10 +310,12 @@ The player defeat handler explicitly replaces gameplay with the current
 session's `DefeatScene`.
 
 The NPC interaction handler creates a new `DialogueScene` from the selected
-NPC's name and ordered lines and explicitly replaces gameplay with it. Each
-interaction therefore starts at the first line. Confirmation after the final
-line restores the same gameplay scene, preserving the current session without
-requiring a scene stack.
+NPC's name and selected ordered lines and explicitly replaces gameplay with it.
+While any map collectible remains active, it selects the NPC's normal lines.
+After every collectible is inactive, it selects a game-owned collection
+completion message instead. Each interaction starts at the first selected line.
+Confirmation after the final line restores the same gameplay scene, preserving
+the current session without requiring a scene stack.
 
 `game.main` retains the title scene and shared application services across the
 application lifetime. Each start request creates a fresh map, score, animation
@@ -429,6 +431,8 @@ Current tests verify:
   gameplay update, and open a dialogue scene with the selected NPC lines;
 - dialogue confirmation advances one line at a time, closes only after the
   final line, and a new interaction restarts from the first line;
+- the composition root passes normal NPC lines while a collectible remains
+  active and completion lines after every collectible becomes inactive;
 - the dialogue scene renders the same injected speaker name for every line.
 - the dialogue panel is rendered from game-owned dimensions and colors before
   its text content.

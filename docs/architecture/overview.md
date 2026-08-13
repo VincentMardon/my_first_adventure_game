@@ -338,6 +338,10 @@ scene manager remain alive.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.
+The inactive collectible state also provides one concrete dialogue condition:
+once every map collectible is inactive, the composition root substitutes a
+game-owned completion message when the Guide is next selected for interaction.
+Before completion, it continues to pass the NPC's normal lines.
 
 `game.main` also injects a callback into `TitleScene` that explicitly replaces
 the active scene when confirmation is pressed. It configures the shared

@@ -97,6 +97,13 @@ The handler composed in `game.main` converts `ItemCollected` into points through
 the game-owned scoring rule and adds them to the current `SessionScore`. The
 event itself remains independent from that consequence.
 
+Collection also leaves the corresponding entity inactive before delivery.
+Later NPC interaction observes the complete set of map collectibles: while any
+remain active, the Guide keeps its normal dialogue; once all are inactive, the
+composition root selects a collection-completion message. This rule consumes
+existing game state rather than adding data to `ItemCollected` or introducing a
+global event system.
+
 The destruction handler currently has no additional consequence. The enemy
 defeat handler replaces gameplay with `VictoryScene` only when every enemy on
 the current map is inactive. The player defeat handler explicitly replaces

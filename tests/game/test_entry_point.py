@@ -26,6 +26,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         "Welcome, traveler!",
         "The road ahead is dangerous.",
     )
+    collectible = Mock()
+    collectible.active = True
+    game_map.collectibles = (collectible,)
     game_map.npcs = (npc,)
     session_score = Mock()
     gameplay_scene = Mock()
@@ -267,6 +270,26 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     scene_manager.change_scene.assert_called_with(gameplay_scene)
 
+    collectible.active = False
+
+    handle_npc_interacted(npc)
+
+    assert create_dialogue_scene.call_count == 2
+    completed_dialogue_args = create_dialogue_scene.call_args.args
+
+    assert completed_dialogue_args[:4] == (
+        font_cache,
+        input_state,
+        npc.name,
+        game_main.COLLECTION_COMPLETE_DIALOGUE_LINES,
+    )
+    assert callable(completed_dialogue_args[4])
+    scene_manager.change_scene.assert_called_with(dialogue_scene)
+
+    completed_dialogue_args[4]()
+
+    scene_manager.change_scene.assert_called_with(gameplay_scene)
+
     player_event = PlayerDefeated(player_id="player")
     handle_player_defeated(player_event)
 
@@ -373,6 +396,8 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert scene_manager.change_scene.call_args_list == [
         call(gameplay_scene),
         call(pause_scene),
+        call(gameplay_scene),
+        call(dialogue_scene),
         call(gameplay_scene),
         call(dialogue_scene),
         call(gameplay_scene),

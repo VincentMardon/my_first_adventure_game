@@ -136,6 +136,8 @@ The project now provides a minimal playable top-down loop:
    identifies its speaker as the Guide;
 18. pressing Enter advances through its lines, then resumes the same gameplay
    session after the last one.
+19. after every collectible is inactive, the Guide replaces its normal lines
+   with a collection-completion message.
 
 Implemented foundations include:
 
@@ -179,6 +181,8 @@ Implemented foundations include:
   spacing around the speaker, current line, and continuation instruction;
 - word-boundary wrapping based on the selected font's measured width, with a
   dialogue panel whose height adapts to the resulting visual lines;
+- a concrete dialogue variation selected from the current collectible state,
+  without a generic condition or dialogue scripting system;
 - game-owned collection behavior based on reusable entity overlap detection;
 - immutable collection, destruction, and enemy defeat facts delivered through
   explicit callbacks;

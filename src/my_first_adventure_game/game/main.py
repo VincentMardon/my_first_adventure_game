@@ -28,6 +28,7 @@ from my_first_adventure_game.game.scoring import (
 )
 
 WINDOW_CONFIG = WindowConfig(title="My First Adventure Game", size=(1280, 720))
+COLLECTION_COMPLETE_DIALOGUE_LINES = ("You found every item. Well done, traveler!",)
 FRAMES_PER_SECOND = 60
 PLAYER_FRAME_SIZE = (32, 32)
 PLAYER_IDLE_COLORS = (
@@ -144,11 +145,16 @@ def main() -> None:
             scene_manager.change_scene(gameplay_scene)
 
         def handle_npc_interacted(npc: NPC) -> None:
+            dialogue_lines = (
+                COLLECTION_COMPLETE_DIALOGUE_LINES
+                if all(not collectible.active for collectible in game_map.collectibles)
+                else npc.dialogue_lines
+            )
             dialogue_scene = DialogueScene(
                 font_cache,
                 input_state,
                 npc.name,
-                npc.dialogue_lines,
+                dialogue_lines,
                 resume_game,
             )
             scene_manager.change_scene(dialogue_scene)
