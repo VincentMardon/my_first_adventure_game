@@ -28,7 +28,7 @@ def test_dialogue_scene_draws_background() -> None:
     scene = DialogueScene(
         font_cache,
         input_state,
-        "Welcome, traveler!",
+        ("Welcome, traveler!",),
         close_dialogue,
     )
 
@@ -52,7 +52,7 @@ def test_dialogue_scene_draws_dialogue_and_instruction(monkeypatch) -> None:
     scene = DialogueScene(
         font_cache,
         input_state,
-        "Welcome, traveler!",
+        ("Welcome, traveler!",),
         close_dialogue,
     )
 
@@ -88,7 +88,7 @@ def test_dialogue_scene_closes_when_confirm_is_pressed() -> None:
     scene = DialogueScene(
         font_cache,
         input_state,
-        "Welcome, traveler!",
+        ("Welcome, traveler!",),
         close_dialogue,
     )
 
@@ -106,7 +106,7 @@ def test_dialogue_scene_remains_open_without_confirm_action() -> None:
     scene = DialogueScene(
         font_cache,
         input_state,
-        "Welcome, traveler!",
+        ("Welcome, traveler!",),
         close_dialogue,
     )
 
@@ -114,3 +114,75 @@ def test_dialogue_scene_remains_open_without_confirm_action() -> None:
 
     input_state.is_pressed.assert_called_once_with(GameAction.CONFIRM)
     close_dialogue.assert_not_called()
+
+
+def test_dialogue_scene_advances_to_next_line_before_closing(
+    monkeypatch,
+) -> None:
+    surface = Mock()
+    surface.get_width.return_value = 1280
+    font_cache = Mock(spec=FontCache)
+    input_state = Mock(spec=InputState)
+    input_state.is_pressed.return_value = True
+    close_dialogue = Mock()
+    font = Mock(spec=pygame.font.Font)
+    font_cache.load.return_value = font
+    draw_text = Mock()
+
+    monkeypatch.setattr(dialogue_scene, "draw_text", draw_text)
+
+    scene = DialogueScene(
+        font_cache,
+        input_state,
+        (
+            "Welcome, traveler!",
+            "The road ahead is dangerous.",
+        ),
+        close_dialogue,
+    )
+
+    scene.update(0.016)
+    scene.draw(surface)
+
+    close_dialogue.assert_not_called()
+    assert draw_text.call_args_list == [
+        call(
+            surface,
+            "The road ahead is dangerous.",
+            font,
+            DIALOGUE_COLOR,
+            center=(640, DIALOGUE_CENTER_Y),
+        ),
+        call(
+            surface,
+            INSTRUCTION_TEXT,
+            font,
+            INSTRUCTION_COLOR,
+            center=(640, INSTRUCTION_CENTER_Y),
+        ),
+    ]
+
+
+def test_dialogue_scene_closes_after_last_line() -> None:
+    font_cache = Mock(spec=FontCache)
+    input_state = Mock(spec=InputState)
+    input_state.is_pressed.return_value = True
+    close_dialogue = Mock()
+    scene = DialogueScene(
+        font_cache,
+        input_state,
+        (
+            "Welcome, traveler!",
+            "The road ahead is dangerous.",
+        ),
+        close_dialogue,
+    )
+
+    scene.update(0.016)
+
+    close_dialogue.assert_not_called()
+
+    scene.update(0.016)
+
+    assert input_state.is_pressed.call_count == 2
+    close_dialogue.assert_called_once_with()

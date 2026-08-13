@@ -21,7 +21,10 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     second_enemy.entity.active = True
     game_map.enemies = (first_enemy, second_enemy)
     npc = Mock()
-    npc.dialogue_text = "Welcome, traveler!"
+    npc.dialogue_lines = (
+        "Welcome, traveler!",
+        "The road ahead is dangerous.",
+    )
     game_map.npcs = (npc,)
     session_score = Mock()
     gameplay_scene = Mock()
@@ -252,7 +255,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert dialogue_args[:3] == (
         font_cache,
         input_state,
-        npc.dialogue_text,
+        npc.dialogue_lines,
     )
     assert callable(dialogue_args[3])
     scene_manager.change_scene.assert_called_with(dialogue_scene)

@@ -67,7 +67,10 @@ def create_demo_map() -> GameMap:
                 position=pygame.Vector2(576.0, 160.0),
                 size=pygame.Vector2(24.0, 32.0),
             ),
-            dialogue_text="Welcome, traveler!",
+            dialogue_lines=(
+                "Welcome, traveler!",
+                "The road ahead is dangerous.",
+            ),
         ),
     )
     collectibles = (

@@ -132,8 +132,9 @@ The project now provides a minimal playable top-down loop:
 15. starting again creates a fresh map, score, animations, and gameplay state.
 16. pressing Escape temporarily replaces gameplay with an opaque pause screen
    and resumes the same session on a second press.
-17. pressing E near the non-player character opens one dialogue line, and
-   pressing Enter resumes the same gameplay session.
+17. pressing E near the non-player character opens an ordered dialogue;
+18. pressing Enter advances through its lines, then resumes the same gameplay
+   session after the last one.
 
 Implemented foundations include:
 
@@ -169,8 +170,9 @@ Implemented foundations include:
   every new game;
 - a game-owned pause action and opaque pause scene that suspend gameplay and
   resume the same session explicitly;
-- a game-owned non-player character, proximity interaction action, and minimal
-  dialogue scene that resumes the same session explicitly;
+- a game-owned non-player character with ordered dialogue lines, a proximity
+  interaction action, and a minimal dialogue scene that advances one line per
+  confirmation before resuming the same session explicitly;
 - game-owned collection behavior based on reusable entity overlap detection;
 - immutable collection, destruction, and enemy defeat facts delivered through
   explicit callbacks;

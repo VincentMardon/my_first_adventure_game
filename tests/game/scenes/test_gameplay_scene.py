@@ -130,7 +130,7 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
             position=pygame.Vector2(320.0, 80.0),
             size=pygame.Vector2(24.0, 32.0),
         ),
-        dialogue_text="Welcome, traveler!",
+        dialogue_lines=("Welcome, traveler!",),
     )
 
     movement_axis = Mock(return_value=pygame.Vector2(0.6, 0.8))
@@ -216,7 +216,7 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
             position=pygame.Vector2(352.0, 160.0),
             size=pygame.Vector2(24.0, 32.0),
         ),
-        dialogue_text="Welcome, traveler!",
+        dialogue_lines=("Welcome, traveler!",),
     )
     inactive_npc = NPC(
         entity=Entity(
@@ -225,7 +225,7 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
             size=pygame.Vector2(24.0, 32.0),
             active=False,
         ),
-        dialogue_text="You should not see this.",
+        dialogue_lines=("You should not see this.",),
     )
     active_collectible = Entity(
         entity_id="collectible-active",
@@ -895,7 +895,7 @@ def test_update_interacts_with_nearby_active_npc_without_advancing_gameplay(
             position=pygame.Vector2(124.0, 80.0),
             size=pygame.Vector2(24.0, 32.0),
         ),
-        dialogue_text="Welcome, traveler!",
+        dialogue_lines=("Welcome, traveler!",),
     )
     distant_npc = NPC(
         entity=Entity(
@@ -903,7 +903,7 @@ def test_update_interacts_with_nearby_active_npc_without_advancing_gameplay(
             position=pygame.Vector2(320.0, 240.0),
             size=pygame.Vector2(24.0, 32.0),
         ),
-        dialogue_text="Too far away.",
+        dialogue_lines=("Too far away.",),
     )
     on_npc_interacted = Mock()
     movement_axis = Mock()
@@ -941,7 +941,7 @@ def test_update_does_not_interact_with_distant_npc(monkeypatch) -> None:
             position=pygame.Vector2(320.0, 240.0),
             size=pygame.Vector2(24.0, 32.0),
         ),
-        dialogue_text="Too far away.",
+        dialogue_lines=("Too far away.",),
     )
     on_npc_interacted = Mock()
 

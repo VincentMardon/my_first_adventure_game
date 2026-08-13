@@ -19,26 +19,33 @@ INSTRUCTION_TEXT = "Press Enter to continue"
 
 
 class DialogueScene(Scene):
-    """Display one dialogue line until the player confirms."""
+    """Display ordered dialogue lines until the player confirms the last one."""
 
     def __init__(
         self,
         font_cache: FontCache,
         input_state: InputState[GameAction],
-        dialogue_text: str,
+        dialogue_lines: tuple[str, ...],
         close_dialogue: Callable[[], None],
     ) -> None:
         self._font_cache = font_cache
         self._input_state = input_state
-        self._dialogue_text = dialogue_text
+        self._dialogue_lines = dialogue_lines
         self._close_dialogue = close_dialogue
+        self._current_line_index = 0
 
     def handle_event(self, event: pygame.event.Event) -> None:
         return None
 
     def update(self, delta_time: float) -> None:
-        if self._input_state.is_pressed(GameAction.CONFIRM):
-            self._close_dialogue()
+        if not self._input_state.is_pressed(GameAction.CONFIRM):
+            return
+
+        if self._current_line_index < len(self._dialogue_lines) - 1:
+            self._current_line_index += 1
+            return
+
+        self._close_dialogue()
 
     def draw(self, surface: pygame.Surface) -> None:
         surface.fill(BACKGROUND_COLOR)
@@ -50,7 +57,7 @@ class DialogueScene(Scene):
 
         draw_text(
             surface,
-            self._dialogue_text,
+            self._dialogue_lines[self._current_line_index],
             font,
             DIALOGUE_COLOR,
             center=(center_x, DIALOGUE_CENTER_Y),

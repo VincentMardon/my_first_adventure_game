@@ -120,5 +120,7 @@ def test_demo_map_has_active_npcs_with_dialogue() -> None:
 
     assert game_map.npcs
     assert all(npc.entity.active for npc in game_map.npcs)
-    assert all(npc.dialogue_text.strip() for npc in game_map.npcs)
+    assert all(npc.dialogue_lines for npc in game_map.npcs)
+    assert all(line.strip() for npc in game_map.npcs for line in npc.dialogue_lines)
     assert not any(npc.entity in game_map.walls for npc in game_map.npcs)
+    assert any(len(npc.dialogue_lines) > 1 for npc in game_map.npcs)

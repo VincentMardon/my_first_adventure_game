@@ -43,7 +43,8 @@ scene transitions or session consequences.
 
 ### [`NPC`](../api/game-entities.md#my_first_adventure_game.game.entities.NPC)
 
-Composes an engine-owned `Entity` with one non-blank dialogue line.
+Composes an engine-owned `Entity` with a non-empty tuple of ordered, non-blank
+dialogue lines.
 
 The NPC owns concrete game content but does not detect interaction, display its
 text, or decide scene transitions. Those responsibilities remain with the
@@ -75,7 +76,7 @@ classDiagram
 
     class NPC {
         +entity
-        +dialogue_text
+        +dialogue_lines
     }
 
     Enemy *-- Entity : spatial state
@@ -111,7 +112,8 @@ invulnerability period. The scene displays current health and emits
 - A fatal hit sets health to zero and deactivates the spatial entity.
 - Only the fatal hit reports a new defeat.
 - The engine never imports or constructs `Enemy` or `Player`.
-- NPC dialogue text is not blank.
+- Every NPC has at least one dialogue line.
+- NPC dialogue lines are ordered and none are blank.
 - The engine never imports or constructs `NPC`.
 
 ## Extension points
@@ -146,5 +148,5 @@ Current tests verify:
 - one player defeat report across later damage attempts;
 - enemy contact damage, temporary invulnerability, and fatal player
   deactivation.
-- storage of NPC spatial state and dialogue text;
-- rejection of blank NPC dialogue text.
+- storage of NPC spatial state and ordered dialogue lines;
+- rejection of empty dialogue sequences and blank dialogue lines.

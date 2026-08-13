@@ -147,7 +147,7 @@ def main() -> None:
             dialogue_scene = DialogueScene(
                 font_cache,
                 input_state,
-                npc.dialogue_text,
+                npc.dialogue_lines,
                 resume_game,
             )
             scene_manager.change_scene(dialogue_scene)

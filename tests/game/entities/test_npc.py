@@ -5,32 +5,58 @@ from my_first_adventure_game.engine.world import Entity
 from my_first_adventure_game.game.entities import NPC
 
 
-def test_npc_stores_spatial_entity_and_dialogue_text() -> None:
-    entity = Entity(
+def _create_entity() -> Entity:
+    return Entity(
         entity_id="npc-1",
         position=pygame.Vector2(160.0, 120.0),
         size=pygame.Vector2(24.0, 32.0),
     )
 
+
+def test_npc_stores_spatial_entity_and_dialogue_lines() -> None:
+    entity = _create_entity()
+    dialogue_lines = (
+        "Welcome, traveler!",
+        "The road ahead is dangerous.",
+    )
+
     npc = NPC(
         entity=entity,
-        dialogue_text="Welcome, traveler!",
+        dialogue_lines=dialogue_lines,
     )
 
     assert npc.entity is entity
-    assert npc.dialogue_text == "Welcome, traveler!"
+    assert npc.dialogue_lines is dialogue_lines
 
 
-@pytest.mark.parametrize("dialogue_text", ["", "   "])
-def test_npc_requires_non_empty_dialogue_text(dialogue_text: str) -> None:
-    entity = Entity(
-        entity_id="npc-1",
-        position=pygame.Vector2(),
-        size=pygame.Vector2(24.0, 32.0),
-    )
-
-    with pytest.raises(ValueError, match="dialogue_text must not be blank"):
+def test_npc_requires_at_least_one_dialogue_line() -> None:
+    with pytest.raises(
+        ValueError,
+        match="dialogue_lines must not be empty",
+    ):
         NPC(
-            entity=entity,
-            dialogue_text=dialogue_text,
+            entity=_create_entity(),
+            dialogue_lines=(),
+        )
+
+
+@pytest.mark.parametrize(
+    "dialogue_lines",
+    [
+        ("",),
+        ("   ",),
+        ("Welcome, traveler!", ""),
+        ("Welcome, traveler!", "   "),
+    ],
+)
+def test_npc_requires_non_blank_dialogue_lines(
+    dialogue_lines: tuple[str, ...],
+) -> None:
+    with pytest.raises(
+        ValueError,
+        match="dialogue_lines must not contain blank lines",
+    ):
+        NPC(
+            entity=_create_entity(),
+            dialogue_lines=dialogue_lines,
         )
