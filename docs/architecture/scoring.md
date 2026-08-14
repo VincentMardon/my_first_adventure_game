@@ -9,6 +9,8 @@ It currently provides:
 
 - `item_collection_points()`, which converts an `ItemCollected` fact into
   points;
+- `guide_objective_completion_points()`, which returns the fixed bonus awarded
+  when the Guide validates the completed collection objective;
 - `SessionScore`, which stores the accumulated session total.
 
 This domain does not persist records, update profiles, or decide when gameplay
@@ -29,6 +31,13 @@ from concrete score rules.
 Returns the points awarded for one `ItemCollected` event.
 
 The current rule awards 100 points regardless of the collected item identifier.
+
+### [`guide_objective_completion_points`](../api/game-scoring.md#my_first_adventure_game.game.scoring.guide_objective_completion_points)
+
+Returns the points awarded when the Guide's collection objective is validated.
+
+The current rule awards a fixed 500-point bonus. It does not decide when the
+objective is complete or mutate the session score itself.
 
 ### [`SessionScore`](../api/game-scoring.md#my_first_adventure_game.game.scoring.SessionScore)
 
@@ -51,26 +60,36 @@ flowchart LR
     GameplayScene["GameplayScene"]
     ItemCollected["ItemCollected"]
     GameMain["game.main"]
-    Rule["item_collection_points"]
+    CollectionRule["item_collection_points"]
+    CompletionRule["guide_objective_completion_points"]
+    GuideObjective["GuideObjective"]
     SessionScore["SessionScore"]
 
     GameplayScene -->|"emits"| ItemCollected
     ItemCollected --> GameMain
-    GameMain --> Rule
-    Rule -->|"returns points"| GameMain
+    GameMain --> CollectionRule
+    CollectionRule -->|"returns points"| GameMain
+    GuideObjective -->|"ready for validation"| GameMain
+    GameMain --> CompletionRule
+    CompletionRule -->|"returns bonus"| GameMain
     GameMain -->|"adds points"| SessionScore
     SessionScore -->|"provides current value"| GameplayScene
 ```
 
 `game.main` composes the scoring flow. Its collection handler converts the
 event into points and adds them to the same `SessionScore` instance displayed
-by `GameplayScene`.
+by `GameplayScene`. When interaction changes the Guide objective from ready to
+completed, the interaction handler adds the completion bonus to that same
+score. Later interactions observe the completed state and do not award it
+again.
 
 ## Invariants
 
 - A new session score starts at zero.
 - Adding points accumulates them with the current value.
 - One item collection currently awards 100 points.
+- Guide objective validation currently awards 500 points.
+- The completion bonus is added only during `READY_TO_COMPLETE` to `COMPLETED`.
 - `GameplayScene` does not calculate point values.
 - The engine does not depend on game scoring.
 
@@ -97,8 +116,11 @@ the mutable score of the current session.
 Current tests verify:
 
 - item collection awards 100 points;
+- Guide objective completion awards 500 points;
 - a session score starts at zero;
 - added points accumulate;
 - `game.main` converts `ItemCollected` into points and updates the session
   score;
+- `game.main` adds the completion bonus exactly once when the Guide validates
+  the ready objective;
 - `GameplayScene` renders the current score.

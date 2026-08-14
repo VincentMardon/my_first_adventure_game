@@ -79,7 +79,8 @@ lines. Later interactions while the objective is active use a reminder. The
 collection handler records each `ItemCollected` fact. The objective marks itself
 ready when the recorded count reaches the total supplied from the map.
 Returning to the Guide then selects the completion message and makes that result
-stable for later interactions.
+stable for later interactions. That validation also awards the game-owned
+completion bonus exactly once.
 
 ## Invariants
 
@@ -92,6 +93,7 @@ stable for later interactions.
 - Each reported collection increments the objective count once.
 - Reaching the required total changes `ACTIVE` to `READY_TO_COMPLETE`.
 - Only a later Guide interaction changes `READY_TO_COMPLETE` to `COMPLETED`.
+- That transition awards the completion bonus once.
 - Later Guide interactions keep the objective completed.
 - Starting another game creates an independent objective state.
 - The active status text displays collected and required item counts.

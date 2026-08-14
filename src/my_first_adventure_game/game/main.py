@@ -28,6 +28,7 @@ from my_first_adventure_game.game.scenes import (
 )
 from my_first_adventure_game.game.scoring import (
     SessionScore,
+    guide_objective_completion_points,
     item_collection_points,
 )
 
@@ -163,6 +164,7 @@ def main() -> None:
                 dialogue_lines = COLLECTION_ACTIVE_DIALOGUE_LINES
             elif guide_objective.state is GuideObjectiveState.READY_TO_COMPLETE:
                 guide_objective.complete()
+                session_score.add(guide_objective_completion_points())
                 dialogue_lines = COLLECTION_COMPLETE_DIALOGUE_LINES
             else:
                 dialogue_lines = COLLECTION_COMPLETE_DIALOGUE_LINES

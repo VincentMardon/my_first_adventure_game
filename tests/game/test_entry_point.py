@@ -61,6 +61,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_demo_map = Mock(return_value=game_map)
     create_session_score = Mock(return_value=session_score)
     score_item_collection = Mock(return_value=100)
+    score_guide_objective_completion = Mock(return_value=500)
     create_gameplay_scene = Mock(return_value=gameplay_scene)
     create_application = Mock(return_value=application)
     create_surface = Mock(
@@ -98,6 +99,11 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         game_main,
         "item_collection_points",
         score_item_collection,
+    )
+    monkeypatch.setattr(
+        game_main,
+        "guide_objective_completion_points",
+        score_guide_objective_completion,
     )
     monkeypatch.setattr(game_main, "GameplayScene", create_gameplay_scene)
     monkeypatch.setattr(game_main, "Application", create_application)
@@ -359,7 +365,11 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert handle_obstacle_destroyed(obstacle_event) is None
 
     score_item_collection.assert_called_once_with(event)
-    session_score.add.assert_called_once_with(100)
+    score_guide_objective_completion.assert_called_once_with()
+    assert session_score.add.call_args_list == [
+        call(100),
+        call(500),
+    ]
 
     second_game_map = Mock()
     second_collectible = Mock()

@@ -141,6 +141,7 @@ The project now provides a minimal playable top-down loop:
    objective after every item is collected, and preserves that completed state.
 21. the current objective status remains visible at the top of the gameplay
    screen and reports collected items against the required total.
+22. returning to the Guide after collection awards a one-time 500-point bonus.
 
 Implemented foundations include:
 
@@ -188,6 +189,7 @@ Implemented foundations include:
   selects reminder and completion dialogue, and resets with each new session;
 - a gameplay objective display that observes the same session-local objective;
 - live collected and required item counts while the Guide objective is active;
+- a one-time game-owned score bonus when the Guide validates the objective;
 - explicit game-owned progression without a generic quest, condition, or
   dialogue scripting system;
 - game-owned collection behavior based on reusable entity overlap detection;

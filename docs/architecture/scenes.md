@@ -322,6 +322,10 @@ starts at the first selected line. Confirmation after the final line restores
 the same gameplay scene, preserving the current session without requiring a
 scene stack.
 
+When interaction validates a ready Guide objective, `game.main` also applies
+the game-owned 500-point completion rule to the shared session score. Later
+interactions use the stable completed branch and do not repeat the bonus.
+
 `game.main` retains the title scene and shared application services across the
 application lifetime. Each start request creates a fresh map, score, animation
 set, gameplay scene, pause scene, defeat scene, victory scene, and session-local

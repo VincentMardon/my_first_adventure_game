@@ -132,7 +132,8 @@ session.
 
 An item collection currently awards 100 points. `game.main` converts each
 `ItemCollected` fact into points, accumulates them in `SessionScore`, and shares
-that score with `GameplayScene` for display.
+that score with `GameplayScene` for display. Validating the ready Guide
+objective awards a fixed 500-point bonus exactly once.
 
 ### Progression
 
@@ -367,6 +368,9 @@ in `game.main`, not a reusable quest or dialogue-condition system.
 The gameplay HUD reads the same objective instance and displays its current
 game-owned status text without owning any transition rule. While collection is
 active, that text includes the live collected and required item counts.
+The ready-to-completed interaction also applies the game-owned objective bonus
+to the shared session score. Reopening completed dialogue does not apply it
+again.
 
 `game.main` also injects a callback into `TitleScene` that explicitly replaces
 the active scene when confirmation is pressed. It configures the shared
