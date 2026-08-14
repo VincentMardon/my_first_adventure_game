@@ -136,8 +136,8 @@ that score with `GameplayScene` for display.
 
 ### Progression
 
-Owns the session-local state and status text of the Guide's concrete collection
-objective.
+Owns the session-local state, required and collected item counts, and status
+text of the Guide's concrete collection objective.
 
 The objective starts before activation, becomes active after the first Guide
 interaction, becomes ready after every requested item is collected, and is
@@ -354,8 +354,9 @@ scene manager remain alive.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.
-It also advances the session-local Guide objective from active to ready once
-every collectible is inactive.
+It also records the fact in the session-local Guide objective. The objective
+advances from active to ready when its collected count reaches the required
+total supplied from the current map.
 
 Objective collectibles initially remain inactive. The first Guide interaction
 activates them and presents the NPC's introductory lines. Further interactions
@@ -364,7 +365,8 @@ item is collected selects a completion message and makes the completed result
 stable for later interactions. This is a concrete progression rule assembled
 in `game.main`, not a reusable quest or dialogue-condition system.
 The gameplay HUD reads the same objective instance and displays its current
-game-owned status text without owning any transition rule.
+game-owned status text without owning any transition rule. While collection is
+active, that text includes the live collected and required item counts.
 
 `game.main` also injects a callback into `TitleScene` that explicitly replaces
 the active scene when confirmation is pressed. It configures the shared

@@ -98,12 +98,12 @@ the game-owned scoring rule and adds them to the current `SessionScore`. The
 event itself remains independent from that consequence.
 
 Collection also leaves the corresponding entity inactive before delivery.
-The collection handler also observes the complete set of map collectibles. If
-the Guide objective is active and every collectible is inactive, it marks the
-objective ready for completion. A later Guide interaction validates that state
-and selects the completion message. This rule consumes existing game state
-rather than adding progression data to `ItemCollected` or introducing a global
-event system.
+The collection handler records each delivered fact in the session-local Guide
+objective. The objective compares its collected count with the required total
+provided during composition and marks itself ready when they match. A later
+Guide interaction validates that state and selects the completion message. This
+rule consumes the factual event without adding progression data to
+`ItemCollected` or introducing a global event system.
 
 The destruction handler currently has no additional consequence. The enemy
 defeat handler replaces gameplay with `VictoryScene` only when every enemy on

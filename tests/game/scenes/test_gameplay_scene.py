@@ -101,7 +101,7 @@ def _create_gameplay_scene(
             player_collection_animation or Mock(spec=Animation)
         ),
         player_attack_animation=player_attack_animation or Mock(spec=Animation),
-        guide_objective=guide_objective or GuideObjective(),
+        guide_objective=guide_objective or GuideObjective(total_items=2),
     )
 
 
@@ -254,7 +254,7 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
     player_idle_animation = Mock(spec=Animation)
     player_idle_frame = Mock(spec=pygame.Surface)
     player_idle_animation.current_frame = player_idle_frame
-    guide_objective = GuideObjective()
+    guide_objective = GuideObjective(total_items=2)
 
     monkeypatch.setattr(gameplay_scene, "draw_text", draw_text)
     monkeypatch.setattr(pygame.draw, "rect", draw_rect)

@@ -8,7 +8,8 @@ objective.
 It currently exposes:
 
 - `GuideObjective`, which owns the session-local state, its explicit
-  transitions, and the concrete status text shown during gameplay;
+  transitions, required and collected item counts, and the concrete status text
+  shown during gameplay;
 - `GuideObjectiveState`, whose ordered states are:
 
 1. `NOT_STARTED` before the player first speaks to the Guide;
@@ -35,10 +36,13 @@ the engine.
 
 Tracks one Guide collection objective for the current game session.
 
-It starts in `NOT_STARTED`. Its `start()`, `mark_ready_to_complete()`, and
-`complete()` methods perform the three explicit state changes. The read-only
-`state` exposes the current state, while `status_text` provides the concrete
-game-owned text displayed by `GameplayScene`.
+It starts in `NOT_STARTED` with zero collected items and a required total
+provided by the composition root. Its `start()` and `complete()` methods perform
+explicit state changes. `record_item_collected()` increments progress and marks
+the objective ready when the count reaches the required total. The read-only
+`state`, `total_items`, and `collected_items` expose current progress, while
+`status_text` provides the concrete game-owned text displayed by
+`GameplayScene`.
 
 ### [`GuideObjectiveState`](../api/game-progression.md#my_first_adventure_game.game.progression.GuideObjectiveState)
 
@@ -62,7 +66,7 @@ for, or decide when an objective is complete.
 stateDiagram-v2
     [*] --> NOT_STARTED
     NOT_STARTED --> ACTIVE: first Guide interaction
-    ACTIVE --> READY_TO_COMPLETE: every collectible becomes inactive
+    ACTIVE --> READY_TO_COMPLETE: recorded count reaches required total
     READY_TO_COMPLETE --> COMPLETED: return to the Guide
     COMPLETED --> COMPLETED: later Guide interaction
 ```
@@ -72,20 +76,26 @@ same instance into `GameplayScene`. The scene reads `status_text` for display
 without changing progression. The first Guide
 interaction activates the map collectibles and uses the NPC's introductory
 lines. Later interactions while the objective is active use a reminder. The
-collection handler marks the objective ready only after every collectible is
-inactive. Returning to the Guide then selects the completion message and makes
-that result stable for later interactions.
+collection handler records each `ItemCollected` fact. The objective marks itself
+ready when the recorded count reaches the total supplied from the map.
+Returning to the Guide then selects the completion message and makes that result
+stable for later interactions.
 
 ## Invariants
 
 - Every new game starts in `NOT_STARTED`.
+- Every new objective starts with zero collected items.
+- The required total equals the number of objective collectibles on that
+  session's map.
 - Objective collectibles remain inactive until the first Guide interaction.
 - The first Guide interaction activates the objective collectibles.
-- Collecting every objective item changes `ACTIVE` to `READY_TO_COMPLETE`.
+- Each reported collection increments the objective count once.
+- Reaching the required total changes `ACTIVE` to `READY_TO_COMPLETE`.
 - Only a later Guide interaction changes `READY_TO_COMPLETE` to `COMPLETED`.
 - Later Guide interactions keep the objective completed.
 - Starting another game creates an independent objective state.
-- Each state has one stable game-owned status text.
+- The active status text displays collected and required item counts.
+- Every other state has one stable game-owned status text.
 - `GameplayScene` observes the objective but does not perform its transitions.
 - The engine does not depend on game progression.
 
@@ -105,6 +115,8 @@ reveal shared mechanics that can be separated from their content and rules.
   policy into a reusable mechanism.
 - Making `GameplayScene` select objective dialogue would couple spatial
   interaction to progression content.
+- Recording the same item event more than once would overcount progress; the
+  gameplay event contract must continue to deliver collection once per item.
 - Introducing a generic quest graph, condition language, or event bus for this
   single objective would create unsupported abstraction.
 
@@ -118,6 +130,10 @@ Current tests verify:
 - interaction during collection uses the active-objective reminder;
 - collecting every item makes the completion dialogue available;
 - later interactions preserve the completed result.
-- each state exposes the expected status text;
+- a new objective exposes the supplied total and starts at zero;
+- recording collection increments the count and reaching the total marks the
+  objective ready;
+- active status text reports live collected and required counts;
+- other states expose the expected status text;
 - runtime composition gives each gameplay session its own objective;
 - gameplay rendering displays the current objective text.

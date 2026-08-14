@@ -7,7 +7,10 @@ from my_first_adventure_game.game.events import (
     ObstacleDestroyed,
     PlayerDefeated,
 )
-from my_first_adventure_game.game.progression import GuideObjective
+from my_first_adventure_game.game.progression import (
+    GuideObjective,
+    GuideObjectiveState,
+)
 
 
 def test_main_builds_and_runs_application(monkeypatch) -> None:
@@ -296,6 +299,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     collectible.active = False
     handle_item_collected(event)
 
+    assert gameplay_args[19].collected_items == 1
+    assert gameplay_args[19].state is GuideObjectiveState.READY_TO_COMPLETE
+
     player_event = PlayerDefeated(player_id="player")
     handle_player_defeated(player_event)
 
@@ -356,6 +362,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     session_score.add.assert_called_once_with(100)
 
     second_game_map = Mock()
+    second_collectible = Mock()
+    second_collectible.active = False
+    second_game_map.collectibles = (second_collectible,)
     second_session_score = Mock()
     second_gameplay_scene = Mock()
     second_defeat_scene = Mock()
@@ -400,6 +409,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert second_gameplay_args[15:19] == second_player_animations
     assert isinstance(second_gameplay_args[19], GuideObjective)
     assert second_gameplay_args[19] is not gameplay_args[19]
+    assert second_gameplay_args[19].total_items == len(second_game_map.collectibles)
 
     second_defeat_args = create_defeat_scene.call_args.args
 

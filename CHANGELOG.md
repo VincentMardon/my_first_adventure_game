@@ -80,6 +80,7 @@ and this project adheres to
   collection, and preserves completion across later interactions.
 - A gameplay objective display backed by the same session-local progression
   state.
+- Live collected and required item counts in the active objective display.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

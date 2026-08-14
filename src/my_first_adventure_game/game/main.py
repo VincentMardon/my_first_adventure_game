@@ -67,7 +67,9 @@ def main() -> None:
     def start_game() -> None:
         game_map = create_demo_map()
         session_score = SessionScore()
-        guide_objective = GuideObjective()
+        guide_objective = GuideObjective(
+            total_items=len(game_map.collectibles),
+        )
         player_idle_frames = tuple(
             pygame.Surface(PLAYER_FRAME_SIZE) for _ in PLAYER_IDLE_COLORS
         )
@@ -193,11 +195,7 @@ def main() -> None:
 
         def handle_item_collected(event: ItemCollected) -> None:
             session_score.add(item_collection_points(event))
-
-            if guide_objective.state is GuideObjectiveState.ACTIVE and all(
-                not collectible.active for collectible in game_map.collectibles
-            ):
-                guide_objective.mark_ready_to_complete()
+            guide_objective.record_item_collected()
 
         def handle_obstacle_destroyed(
             _event: ObstacleDestroyed,

@@ -304,9 +304,10 @@ animations, and explicit interaction, collection, destruction, enemy defeat,
 and player defeat handlers. It also receives the session-local `GuideObjective`
 as a read-only presentation collaborator.
 The collection handler applies the game-owned collection point rule to the same
-session score displayed by the scene. The destruction handler currently has no
-additional consequence. The enemy defeat handler replaces gameplay with the
-current session's `VictoryScene` only after all map enemies become inactive.
+session score displayed by the scene and records progress in the session-local
+Guide objective. The destruction handler currently has no additional
+consequence. The enemy defeat handler replaces gameplay with the current
+session's `VictoryScene` only after all map enemies become inactive.
 The player defeat handler explicitly replaces gameplay with the current
 session's `DefeatScene`.
 

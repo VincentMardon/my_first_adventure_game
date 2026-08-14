@@ -140,7 +140,7 @@ The project now provides a minimal playable top-down loop:
 20. the Guide gives a reminder while collection remains active, validates the
    objective after every item is collected, and preserves that completed state.
 21. the current objective status remains visible at the top of the gameplay
-   screen.
+   screen and reports collected items against the required total.
 
 Implemented foundations include:
 
@@ -187,6 +187,7 @@ Implemented foundations include:
 - a concrete four-state Guide collection objective that activates its items,
   selects reminder and completion dialogue, and resets with each new session;
 - a gameplay objective display that observes the same session-local objective;
+- live collected and required item counts while the Guide objective is active;
 - explicit game-owned progression without a generic quest, condition, or
   dialogue scripting system;
 - game-owned collection behavior based on reusable entity overlap detection;
