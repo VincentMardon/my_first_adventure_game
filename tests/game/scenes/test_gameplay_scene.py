@@ -15,6 +15,7 @@ from my_first_adventure_game.game.events import (
     PlayerDefeated,
 )
 from my_first_adventure_game.game.input import GameAction
+from my_first_adventure_game.game.progression import GuideObjective
 from my_first_adventure_game.game.scenes import gameplay_scene
 from my_first_adventure_game.game.scenes.gameplay_scene import (
     BACKGROUND_COLOR,
@@ -26,6 +27,8 @@ from my_first_adventure_game.game.scenes.gameplay_scene import (
     HEALTH_CENTER,
     HEALTH_COLOR,
     NPC_COLOR,
+    OBJECTIVE_CENTER,
+    OBJECTIVE_COLOR,
     PLAYER_INVULNERABILITY_DURATION,
     PLAYER_SPEED,
     SCORE_CENTER,
@@ -59,6 +62,7 @@ def _create_gameplay_scene(
     player_movement_animation: Animation | None = None,
     player_collection_animation: Animation | None = None,
     player_attack_animation: Animation | None = None,
+    guide_objective: GuideObjective | None = None,
 ) -> GameplayScene:
     if input_state is None:
         input_state_mock = Mock(spec=InputState)
@@ -97,6 +101,7 @@ def _create_gameplay_scene(
             player_collection_animation or Mock(spec=Animation)
         ),
         player_attack_animation=player_attack_animation or Mock(spec=Animation),
+        guide_objective=guide_objective or GuideObjective(),
     )
 
 
@@ -249,6 +254,7 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
     player_idle_animation = Mock(spec=Animation)
     player_idle_frame = Mock(spec=pygame.Surface)
     player_idle_animation.current_frame = player_idle_frame
+    guide_objective = GuideObjective()
 
     monkeypatch.setattr(gameplay_scene, "draw_text", draw_text)
     monkeypatch.setattr(pygame.draw, "rect", draw_rect)
@@ -261,6 +267,7 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         npcs=(active_npc, inactive_npc),
         collectibles=(active_collectible, inactive_collectible),
         player_idle_animation=player_idle_animation,
+        guide_objective=guide_objective,
     )
 
     scene.draw(surface)
@@ -283,6 +290,13 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
             score_font,
             HEALTH_COLOR,
             center=HEALTH_CENTER,
+        ),
+        call(
+            surface,
+            "Objective: Talk to the Guide",
+            score_font,
+            OBJECTIVE_COLOR,
+            center=OBJECTIVE_CENTER,
         ),
     ]
     surface.fill.assert_called_once_with(BACKGROUND_COLOR)

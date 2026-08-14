@@ -136,12 +136,15 @@ that score with `GameplayScene` for display.
 
 ### Progression
 
-Names the session-local states of the Guide's concrete collection objective.
+Owns the session-local state and status text of the Guide's concrete collection
+objective.
 
 The objective starts before activation, becomes active after the first Guide
 interaction, becomes ready after every requested item is collected, and is
 completed when the player returns to the Guide. The transitions remain
-game-owned orchestration in `game.main`, not a generic engine quest system.
+game-owned: `GuideObjective` records them, while `game.main` decides when they
+occur and what they change in the world. `GameplayScene` only reads the current
+status for display. This is not a generic engine quest system.
 
 ### Scenes
 
@@ -285,6 +288,7 @@ flowchart LR
 
     InputState["InputState"] --> GameplayScene
     SessionScore["SessionScore"] --> GameplayScene
+    GuideObjective["GuideObjective"] -->|"provides status text"| GameplayScene
     Animation["Animation"] --> GameplayScene
     FontCache["FontCache"] --> GameplayScene
     GameplayScene --> DrawText["draw_text"]
@@ -302,11 +306,12 @@ flowchart LR
     GuideObjectiveState -->|"selects Guide dialogue"| DialogueScene["DialogueScene"]
 ```
 
-`game.main` creates the demo map, current `SessionScore`, and temporary
-two-frame idle, movement, collection, and attack animations only after the
-title scene requests a new game, then composes
+`game.main` creates the demo map, current `SessionScore`, temporary two-frame
+idle, movement, collection, and attack animations, and a `GuideObjective` only
+after the title scene requests a new game, then composes
 `GameplayScene` from its gameplay entities, shared rendering services, score,
-animations, and explicit collection and destruction handlers. `GameplayScene`
+objective, animations, and explicit collection and destruction handlers.
+`GameplayScene`
 selects idle or
 movement presentation from directional intent, gives one-shot collection
 presentation priority until completion, advances and renders the selected
@@ -358,6 +363,8 @@ before collection finishes use a game-owned reminder. Returning after every
 item is collected selects a completion message and makes the completed result
 stable for later interactions. This is a concrete progression rule assembled
 in `game.main`, not a reusable quest or dialogue-condition system.
+The gameplay HUD reads the same objective instance and displays its current
+game-owned status text without owning any transition rule.
 
 `game.main` also injects a callback into `TitleScene` that explicitly replaces
 the active scene when confirmation is pressed. It configures the shared

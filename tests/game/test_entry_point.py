@@ -7,6 +7,7 @@ from my_first_adventure_game.game.events import (
     ObstacleDestroyed,
     PlayerDefeated,
 )
+from my_first_adventure_game.game.progression import GuideObjective
 
 
 def test_main_builds_and_runs_application(monkeypatch) -> None:
@@ -238,6 +239,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert gameplay_args[16] is player_movement_animation
     assert gameplay_args[17] is player_collection_animation
     assert gameplay_args[18] is player_attack_animation
+    assert isinstance(gameplay_args[19], GuideObjective)
 
     request_pause = gameplay_args[4]
     handle_player_defeated = gameplay_args[5]
@@ -395,7 +397,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert second_gameplay_args[8] is second_game_map.npcs
     assert second_gameplay_args[11] is second_game_map.collectibles
     assert second_gameplay_args[13] is second_game_map.destructible_obstacles
-    assert second_gameplay_args[15:] == second_player_animations
+    assert second_gameplay_args[15:19] == second_player_animations
+    assert isinstance(second_gameplay_args[19], GuideObjective)
+    assert second_gameplay_args[19] is not gameplay_args[19]
 
     second_defeat_args = create_defeat_scene.call_args.args
 

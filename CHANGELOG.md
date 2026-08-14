@@ -78,6 +78,8 @@ and this project adheres to
 - A session-local four-state Guide collection objective that starts by
   activating its items, provides an active reminder, validates return after
   collection, and preserves completion across later interactions.
+- A gameplay objective display backed by the same session-local progression
+  state.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

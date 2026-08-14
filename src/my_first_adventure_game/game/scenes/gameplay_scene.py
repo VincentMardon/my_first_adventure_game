@@ -16,6 +16,7 @@ from my_first_adventure_game.game.events import (
     PlayerDefeated,
 )
 from my_first_adventure_game.game.input import GameAction
+from my_first_adventure_game.game.progression import GuideObjective
 from my_first_adventure_game.game.scoring import SessionScore
 
 ATTACK_REACH = 16.0
@@ -30,6 +31,8 @@ HEALTH_COLOR = (248, 112, 112)
 HEALTH_CENTER = (80, 52)
 INTERACTION_REACH = 16.0
 NPC_COLOR = (112, 160, 240)
+OBJECTIVE_CENTER = (640, 24)
+OBJECTIVE_COLOR = (200, 220, 240)
 PLAYER_ATTACK_DAMAGE = 1
 PLAYER_SPEED = 160.0
 PLAYER_INVULNERABILITY_DURATION = 1.0
@@ -64,6 +67,7 @@ class GameplayScene(Scene):
         player_movement_animation: Animation,
         player_collection_animation: Animation,
         player_attack_animation: Animation,
+        guide_objective: GuideObjective,
     ) -> None:
         self._input_state = input_state
         self._font_cache = font_cache
@@ -91,6 +95,7 @@ class GameplayScene(Scene):
         self._player_is_collecting = False
         self._player_attack_animation = player_attack_animation
         self._player_is_attacking = False
+        self._guide_objective = guide_objective
 
     def handle_event(self, event: pygame.event.Event) -> None:
         return None
@@ -291,13 +296,19 @@ class GameplayScene(Scene):
             SCORE_COLOR,
             center=SCORE_CENTER,
         )
-
         draw_text(
             surface,
             f"Health: {self._player.health}",
             score_font,
             HEALTH_COLOR,
             center=HEALTH_CENTER,
+        )
+        draw_text(
+            surface,
+            self._guide_objective.status_text,
+            score_font,
+            OBJECTIVE_COLOR,
+            center=OBJECTIVE_CENTER,
         )
 
 

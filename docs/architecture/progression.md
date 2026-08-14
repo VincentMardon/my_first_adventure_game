@@ -5,15 +5,19 @@
 The game progression domain names the states of the Guide's concrete collection
 objective.
 
-It currently exposes `GuideObjectiveState`, whose ordered states are:
+It currently exposes:
+
+- `GuideObjective`, which owns the session-local state, its explicit
+  transitions, and the concrete status text shown during gameplay;
+- `GuideObjectiveState`, whose ordered states are:
 
 1. `NOT_STARTED` before the player first speaks to the Guide;
 2. `ACTIVE` while the requested collectibles are available;
 3. `READY_TO_COMPLETE` after every requested collectible has been collected;
 4. `COMPLETED` after the player returns to the Guide.
 
-The transitions and their gameplay consequences are composed in `game.main`.
-This domain does not provide a generic quest system.
+`GuideObjective` owns the transitions. Their gameplay consequences remain
+composed in `game.main`. This domain does not provide a generic quest system.
 
 ## Why this domain exists
 
@@ -27,12 +31,22 @@ the engine.
 
 ## Public components
 
+### [`GuideObjective`](../api/game-progression.md#my_first_adventure_game.game.progression.GuideObjective)
+
+Tracks one Guide collection objective for the current game session.
+
+It starts in `NOT_STARTED`. Its `start()`, `mark_ready_to_complete()`, and
+`complete()` methods perform the three explicit state changes. The read-only
+`state` exposes the current state, while `status_text` provides the concrete
+game-owned text displayed by `GameplayScene`.
+
 ### [`GuideObjectiveState`](../api/game-progression.md#my_first_adventure_game.game.progression.GuideObjectiveState)
 
 Names the four states of the Guide's collection objective.
 
-The enum carries no transition logic. `game.main` owns the session-local state
-and changes it in response to NPC interaction and item collection.
+The enum carries no transition logic. `GuideObjective` owns the session-local
+state and changes it when instructed by `game.main` after NPC interaction or
+item collection.
 
 ## Ownership
 
@@ -53,7 +67,9 @@ stateDiagram-v2
     COMPLETED --> COMPLETED: later Guide interaction
 ```
 
-`game.main` creates a fresh state for every new game. The first Guide
+`game.main` creates a fresh `GuideObjective` for every new game and injects the
+same instance into `GameplayScene`. The scene reads `status_text` for display
+without changing progression. The first Guide
 interaction activates the map collectibles and uses the NPC's introductory
 lines. Later interactions while the objective is active use a reminder. The
 collection handler marks the objective ready only after every collectible is
@@ -69,6 +85,8 @@ that result stable for later interactions.
 - Only a later Guide interaction changes `READY_TO_COMPLETE` to `COMPLETED`.
 - Later Guide interactions keep the objective completed.
 - Starting another game creates an independent objective state.
+- Each state has one stable game-owned status text.
+- `GameplayScene` observes the objective but does not perform its transitions.
 - The engine does not depend on game progression.
 
 ## Extension points
@@ -100,3 +118,6 @@ Current tests verify:
 - interaction during collection uses the active-objective reminder;
 - collecting every item makes the completion dialogue available;
 - later interactions preserve the completed result.
+- each state exposes the expected status text;
+- runtime composition gives each gameplay session its own objective;
+- gameplay rendering displays the current objective text.

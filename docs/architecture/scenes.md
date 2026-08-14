@@ -251,8 +251,8 @@ and
 - returns to the animation selected by directional intent after collection
   playback finishes;
 - draws active walls, enemies, NPCs, and collectibles as game-owned rectangles,
-  blits the current player animation frame, and draws the current session score
-  and player health;
+  blits the current player animation frame, and draws the current session score,
+  player health, and Guide objective status;
 - rounds floating-point geometry only at rendering time.
 
 `DefeatScene`:
@@ -301,7 +301,8 @@ and
 score, the player, walls, enemies, NPCs, destructible obstacles, and
 collectibles provided by the demo map, idle, movement, collection, and attack
 animations, and explicit interaction, collection, destruction, enemy defeat,
-and player defeat handlers.
+and player defeat handlers. It also receives the session-local `GuideObjective`
+as a read-only presentation collaborator.
 The collection handler applies the game-owned collection point rule to the same
 session score displayed by the scene. The destruction handler currently has no
 additional consequence. The enemy defeat handler replaces gameplay with the
@@ -407,6 +408,8 @@ Current tests verify:
   completion, and then returns to the state selected by directional input;
 - the gameplay scene draws its background, walls, active enemies, NPCs,
   collectibles, and animated player in order;
+- the gameplay scene displays the current Guide objective status without
+  changing its state;
 - the gameplay scene deactivates an active overlapping collectible and delivers
   its event exactly once across subsequent updates while leaving distant
   collectibles active;

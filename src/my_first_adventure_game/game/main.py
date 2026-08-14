@@ -14,7 +14,10 @@ from my_first_adventure_game.game.events import (
 )
 from my_first_adventure_game.game.input import DEFAULT_KEYBOARD_BINDINGS
 from my_first_adventure_game.game.levels import create_demo_map
-from my_first_adventure_game.game.progression import GuideObjectiveState
+from my_first_adventure_game.game.progression import (
+    GuideObjective,
+    GuideObjectiveState,
+)
 from my_first_adventure_game.game.scenes import (
     DefeatScene,
     DialogueScene,
@@ -64,7 +67,7 @@ def main() -> None:
     def start_game() -> None:
         game_map = create_demo_map()
         session_score = SessionScore()
-        guide_objective_state = GuideObjectiveState.NOT_STARTED
+        guide_objective = GuideObjective()
         player_idle_frames = tuple(
             pygame.Surface(PLAYER_FRAME_SIZE) for _ in PLAYER_IDLE_COLORS
         )
@@ -148,18 +151,16 @@ def main() -> None:
             scene_manager.change_scene(gameplay_scene)
 
         def handle_npc_interacted(npc: NPC) -> None:
-            nonlocal guide_objective_state
-
-            if guide_objective_state is GuideObjectiveState.NOT_STARTED:
+            if guide_objective.state is GuideObjectiveState.NOT_STARTED:
                 for collectible in game_map.collectibles:
                     collectible.active = True
 
-                guide_objective_state = GuideObjectiveState.ACTIVE
                 dialogue_lines = npc.dialogue_lines
-            elif guide_objective_state is GuideObjectiveState.ACTIVE:
+                guide_objective.start()
+            elif guide_objective.state is GuideObjectiveState.ACTIVE:
                 dialogue_lines = COLLECTION_ACTIVE_DIALOGUE_LINES
-            elif guide_objective_state is GuideObjectiveState.READY_TO_COMPLETE:
-                guide_objective_state = GuideObjectiveState.COMPLETED
+            elif guide_objective.state is GuideObjectiveState.READY_TO_COMPLETE:
+                guide_objective.complete()
                 dialogue_lines = COLLECTION_COMPLETE_DIALOGUE_LINES
             else:
                 dialogue_lines = COLLECTION_COMPLETE_DIALOGUE_LINES
@@ -191,14 +192,12 @@ def main() -> None:
                 scene_manager.change_scene(victory_scene)
 
         def handle_item_collected(event: ItemCollected) -> None:
-            nonlocal guide_objective_state
-
             session_score.add(item_collection_points(event))
 
-            if guide_objective_state is GuideObjectiveState.ACTIVE and all(
+            if guide_objective.state is GuideObjectiveState.ACTIVE and all(
                 not collectible.active for collectible in game_map.collectibles
             ):
-                guide_objective_state = GuideObjectiveState.READY_TO_COMPLETE
+                guide_objective.mark_ready_to_complete()
 
         def handle_obstacle_destroyed(
             _event: ObstacleDestroyed,
@@ -225,6 +224,7 @@ def main() -> None:
             player_movement_animation,
             player_collection_animation,
             player_attack_animation,
+            guide_objective,
         )
 
         scene_manager.change_scene(gameplay_scene)
