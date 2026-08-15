@@ -88,6 +88,8 @@ and this project adheres to
 - In-session map changes that preserve the same gameplay scene, player, score,
   and progression state.
 - Temporary game-owned visual markers for active map exits.
+- Registered boundary walls around the clearing with an opening for its return
+  exit.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

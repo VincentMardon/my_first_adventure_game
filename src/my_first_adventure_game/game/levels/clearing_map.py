@@ -20,9 +20,37 @@ def create_clearing_map(player: Player) -> GameMap:
             destination_position=(1120.0, 320.0),
         ),
     )
+    walls = (
+        Entity(
+            entity_id="clearing-wall-top",
+            position=pygame.Vector2(64.0, 64.0),
+            size=pygame.Vector2(1152.0, 32.0),
+        ),
+        Entity(
+            entity_id="clearing-wall-bottom",
+            position=pygame.Vector2(64.0, 624.0),
+            size=pygame.Vector2(1152.0, 32.0),
+        ),
+        Entity(
+            entity_id="clearing-wall-left-top",
+            position=pygame.Vector2(64.0, 96.0),
+            size=pygame.Vector2(32.0, 224.0),
+        ),
+        Entity(
+            entity_id="clearing-wall-left-bottom",
+            position=pygame.Vector2(64.0, 400.0),
+            size=pygame.Vector2(32.0, 224.0),
+        ),
+        Entity(
+            entity_id="clearing-wall-right",
+            position=pygame.Vector2(1184.0, 96.0),
+            size=pygame.Vector2(32.0, 528.0),
+        ),
+    )
 
     for entity in (
         player.entity,
+        *walls,
         *(map_exit.entity for map_exit in exits),
     ):
         world.add(entity)
@@ -31,7 +59,7 @@ def create_clearing_map(player: Player) -> GameMap:
         map_id="clearing",
         world=world,
         player=player,
-        walls=(),
+        walls=walls,
         enemies=(),
         npcs=(),
         destructible_obstacles=(),

@@ -65,7 +65,8 @@ map to load.
 
 Creates the current minimal clearing map with the player supplied by the
 active session. Its return exit leads back to the demo map. The clearing is a
-technical navigation target and does not yet represent finished game content.
+technical navigation target bounded by game-owned walls around an opening for
+that exit; it does not yet represent finished game content.
 
 ## Ownership
 
@@ -152,6 +153,13 @@ The demo map additionally guarantees:
 - The player starts outside every wall.
 - Every collectible starts outside the player and every wall.
 - Wall bounds are distinct.
+
+The clearing map additionally guarantees:
+
+- Its boundary walls are registered in its world.
+- Its left boundary leaves an opening around the return exit.
+- Neither the return exit nor the shared player's arrival position overlaps a
+  wall.
 
 ## Extension points
 
