@@ -6,8 +6,12 @@ The game levels domain defines the concrete spatial content used during gameplay
 
 It currently provides:
 
-- `GameMap`, which groups a world with the entities whose roles matter to the game;
-- `create_demo_map()`, which creates the first Python-authored map.
+- `GameMap`, which groups a stable map identifier, a world, and the entities
+  whose roles matter to the game;
+- `MapExit`, which describes a spatial trigger and its concrete destination;
+- `create_demo_map()`, which creates the first Python-authored map;
+- `create_clearing_map()`, which creates a minimal second map around the
+  current session player.
 
 This domain belongs to `game`, not `engine`.
 
@@ -32,6 +36,7 @@ Groups:
 - the `NPC` objects assigned the interaction role by the game;
 - the wall entities assigned the destructible obstacle role by the game;
 - the entities assigned the collectible role by the game.
+- the spatial exits available from the map.
 
 The dataclass is immutable, but the grouped world, entities, and enemies remain
 mutable.
@@ -49,6 +54,19 @@ activated by the concrete progression rule after the first Guide interaction.
 
 The concrete identifiers, positions, sizes, and entity roles belong to the game.
 
+### [`MapExit`](../api/game-levels.md#my_first_adventure_game.game.levels.MapExit)
+
+Associates an active spatial entity with a destination map identifier and the
+player position to apply after arrival. `GameplayScene` detects overlap and
+reports the selected exit to the composition root; it does not decide which
+map to load.
+
+### [`create_clearing_map`](../api/game-levels.md#my_first_adventure_game.game.levels.create_clearing_map)
+
+Creates the current minimal clearing map with the player supplied by the
+active session. Its return exit leads back to the demo map. The clearing is a
+technical navigation target and does not yet represent finished game content.
+
 ## Ownership
 
 The engine owns reusable world storage, spatial entities, bounds, and movement
@@ -61,6 +79,7 @@ The game levels domain owns:
 - entity identifiers;
 - initial positions and sizes;
 - the selection and ordering of map content.
+- stable map identifiers, exit destinations, and arrival positions.
 
 ## Relationships
 
@@ -70,6 +89,8 @@ flowchart TD
     GameMain["game.main"]
     GameplayScene["game.scenes.GameplayScene"]
     DemoMap["game.levels.create_demo_map"]
+    ClearingMap["game.levels.create_clearing_map"]
+    MapExit["game.levels.MapExit"]
     World["engine.world.World"]
     Entity["engine.world.Entity"]
     Enemy["game.entities.Enemy"]
@@ -77,6 +98,9 @@ flowchart TD
     Player["game.entities.Player"]
 
     DemoMap --> GameMap
+    ClearingMap --> GameMap
+    DemoMap --> MapExit
+    ClearingMap --> MapExit
     DemoMap --> World
     DemoMap --> Entity
     DemoMap --> Enemy
@@ -88,23 +112,31 @@ flowchart TD
     GameMap --> NPC
     GameMap --> Player
     GameMain --> DemoMap
+    GameMain --> ClearingMap
     GameMain -->|"reads entity roles"| GameMap
     GameMain --> GameplayScene
 ```
 
-`game.main` creates the demo map and passes its player, walls, enemies, NPCs,
-destructible obstacles, and collectibles to `GameplayScene`. The scene consumes
-these concrete roles without depending on the `GameMap` container itself.
+`game.main` creates the demo and clearing maps for each new session. Both maps
+share the same `Player`. It initially passes the demo roles and exits to
+`GameplayScene`; later changes replace the scene's spatial content from the
+selected `GameMap` while preserving the scene and session collaborators.
 
 A map is spatial content managed during gameplay. It is not a scene and is not
 managed by `SceneManager`.
 
 ## Invariants
 
-- The player, every wall, enemy, NPC, and collectible are registered in the
-  same world.
+- The player and every map-owned spatial entity, including exits, are
+  registered in the same world.
 - Entity identifiers are unique within the map.
+- Every map has a stable identifier used by concrete exit destinations.
+- Every exit entity is registered in its map's world.
 - Registration order is deterministic.
+- Maps created for the same session share the same player object.
+
+The demo map additionally guarantees:
+
 - The map contains at least one wall and one collectible.
 - Every objective collectible starts inactive.
 - The map contains at least one active enemy.

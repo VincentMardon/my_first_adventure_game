@@ -142,6 +142,10 @@ The project now provides a minimal playable top-down loop:
 21. the current objective status remains visible at the top of the gameplay
    screen and reports collected items against the required total.
 22. returning to the Guide after collection awards a one-time 500-point bonus.
+23. crossing the demo map's right exit moves the same player into a minimal
+   clearing without replacing the gameplay scene;
+24. crossing the clearing's left exit returns to the preserved demo map while
+   keeping session score and progression.
 
 Implemented foundations include:
 
@@ -159,6 +163,8 @@ Implemented foundations include:
 - lightweight spatial entities and deterministic world storage;
 - axis-separated movement against solid obstacles;
 - a game-owned Python-authored demo map with collectible objects;
+- a minimal second map and bidirectional exits that preserve the same gameplay
+  scene and session player;
 - a game-owned destructible obstacle removed by a proximity attack;
 - a game-owned stationary enemy composed from reusable spatial state and
   mutable health;

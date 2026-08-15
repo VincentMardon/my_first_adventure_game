@@ -184,12 +184,13 @@ after the final line.
 
 ### Levels
 
-Defines the first Python-authored game map.
+Defines the current Python-authored game maps and their spatial connections.
 
-`GameMap` groups the reusable world representation with the concrete player,
-wall, enemy, NPC, destructible obstacle, and collectible roles owned by the
-game.
-`create_demo_map()` defines their initial geometry and registration order.
+`GameMap` groups a stable identifier and reusable world representation with the
+concrete player, wall, enemy, NPC, destructible obstacle, collectible, and exit
+roles owned by the game. `MapExit` associates a spatial trigger with a concrete
+destination identifier and arrival position. `create_demo_map()` and
+`create_clearing_map()` define the current layouts and registration order.
 
 ## Reserved domains
 
@@ -269,16 +270,20 @@ flowchart TD
 ```mermaid
 flowchart LR
     GameMain["game.main"] --> DemoMap["create_demo_map"]
+    GameMain --> ClearingMap["create_clearing_map"]
     DemoMap --> GameMap["GameMap"]
+    ClearingMap --> GameMap
     GameMap --> World["World"]
     GameMap --> Player["Player"]
     GameMap --> Enemy["Enemy"]
     GameMap --> NPC["NPC"]
+    GameMap --> MapExit["MapExit"]
+    MapExit --> Entity
     Player -->|"composes"| Entity["Entity"]
     Enemy -->|"composes"| Entity
     NPC -->|"composes"| Entity
     World -->|"stores"| Entity
-    GameMain -->|"injects map roles"| GameplayScene["GameplayScene"]
+    GameMain -->|"injects and replaces map roles"| GameplayScene["GameplayScene"]
 ```
 
 ### Gameplay collaborators and facts
@@ -307,9 +312,10 @@ flowchart LR
     GuideObjectiveState -->|"selects Guide dialogue"| DialogueScene["DialogueScene"]
 ```
 
-`game.main` creates the demo map, current `SessionScore`, temporary two-frame
-idle, movement, collection, and attack animations, and a `GuideObjective` only
-after the title scene requests a new game, then composes
+`game.main` creates the demo and clearing maps around the same player, the
+current `SessionScore`, temporary two-frame idle, movement, collection, and
+attack animations, and a `GuideObjective` only after the title scene requests
+a new game, then composes
 `GameplayScene` from its gameplay entities, shared rendering services, score,
 objective, animations, and explicit collection and destruction handlers.
 `GameplayScene`
@@ -325,6 +331,13 @@ same attack reach takes one point of damage. The current enemy survives the
 first hit and briefly flashes with a game-owned feedback color. The second hit
 deactivates its spatial entity, removes it from later collision and rendering,
 and reports an `EnemyDefeated` fact.
+
+After movement, `GameplayScene` detects overlap with active exits and reports
+the selected `MapExit` to the composition root. The root resolves either the
+demo or clearing map, applies the exit's arrival position to their shared
+player, and calls `GameplayScene.change_map()`. This replaces only map-owned
+spatial roles and enemy timers; the gameplay scene, score, objective, and
+session callbacks remain unchanged. The `SceneManager` is not involved.
 
 The enemy defeat handler inspects the remaining map enemies after each factual
 event. It explicitly replaces gameplay with `VictoryScene` only when all of
@@ -348,10 +361,10 @@ to the scene instance. This remains a concrete linear interaction flow, not an
 engine dialogue system.
 
 Confirmation on `DefeatScene` explicitly returns to the existing title scene.
-The next start request constructs a new map, session score, animation set,
-gameplay scene, pause scene, defeat scene, victory scene, and session-local
-callbacks. Shared application services such as input state, font cache, and
-scene manager remain alive.
+The next start request constructs new demo and clearing maps, session score,
+animation set, gameplay scene, pause scene, defeat scene, victory scene, and
+session-local callbacks. Shared application services such as input state, font
+cache, and scene manager remain alive.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.

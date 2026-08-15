@@ -12,6 +12,7 @@ def test_demo_map_registers_all_entities_in_world() -> None:
         *(enemy.entity for enemy in game_map.enemies),
         *(npc.entity for npc in game_map.npcs),
         *game_map.collectibles,
+        *(map_exit.entity for map_exit in game_map.exits),
     )
     assert (
         game_map.world.get(game_map.player.entity.entity_id) is game_map.player.entity
@@ -125,3 +126,21 @@ def test_demo_map_has_active_npcs_with_dialogue() -> None:
     assert all(line.strip() for npc in game_map.npcs for line in npc.dialogue_lines)
     assert not any(npc.entity in game_map.walls for npc in game_map.npcs)
     assert any(len(npc.dialogue_lines) > 1 for npc in game_map.npcs)
+
+
+def test_demo_map_has_stable_identifier() -> None:
+    game_map = create_demo_map()
+
+    assert game_map.map_id == "demo"
+
+
+def test_demo_map_has_registered_exit_to_clearing() -> None:
+    game_map = create_demo_map()
+
+    assert len(game_map.exits) == 1
+
+    map_exit = game_map.exits[0]
+
+    assert map_exit.destination_map_id == "clearing"
+    assert map_exit.destination_position == (128.0, 320.0)
+    assert game_map.world.get(map_exit.entity.entity_id) is map_exit.entity

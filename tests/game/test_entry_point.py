@@ -19,6 +19,11 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     scene_manager = Mock()
     font_cache = Mock()
     game_map = Mock()
+    game_map.map_id = "demo"
+    game_map.exits = ()
+    clearing_map = Mock()
+    clearing_map.map_id = "clearing"
+    clearing_map.player = game_map.player
     first_enemy = Mock()
     first_enemy.entity.active = False
     second_enemy = Mock()
@@ -59,6 +64,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_scene_manager = Mock(return_value=scene_manager)
     create_font_cache = Mock(return_value=font_cache)
     create_demo_map = Mock(return_value=game_map)
+    create_clearing_map = Mock(return_value=clearing_map)
     create_session_score = Mock(return_value=session_score)
     score_item_collection = Mock(return_value=100)
     score_guide_objective_completion = Mock(return_value=500)
@@ -94,6 +100,11 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     monkeypatch.setattr(game_main, "InputState", create_input_state)
     monkeypatch.setattr(game_main, "FontCache", create_font_cache)
     monkeypatch.setattr(game_main, "create_demo_map", create_demo_map)
+    monkeypatch.setattr(
+        game_main,
+        "create_clearing_map",
+        create_clearing_map,
+    )
     monkeypatch.setattr(game_main, "SessionScore", create_session_score)
     monkeypatch.setattr(
         game_main,
@@ -119,6 +130,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_input_state.assert_called_once_with(game_main.DEFAULT_KEYBOARD_BINDINGS)
     create_font_cache.assert_called_once_with(game_main.pygame)
     create_demo_map.assert_not_called()
+    create_clearing_map.assert_not_called()
     create_session_score.assert_not_called()
     create_gameplay_scene.assert_not_called()
     create_defeat_scene.assert_not_called()
@@ -146,6 +158,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert callable(pause_args[2])
 
     create_demo_map.assert_called_once_with()
+    create_clearing_map.assert_called_once_with(game_map.player)
     create_session_score.assert_called_once_with()
     create_defeat_scene.assert_called_once()
 
@@ -249,6 +262,8 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert gameplay_args[17] is player_collection_animation
     assert gameplay_args[18] is player_attack_animation
     assert isinstance(gameplay_args[19], GuideObjective)
+    assert gameplay_args[20] is game_map.exits
+    assert callable(gameplay_args[21])
 
     request_pause = gameplay_args[4]
     handle_player_defeated = gameplay_args[5]
@@ -327,6 +342,33 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     scene_manager.change_scene.assert_called_with(victory_scene)
 
+    handle_map_exit_reached = gameplay_args[21]
+    map_exit = Mock()
+    map_exit.destination_map_id = "clearing"
+    map_exit.destination_position = (128.0, 320.0)
+
+    handle_map_exit_reached(map_exit)
+
+    game_map.player.entity.position.update.assert_called_once_with(
+        map_exit.destination_position
+    )
+    gameplay_scene.change_map.assert_called_once_with(clearing_map)
+
+    return_exit = Mock()
+    return_exit.destination_map_id = "demo"
+    return_exit.destination_position = (1120.0, 320.0)
+
+    handle_map_exit_reached(return_exit)
+
+    assert game_map.player.entity.position.update.call_args_list == [
+        call(map_exit.destination_position),
+        call(return_exit.destination_position),
+    ]
+    assert gameplay_scene.change_map.call_args_list == [
+        call(clearing_map),
+        call(game_map),
+    ]
+
     handle_npc_interacted(npc)
 
     assert create_dialogue_scene.call_count == 3
@@ -372,6 +414,11 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     ]
 
     second_game_map = Mock()
+    second_game_map.map_id = "demo"
+    second_game_map.exits = ()
+    second_clearing_map = Mock()
+    second_clearing_map.map_id = "clearing"
+    second_clearing_map.player = second_game_map.player
     second_collectible = Mock()
     second_collectible.active = False
     second_game_map.collectibles = (second_collectible,)
@@ -384,6 +431,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     second_player_animations = tuple(Mock() for _ in range(4))
 
     create_demo_map.return_value = second_game_map
+    create_clearing_map.return_value = second_clearing_map
     create_session_score.return_value = second_session_score
     create_gameplay_scene.return_value = second_gameplay_scene
     create_defeat_scene.return_value = second_defeat_scene
@@ -395,11 +443,17 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     start_game()
 
     assert create_demo_map.call_count == 2
+    assert create_clearing_map.call_count == 2
     assert create_session_score.call_count == 2
     assert create_gameplay_scene.call_count == 2
     assert create_defeat_scene.call_count == 2
     assert create_victory_scene.call_count == 2
     assert create_pause_scene.call_count == 2
+
+    assert create_clearing_map.call_args_list == [
+        call(game_map.player),
+        call(second_game_map.player),
+    ]
 
     second_gameplay_args = create_gameplay_scene.call_args.args
 
@@ -420,6 +474,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert isinstance(second_gameplay_args[19], GuideObjective)
     assert second_gameplay_args[19] is not gameplay_args[19]
     assert second_gameplay_args[19].total_items == len(second_game_map.collectibles)
+    assert second_gameplay_args[20] is second_game_map.exits
+    assert callable(second_gameplay_args[21])
+    assert second_gameplay_args[21] is not handle_map_exit_reached
 
     second_defeat_args = create_defeat_scene.call_args.args
 
@@ -465,6 +522,18 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         call(gameplay_scene),
         call(second_gameplay_scene),
     ]
+
+    second_handle_map_exit_reached = second_gameplay_args[21]
+    second_map_exit = Mock()
+    second_map_exit.destination_map_id = "clearing"
+    second_map_exit.destination.position = (128.0, 320.0)
+
+    second_handle_map_exit_reached(second_map_exit)
+
+    second_game_map.player.entity.position.update.assert_called_once_with(
+        second_map_exit.destination_position
+    )
+    second_gameplay_scene.change_map.assert_called_once_with(second_clearing_map)
 
     create_scene_manager.assert_called_once_with(initial_scene)
     create_application.assert_called_once_with(

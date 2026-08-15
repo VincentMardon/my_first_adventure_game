@@ -25,8 +25,12 @@ A map represents spatial content owned by a gameplay scene.
 
 Changing maps does not automatically change scenes.
 
-`SceneManager` manages the active scene. A future gameplay scene will manage
-the active map through world or level collaborators.
+`SceneManager` manages the active scene. `GameplayScene` manages the current
+map-owned spatial roles and replaces them explicitly through `change_map()`.
+
+Concrete `MapExit` values identify a destination map and arrival position.
+`game.main` resolves the current game's destinations, updates the shared
+player position, and asks the existing gameplay scene to change maps.
 
 ## Consequences
 
@@ -40,8 +44,9 @@ the active map through world or level collaborators.
 
 ### Negative
 
-- The gameplay scene will coordinate additional world and map services.
-- Map transitions require their own explicit design.
+- The gameplay scene coordinates the spatial roles belonging to the active
+  map.
+- The composition root must resolve concrete destination identifiers.
 - Developers must understand two different kinds of navigation.
 
 ## Alternatives considered

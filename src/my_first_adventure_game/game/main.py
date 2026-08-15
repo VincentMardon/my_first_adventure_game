@@ -13,7 +13,11 @@ from my_first_adventure_game.game.events import (
     PlayerDefeated,
 )
 from my_first_adventure_game.game.input import DEFAULT_KEYBOARD_BINDINGS
-from my_first_adventure_game.game.levels import create_demo_map
+from my_first_adventure_game.game.levels import (
+    MapExit,
+    create_clearing_map,
+    create_demo_map,
+)
 from my_first_adventure_game.game.progression import (
     GuideObjective,
     GuideObjectiveState,
@@ -67,6 +71,7 @@ def main() -> None:
 
     def start_game() -> None:
         game_map = create_demo_map()
+        clearing_map = create_clearing_map(game_map.player)
         session_score = SessionScore()
         guide_objective = GuideObjective(
             total_items=len(game_map.collectibles),
@@ -204,6 +209,19 @@ def main() -> None:
         ) -> None:
             pass
 
+        def handle_map_exit_reached(map_exit: MapExit) -> None:
+            if map_exit.destination_map_id == game_map.map_id:
+                destination_map = game_map
+            elif map_exit.destination_map_id == clearing_map.map_id:
+                destination_map = clearing_map
+            else:
+                raise ValueError(
+                    f"Unknown destination map: {map_exit.destination_map_id}"
+                )
+
+            destination_map.player.entity.position.update(map_exit.destination_position)
+            gameplay_scene.change_map(destination_map)
+
         gameplay_scene = GameplayScene(
             input_state,
             font_cache,
@@ -225,6 +243,8 @@ def main() -> None:
             player_collection_animation,
             player_attack_animation,
             guide_objective,
+            game_map.exits,
+            handle_map_exit_reached,
         )
 
         scene_manager.change_scene(gameplay_scene)

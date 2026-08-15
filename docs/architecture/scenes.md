@@ -215,7 +215,7 @@ and
   wall entities, game-owned enemies and NPCs, destructible obstacles,
   collectible entities, idle, movement, collection, and attack animations, and
   explicit interaction, collection, destruction, enemy defeat, and player
-  defeat handlers;
+  defeat handlers, plus map exits and an explicit exit handler;
 - requests pause and returns immediately when `PAUSE` is pressed, before any
   gameplay timer, movement, attack, damage, collection, or animation advances;
 - converts directional actions into normalized movement;
@@ -226,6 +226,11 @@ and
 - applies the game-owned movement speed using delta time;
 - selects active wall, enemy, and NPC bounds as solid obstacles;
 - delegates collision-aware movement to the engine;
+- detects overlap with active map exits after movement, reports the selected
+  exit, and stops the old map's update immediately;
+- replaces its player and map-owned spatial roles through `change_map()` while
+  preserving the same gameplay scene, score, progression, callbacks, and
+  presentation collaborators;
 - finds the first active NPC within game-owned interaction reach when
   `INTERACT` is pressed, requests dialogue through an injected callback, and
   returns before the rest of that gameplay frame advances;
@@ -301,8 +306,8 @@ and
 score, the player, walls, enemies, NPCs, destructible obstacles, and
 collectibles provided by the demo map, idle, movement, collection, and attack
 animations, and explicit interaction, collection, destruction, enemy defeat,
-and player defeat handlers. It also receives the session-local `GuideObjective`
-as a read-only presentation collaborator.
+player defeat, and map-exit handlers. It also receives the session-local
+`GuideObjective` as a read-only presentation collaborator.
 The collection handler applies the game-owned collection point rule to the same
 session score displayed by the scene and records progress in the session-local
 Guide objective. The destruction handler currently has no additional
@@ -325,6 +330,12 @@ scene stack.
 When interaction validates a ready Guide objective, `game.main` also applies
 the game-owned 500-point completion rule to the shared session score. Later
 interactions use the stable completed branch and do not repeat the bonus.
+
+For each new session, `game.main` creates the demo map and a minimal clearing
+map around the same player. Reaching an exit selects one of those concrete
+maps, applies the exit's arrival position, and asks the existing
+`GameplayScene` to replace its spatial content. `SceneManager` is not involved,
+so score and progression remain unchanged across the round trip.
 
 `game.main` retains the title scene and shared application services across the
 application lifetime. Each start request creates a fresh map, score, animation
@@ -364,6 +375,7 @@ movement, which is a concrete presentation rule owned by the game.
 - A transition replaces the active scene explicitly.
 - The scenes domain never imports concrete game scenes.
 - Map transitions are not scene transitions by default.
+- A map change preserves the active gameplay scene and session state.
 
 ## Extension points
 
@@ -434,6 +446,11 @@ Current tests verify:
 - the title scene requests gameplay only when confirmation is pressed;
 - the composition root connects the demo map and explicit title-to-gameplay
   transition;
+- overlapping a map exit reports it once and stops the remainder of the old
+  map update;
+- replacing map content removes the previous map's exits;
+- the composition root preserves one gameplay scene and player while moving
+  between the demo map and clearing in both directions;
 - the defeat scene draws its background, message, and final session score;
 - confirmation on the defeat scene explicitly returns to the title;
 - pause requests stop the current gameplay update immediately, replace gameplay

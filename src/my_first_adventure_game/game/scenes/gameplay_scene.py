@@ -16,6 +16,7 @@ from my_first_adventure_game.game.events import (
     PlayerDefeated,
 )
 from my_first_adventure_game.game.input import GameAction
+from my_first_adventure_game.game.levels import GameMap, MapExit
 from my_first_adventure_game.game.progression import GuideObjective
 from my_first_adventure_game.game.scoring import SessionScore
 
@@ -68,6 +69,8 @@ class GameplayScene(Scene):
         player_collection_animation: Animation,
         player_attack_animation: Animation,
         guide_objective: GuideObjective,
+        exits: tuple[MapExit, ...],
+        on_map_exit_reached: Callable[[MapExit], None],
     ) -> None:
         self._input_state = input_state
         self._font_cache = font_cache
@@ -96,9 +99,24 @@ class GameplayScene(Scene):
         self._player_attack_animation = player_attack_animation
         self._player_is_attacking = False
         self._guide_objective = guide_objective
+        self._exits = exits
+        self._on_map_exit_reached = on_map_exit_reached
 
     def handle_event(self, event: pygame.event.Event) -> None:
         return None
+
+    def change_map(self, game_map: GameMap) -> None:
+        """Replace the spatial content managed by the gameplay scene."""
+        self._player = game_map.player
+        self._walls = game_map.walls
+        self._enemies = game_map.enemies
+        self._npcs = game_map.npcs
+        self._collectibles = game_map.collectibles
+        self._destructible_obstacles = game_map.destructible_obstacles
+        self._exits = game_map.exits
+        self._enemy_hit_time_remaining = {
+            enemy.entity.entity_id: 0.0 for enemy in game_map.enemies
+        }
 
     def update(self, delta_time: float) -> None:
         if self._input_state.is_pressed(GameAction.PAUSE):
@@ -110,6 +128,7 @@ class GameplayScene(Scene):
 
         if self._input_state.is_pressed(GameAction.INTERACT):
             player_bounds = self._player.entity.bounds
+
             interaction_bounds = AABB(
                 x=player_bounds.x - INTERACTION_REACH,
                 y=player_bounds.y - INTERACTION_REACH,
@@ -150,6 +169,13 @@ class GameplayScene(Scene):
         move_entity(self._player.entity, movement, solid_bounds)
 
         player_bounds = self._player.entity.bounds
+
+        for map_exit in self._exits:
+            if map_exit.entity.active and player_bounds.overlaps(
+                map_exit.entity.bounds
+            ):
+                self._on_map_exit_reached(map_exit)
+                return
 
         if self._player.entity.active and self._player_invulnerability_remaining <= 0.0:
             contact_bounds = AABB(

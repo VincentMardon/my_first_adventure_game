@@ -15,6 +15,7 @@ from my_first_adventure_game.game.events import (
     PlayerDefeated,
 )
 from my_first_adventure_game.game.input import GameAction
+from my_first_adventure_game.game.levels import MapExit, create_clearing_map
 from my_first_adventure_game.game.progression import GuideObjective
 from my_first_adventure_game.game.scenes import gameplay_scene
 from my_first_adventure_game.game.scenes.gameplay_scene import (
@@ -63,6 +64,8 @@ def _create_gameplay_scene(
     player_collection_animation: Animation | None = None,
     player_attack_animation: Animation | None = None,
     guide_objective: GuideObjective | None = None,
+    exits: tuple[MapExit, ...] = (),
+    on_map_exit_reached: Callable[[MapExit], None] | None = None,
 ) -> GameplayScene:
     if input_state is None:
         input_state_mock = Mock(spec=InputState)
@@ -102,6 +105,8 @@ def _create_gameplay_scene(
         ),
         player_attack_animation=player_attack_animation or Mock(spec=Animation),
         guide_objective=guide_objective or GuideObjective(total_items=2),
+        exits=exits,
+        on_map_exit_reached=on_map_exit_reached or Mock(),
     )
 
 
@@ -981,3 +986,72 @@ def test_update_does_not_interact_with_distant_npc(monkeypatch) -> None:
     scene.update(0.016)
 
     on_npc_interacted.assert_not_called()
+
+
+def test_update_reports_overlapping_map_exit(monkeypatch) -> None:
+    map_exit = MapExit(
+        entity=Entity(
+            entity_id="exit-to-clearing",
+            position=pygame.Vector2(100.0, 80.0),
+            size=pygame.Vector2(32.0, 32.0),
+        ),
+        destination_map_id="clearing",
+        destination_position=(128.0, 320.0),
+    )
+    on_map_exit_reached = Mock()
+
+    monkeypatch.setattr(
+        gameplay_scene,
+        "movement_axis",
+        Mock(return_value=pygame.Vector2()),
+    )
+    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+
+    scene = _create_gameplay_scene(
+        exits=(map_exit,),
+        on_map_exit_reached=on_map_exit_reached,
+    )
+
+    scene.update(0.0)
+
+    on_map_exit_reached.assert_called_once_with(map_exit)
+
+
+def test_change_map_replaces_spatial_content(monkeypatch) -> None:
+    player = Player(
+        entity=Entity(
+            entity_id="player",
+            position=pygame.Vector2(64.0, 320.0),
+            size=pygame.Vector2(24.0, 24.0),
+        ),
+        health=3,
+    )
+    old_exit = MapExit(
+        entity=Entity(
+            entity_id="old_exit",
+            position=pygame.Vector2(64.0, 320.0),
+            size=pygame.Vector2(32.0, 80.0),
+        ),
+        destination_map_id="old-destination",
+        destination_position=(0.0, 0.0),
+    )
+    destination_map = create_clearing_map(player)
+    on_map_exit_reached = Mock()
+
+    monkeypatch.setattr(
+        gameplay_scene,
+        "movement_axis",
+        Mock(return_value=pygame.Vector2()),
+    )
+    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+
+    scene = _create_gameplay_scene(
+        player=player,
+        exits=(old_exit,),
+        on_map_exit_reached=on_map_exit_reached,
+    )
+
+    scene.change_map(destination_map)
+    scene.update(0.0)
+
+    on_map_exit_reached.assert_called_once_with(destination_map.exits[0])

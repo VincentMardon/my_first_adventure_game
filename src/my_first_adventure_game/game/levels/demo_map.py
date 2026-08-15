@@ -3,6 +3,7 @@ import pygame
 from my_first_adventure_game.engine.world import Entity, World
 from my_first_adventure_game.game.entities import NPC, Enemy, Player
 from my_first_adventure_game.game.levels.game_map import GameMap
+from my_first_adventure_game.game.levels.map_exit import MapExit
 
 
 def create_demo_map() -> GameMap:
@@ -91,6 +92,17 @@ def create_demo_map() -> GameMap:
             active=False,
         ),
     )
+    exits = (
+        MapExit(
+            entity=Entity(
+                entity_id="exit-to-clearing",
+                position=pygame.Vector2(1152.0, 320.0),
+                size=pygame.Vector2(32.0, 80.0),
+            ),
+            destination_map_id="clearing",
+            destination_position=(128.0, 320.0),
+        ),
+    )
 
     world = World()
 
@@ -100,10 +112,12 @@ def create_demo_map() -> GameMap:
         *(enemy.entity for enemy in enemies),
         *(npc.entity for npc in npcs),
         *collectibles,
+        *(map_exit.entity for map_exit in exits),
     ):
         world.add(entity)
 
     return GameMap(
+        map_id="demo",
         world=world,
         player=player,
         walls=walls,
@@ -111,4 +125,5 @@ def create_demo_map() -> GameMap:
         npcs=npcs,
         destructible_obstacles=destructible_obstacles,
         collectibles=collectibles,
+        exits=exits,
     )

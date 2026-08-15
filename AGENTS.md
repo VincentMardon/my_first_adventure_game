@@ -314,7 +314,9 @@ Implemented engine domains:
 Implemented game foundations:
 
 - concrete title and gameplay scenes;
-- a Python-authored demo map with concrete gameplay roles;
+- Python-authored demo and clearing maps with concrete gameplay roles;
+- bidirectional spatial exits that preserve one gameplay scene and session
+  player;
 - a session-local four-state Guide collection objective.
 
 Reserved but not implemented:
