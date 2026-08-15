@@ -85,6 +85,7 @@ and this project adheres to
 - Stable game map identifiers and immutable spatial exits with explicit
   destination positions.
 - A minimal clearing map connected bidirectionally to the demo map.
+- Distinct game-owned background colors for the demo map and clearing.
 - In-session map changes that preserve the same gameplay scene, player, score,
   and progression state.
 - Temporary game-owned visual markers for active map exits.

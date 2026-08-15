@@ -156,6 +156,8 @@ The project now provides a minimal playable top-down loop:
    progress and score continue across both maps.
 29. victory requires both every demo enemy to be defeated and the Guide
    objective to be completed, in either order.
+30. the demo map and clearing use distinct game-owned background colors that
+   change with their spatial content.
 
 Implemented foundations include:
 
@@ -175,6 +177,8 @@ Implemented foundations include:
 - a game-owned Python-authored demo map with collectible objects;
 - a minimal second map and bidirectional exits that preserve the same gameplay
   scene and session player;
+- map-specific game-owned background colors applied through the same map-change
+  path as spatial content;
 - a game-owned destructible obstacle removed by a proximity attack;
 - a game-owned stationary enemy composed from reusable spatial state and
   mutable health;

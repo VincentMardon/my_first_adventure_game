@@ -144,3 +144,9 @@ def test_demo_map_has_registered_exit_to_clearing() -> None:
     assert map_exit.destination_map_id == "clearing"
     assert map_exit.destination_position == (128.0, 320.0)
     assert game_map.world.get(map_exit.entity.entity_id) is map_exit.entity
+
+
+def test_demo_map_has_game_owned_background_color() -> None:
+    game_map = create_demo_map()
+
+    assert game_map.background_color == (18, 32, 24)

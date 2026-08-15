@@ -104,3 +104,11 @@ def test_clearing_map_has_registered_hidden_collectible() -> None:
     )
     assert not collectible.bounds.overlaps(player.entity.bounds)
     assert not collectible.bounds.overlaps(game_map.exits[0].entity.bounds)
+
+
+def test_clearing_map_has_distinct_background_color() -> None:
+    player = create_demo_map().player
+
+    game_map = create_clearing_map(player)
+
+    assert game_map.background_color == (28, 26, 40)

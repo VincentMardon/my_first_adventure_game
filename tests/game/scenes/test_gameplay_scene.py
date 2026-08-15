@@ -23,7 +23,6 @@ from my_first_adventure_game.game.levels import (
 from my_first_adventure_game.game.progression import GuideObjective
 from my_first_adventure_game.game.scenes import gameplay_scene
 from my_first_adventure_game.game.scenes.gameplay_scene import (
-    BACKGROUND_COLOR,
     COLLECTIBLE_COLOR,
     ENEMY_COLOR,
     ENEMY_CONTACT_REACH,
@@ -45,6 +44,8 @@ from my_first_adventure_game.game.scenes.gameplay_scene import (
     GameplayScene,
 )
 from my_first_adventure_game.game.scoring import SessionScore
+
+TEST_BACKGROUND_COLOR = (18, 32, 24)
 
 
 def _create_gameplay_scene(
@@ -91,6 +92,7 @@ def _create_gameplay_scene(
     if game_map is None:
         game_map = GameMap(
             map_id="test",
+            background_color=TEST_BACKGROUND_COLOR,
             world=Mock(spec=World),
             player=player,
             walls=walls,
@@ -337,7 +339,7 @@ def test_draw_renders_spatial_content_and_player(
             center=OBJECTIVE_CENTER,
         ),
     ]
-    surface.fill.assert_called_once_with(BACKGROUND_COLOR)
+    surface.fill.assert_called_once_with(TEST_BACKGROUND_COLOR)
     assert draw_rect.call_args_list == [
         call(
             surface,
@@ -1056,6 +1058,7 @@ def test_update_reports_overlapping_map_exit(monkeypatch) -> None:
 
 
 def test_change_map_replaces_spatial_content(monkeypatch) -> None:
+    surface = Mock(spec=pygame.Surface)
     player = Player(
         entity=Entity(
             entity_id="player",
@@ -1082,6 +1085,8 @@ def test_change_map_replaces_spatial_content(monkeypatch) -> None:
         Mock(return_value=pygame.Vector2()),
     )
     monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+    monkeypatch.setattr(gameplay_scene, "draw_text", Mock())
+    monkeypatch.setattr(pygame.draw, "rect", Mock())
 
     scene = _create_gameplay_scene(
         player=player,
@@ -1091,5 +1096,7 @@ def test_change_map_replaces_spatial_content(monkeypatch) -> None:
 
     scene.change_map(destination_map)
     scene.update(0.0)
+    scene.draw(surface)
 
     on_map_exit_reached.assert_called_once_with(destination_map.exits[0])
+    surface.fill.assert_called_once_with(destination_map.background_color)

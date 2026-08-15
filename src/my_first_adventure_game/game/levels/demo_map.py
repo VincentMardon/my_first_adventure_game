@@ -118,6 +118,7 @@ def create_demo_map() -> GameMap:
 
     return GameMap(
         map_id="demo",
+        background_color=(18, 32, 24),
         world=world,
         player=player,
         walls=walls,

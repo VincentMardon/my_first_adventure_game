@@ -81,6 +81,7 @@ def create_clearing_map(player: Player) -> GameMap:
 
     return GameMap(
         map_id="clearing",
+        background_color=(28, 26, 40),
         world=world,
         player=player,
         walls=walls,

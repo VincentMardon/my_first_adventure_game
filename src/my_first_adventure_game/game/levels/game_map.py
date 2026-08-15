@@ -11,6 +11,7 @@ class GameMap:
 
     Attributes:
         map_id: Stable identifier of the concrete map.
+        background_color: Game-owned color used to clear the gameplay surface.
         world: World containing every entity registered for the map.
         player: Concrete player and its spatial entity.
         walls: Entities selected as solid obstacles by the gameplay scene.
@@ -22,6 +23,7 @@ class GameMap:
     """
 
     map_id: str
+    background_color: tuple[int, int, int]
     world: World
     player: Player
     walls: tuple[Entity, ...]

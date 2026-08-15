@@ -229,8 +229,8 @@ and
 - detects overlap with active map exits after movement, reports the selected
   exit, and stops the old map's update immediately;
 - replaces its player and map-owned spatial roles through `change_map()` while
-  preserving the same gameplay scene, score, progression, callbacks, and
-  presentation collaborators;
+  applying the selected map's background color and preserving the same gameplay
+  scene, score, progression, callbacks, and presentation collaborators;
 - finds the first active NPC within game-owned interaction reach when
   `INTERACT` is pressed, requests dialogue through an injected callback, and
   returns before the rest of that gameplay frame advances;
@@ -307,7 +307,8 @@ font cache and session score, idle, movement, collection, and attack animations,
 and explicit interaction, collection, destruction, enemy defeat, player defeat,
 and map-exit handlers. It also receives the session-local `GuideObjective` as a
 read-only presentation collaborator. Initial construction and later map changes
-use the same `change_map()` content-replacement path.
+use the same `change_map()` content-replacement path. The scene has no default
+map theme: it draws the background color supplied by the active `GameMap`.
 The collection handler applies the game-owned collection point rule to the same
 session score displayed by the scene and records progress in the session-local
 Guide objective. The destruction handler currently has no additional
@@ -454,6 +455,7 @@ Current tests verify:
 - overlapping a map exit reports it once and stops the remainder of the old
   map update;
 - replacing map content removes the previous map's exits;
+- replacing map content also replaces the rendered background color;
 - active exits use a temporary game-owned marker while inactive exits remain
   hidden;
 - the composition root preserves one gameplay scene and player while moving

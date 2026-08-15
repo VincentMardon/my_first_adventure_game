@@ -187,11 +187,12 @@ after the final line.
 
 Defines the current Python-authored game maps and their spatial connections.
 
-`GameMap` groups a stable identifier and reusable world representation with the
-concrete player, wall, enemy, NPC, destructible obstacle, collectible, and exit
-roles owned by the game. `MapExit` associates a spatial trigger with a concrete
-destination identifier and arrival position. `create_demo_map()` and
-`create_clearing_map()` define the current layouts and registration order.
+`GameMap` groups a stable identifier, game-owned background color, and reusable
+world representation with the concrete player, wall, enemy, NPC, destructible
+obstacle, collectible, and exit roles owned by the game. `MapExit` associates a
+spatial trigger with a concrete destination identifier and arrival position.
+`create_demo_map()` and `create_clearing_map()` define the current layouts,
+background colors, and registration order.
 
 ## Reserved domains
 
@@ -340,8 +341,10 @@ After movement, `GameplayScene` detects overlap with active exits and reports
 the selected `MapExit` to the composition root. The root resolves either the
 demo or clearing map, applies the exit's arrival position to their shared
 player, and calls `GameplayScene.change_map()`. This replaces only map-owned
-spatial roles and enemy timers; the gameplay scene, score, objective, and
-session callbacks remain unchanged. The `SceneManager` is not involved.
+spatial roles, enemy timers, and the rendered background color; the gameplay
+scene, score, objective, and session callbacks remain unchanged. Each concrete
+map owns its color, so neither the scene nor the engine defines a map theme. The
+`SceneManager` is not involved.
 
 The enemy defeat handler inspects the remaining demo enemies after each factual
 event. It explicitly replaces gameplay with `VictoryScene` only when all are

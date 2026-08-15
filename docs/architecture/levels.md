@@ -6,8 +6,8 @@ The game levels domain defines the concrete spatial content used during gameplay
 
 It currently provides:
 
-- `GameMap`, which groups a stable map identifier, a world, and the entities
-  whose roles matter to the game;
+- `GameMap`, which groups a stable map identifier, a game-owned background
+  color, a world, and the entities whose roles matter to the game;
 - `MapExit`, which describes a spatial trigger and its concrete destination;
 - `create_demo_map()`, which creates the first Python-authored map;
 - `create_clearing_map()`, which creates a minimal second map around the
@@ -29,6 +29,7 @@ scene behavior while preserving the distinction between scenes and maps.
 
 Groups:
 
+- the game-owned background color used while the map is active;
 - the `World` containing all registered entities;
 - the game-owned `Player`, including its reusable spatial entity;
 - the wall entities used as solid obstacles;
@@ -79,6 +80,7 @@ resolution.
 The game levels domain owns:
 
 - concrete map layouts;
+- map-specific background colors;
 - player, wall, enemy, NPC, destructible obstacle, and collectible roles;
 - entity identifiers;
 - initial positions and sizes;
@@ -125,7 +127,8 @@ flowchart TD
 `game.main` creates the demo and clearing maps for each new session. Both maps
 share the same `Player`. It injects the complete demo `GameMap` into
 `GameplayScene`; later changes pass the selected `GameMap` through the same
-content-replacement path while preserving the scene and session collaborators.
+content-replacement path. The scene applies the selected map's background color
+with its spatial content while preserving the scene and session collaborators.
 
 A map is spatial content managed during gameplay. It is not a scene and is not
 managed by `SceneManager`.
@@ -136,6 +139,7 @@ managed by `SceneManager`.
   registered in the same world.
 - Entity identifiers are unique within the map.
 - Every map has a stable identifier used by concrete exit destinations.
+- Every map supplies an explicit game-owned background color.
 - Every exit entity is registered in its map's world.
 - Registration order is deterministic.
 - Maps created for the same session share the same player object.

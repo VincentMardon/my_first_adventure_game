@@ -21,7 +21,6 @@ from my_first_adventure_game.game.progression import GuideObjective
 from my_first_adventure_game.game.scoring import SessionScore
 
 ATTACK_REACH = 16.0
-BACKGROUND_COLOR = (18, 32, 24)
 COLLECTIBLE_COLOR = (112, 200, 224)
 ENEMY_COLOR = (200, 72, 96)
 ENEMY_CONTACT_DAMAGE = 1
@@ -94,6 +93,7 @@ class GameplayScene(Scene):
     def change_map(self, game_map: GameMap) -> None:
         """Replace the spatial content managed by the gameplay scene."""
         self._player = game_map.player
+        self._background_color = game_map.background_color
         self._walls = game_map.walls
         self._enemies = game_map.enemies
         self._npcs = game_map.npcs
@@ -257,7 +257,7 @@ class GameplayScene(Scene):
             self._player_is_attacking = False
 
     def draw(self, surface: pygame.Surface) -> None:
-        surface.fill(BACKGROUND_COLOR)
+        surface.fill(self._background_color)
 
         for wall in self._walls:
             if wall.active:
