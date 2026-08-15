@@ -146,6 +146,7 @@ The project now provides a minimal playable top-down loop:
    clearing without replacing the gameplay scene;
 24. crossing the clearing's left exit returns to the preserved demo map while
    keeping session score and progression.
+25. temporary purple markers make both active map exits visible.
 
 Implemented foundations include:
 

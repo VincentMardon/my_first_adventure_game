@@ -87,6 +87,7 @@ and this project adheres to
 - A minimal clearing map connected bidirectionally to the demo map.
 - In-session map changes that preserve the same gameplay scene, player, score,
   and progression state.
+- Temporary game-owned visual markers for active map exits.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

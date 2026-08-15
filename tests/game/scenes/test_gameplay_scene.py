@@ -25,6 +25,7 @@ from my_first_adventure_game.game.scenes.gameplay_scene import (
     ENEMY_CONTACT_REACH,
     ENEMY_HIT_COLOR,
     ENEMY_HIT_DURATION,
+    EXIT_COLOR,
     HEALTH_CENTER,
     HEALTH_COLOR,
     NPC_COLOR,
@@ -187,7 +188,7 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
     )
 
 
-def test_draw_renders_background_walls_active_collectibles_and_player(
+def test_draw_renders_spatial_content_and_player(
     monkeypatch,
 ) -> None:
     surface = Mock(spec=pygame.Surface)
@@ -251,6 +252,25 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         size=pygame.Vector2(12.0, 12.0),
         active=False,
     )
+    active_exit = MapExit(
+        entity=Entity(
+            entity_id="exit-active",
+            position=pygame.Vector2(416.0, 144.0),
+            size=pygame.Vector2(32.0, 80.0),
+        ),
+        destination_map_id="clearing",
+        destination_position=(128.0, 320.0),
+    )
+    inactive_exit = MapExit(
+        entity=Entity(
+            entity_id="exit-inactive",
+            position=pygame.Vector2(464.0, 144.0),
+            size=pygame.Vector2(32.0, 80.0),
+            active=False,
+        ),
+        destination_map_id="clearing",
+        destination_position=(128.0, 320.0),
+    )
     score_font = Mock(spec=pygame.font.Font)
     session_score.value = 200
     font_cache.load.return_value = score_font
@@ -273,6 +293,7 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
         collectibles=(active_collectible, inactive_collectible),
         player_idle_animation=player_idle_animation,
         guide_objective=guide_objective,
+        exits=(active_exit, inactive_exit),
     )
 
     scene.draw(surface)
@@ -325,6 +346,11 @@ def test_draw_renders_background_walls_active_collectibles_and_player(
             surface,
             COLLECTIBLE_COLOR,
             pygame.Rect(120, 96, 12, 12),
+        ),
+        call(
+            surface,
+            EXIT_COLOR,
+            pygame.Rect(416, 144, 32, 80),
         ),
     ]
     surface.blit.assert_called_once_with(

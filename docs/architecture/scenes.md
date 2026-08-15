@@ -255,9 +255,9 @@ and
   gives it priority over idle and movement presentation;
 - returns to the animation selected by directional intent after collection
   playback finishes;
-- draws active walls, enemies, NPCs, and collectibles as game-owned rectangles,
-  blits the current player animation frame, and draws the current session score,
-  player health, and Guide objective status;
+- draws active walls, enemies, NPCs, collectibles, and map exits as game-owned
+  rectangles, blits the current player animation frame, and draws the current
+  session score, player health, and Guide objective status;
 - rounds floating-point geometry only at rendering time.
 
 `DefeatScene`:
@@ -449,6 +449,8 @@ Current tests verify:
 - overlapping a map exit reports it once and stops the remainder of the old
   map update;
 - replacing map content removes the previous map's exits;
+- active exits use a temporary game-owned marker while inactive exits remain
+  hidden;
 - the composition root preserves one gameplay scene and player while moving
   between the demo map and clearing in both directions;
 - the defeat scene draws its background, message, and final session score;

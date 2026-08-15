@@ -28,6 +28,7 @@ ENEMY_CONTACT_DAMAGE = 1
 ENEMY_CONTACT_REACH = 1.0
 ENEMY_HIT_COLOR = (255, 224, 224)
 ENEMY_HIT_DURATION = 0.15
+EXIT_COLOR = (168, 112, 240)
 HEALTH_COLOR = (248, 112, 112)
 HEALTH_CENTER = (80, 52)
 INTERACTION_REACH = 16.0
@@ -305,6 +306,10 @@ class GameplayScene(Scene):
                     COLLECTIBLE_COLOR,
                     _entity_rect(collectible),
                 )
+
+        for map_exit in self._exits:
+            if map_exit.entity.active:
+                pygame.draw.rect(surface, EXIT_COLOR, _entity_rect(map_exit.entity))
 
         surface.blit(
             self._player_animation.current_frame,
