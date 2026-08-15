@@ -30,6 +30,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     second_enemy.entity.active = True
     game_map.enemies = (first_enemy, second_enemy)
     npc = Mock()
+    npc.entity.entity_id = "npc-1"
     npc.name = "Guide"
     npc.dialogue_lines = (
         "Welcome, traveler!",
@@ -277,6 +278,30 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     handle_npc_interacted = gameplay_args[9]
 
+    caretaker = Mock()
+    caretaker.name = "Caretaker"
+    caretaker.entity.entity_id = "npc-clearing-caretaker"
+    caretaker.dialogue_lines = (
+        "I just finished cleaning these walls.",
+        "Please try not to leave any mysterious stains.",
+    )
+
+    handle_npc_interacted(caretaker)
+
+    create_dialogue_scene.assert_called_once()
+    caretaker_dialogue_args = create_dialogue_scene.call_args.args
+
+    assert caretaker_dialogue_args[:4] == (
+        font_cache,
+        input_state,
+        caretaker.name,
+        caretaker.dialogue_lines,
+    )
+    assert gameplay_args[19].state is GuideObjectiveState.NOT_STARTED
+    assert not collectible.active
+
+    create_dialogue_scene.reset_mock()
+
     handle_npc_interacted(npc)
 
     create_dialogue_scene.assert_called_once()
@@ -509,16 +534,17 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         call(gameplay_scene),
         call(pause_scene),
         call(gameplay_scene),
-        call(dialogue_scene),
+        call(dialogue_scene),  # Caretaker
+        call(dialogue_scene),  # Guide introduction
         call(gameplay_scene),
-        call(dialogue_scene),
+        call(dialogue_scene),  # Guide reminder
         call(gameplay_scene),
         call(defeat_scene),
         call(initial_scene),
         call(victory_scene),
-        call(dialogue_scene),
+        call(dialogue_scene),  # Guide completion
         call(gameplay_scene),
-        call(dialogue_scene),
+        call(dialogue_scene),  # Guide after completion
         call(gameplay_scene),
         call(second_gameplay_scene),
     ]

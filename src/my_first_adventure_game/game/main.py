@@ -40,6 +40,7 @@ WINDOW_CONFIG = WindowConfig(title="My First Adventure Game", size=(1280, 720))
 COLLECTION_ACTIVE_DIALOGUE_LINES = ("Find every item and return to me.",)
 COLLECTION_COMPLETE_DIALOGUE_LINES = ("You found every item. Well done, traveler!",)
 FRAMES_PER_SECOND = 60
+GUIDE_NPC_ID = "npc-1"
 PLAYER_FRAME_SIZE = (32, 32)
 PLAYER_IDLE_COLORS = (
     (224, 196, 96),
@@ -159,7 +160,9 @@ def main() -> None:
             scene_manager.change_scene(gameplay_scene)
 
         def handle_npc_interacted(npc: NPC) -> None:
-            if guide_objective.state is GuideObjectiveState.NOT_STARTED:
+            if npc.entity.entity_id != GUIDE_NPC_ID:
+                dialogue_lines = npc.dialogue_lines
+            elif guide_objective.state is GuideObjectiveState.NOT_STARTED:
                 for collectible in game_map.collectibles:
                     collectible.active = True
 

@@ -56,3 +56,29 @@ def test_clearing_map_registers_boundary_walls_around_exit() -> None:
     assert all(
         not wall.bounds.overlaps(player.entity.bounds) for wall in game_map.walls
     )
+
+
+def test_clearing_map_has_registered_caretaker() -> None:
+    player = create_demo_map().player
+
+    game_map = create_clearing_map(player)
+
+    assert len(game_map.npcs) == 1
+
+    caretaker = game_map.npcs[0]
+
+    assert caretaker.name == "Caretaker"
+    assert caretaker.entity.entity_id == "npc-clearing-caretaker"
+    assert caretaker.entity.position == (640.0, 320.0)
+    assert caretaker.entity.size == (24.0, 32.0)
+    assert caretaker.entity.active
+    assert caretaker.dialogue_lines == (
+        "I just finished cleaning these walls.",
+        "Please try not to leave any mysterious stains.",
+    )
+    assert game_map.world.get(caretaker.entity.entity_id) is caretaker.entity
+    assert all(
+        not caretaker.entity.bounds.overlaps(wall.bounds) for wall in game_map.walls
+    )
+    assert not caretaker.entity.bounds.overlaps(player.entity.bounds)
+    assert not caretaker.entity.bounds.overlaps(game_map.exits[0].entity.bounds)

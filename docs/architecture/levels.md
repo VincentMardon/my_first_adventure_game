@@ -66,7 +66,8 @@ map to load.
 Creates the current minimal clearing map with the player supplied by the
 active session. Its return exit leads back to the demo map. The clearing is a
 technical navigation target bounded by game-owned walls around an opening for
-that exit; it does not yet represent finished game content.
+that exit. It also contains a named Caretaker with static dialogue; it does not
+yet represent finished game content.
 
 ## Ownership
 
@@ -160,6 +161,8 @@ The clearing map additionally guarantees:
 - Its left boundary leaves an opening around the return exit.
 - Neither the return exit nor the shared player's arrival position overlaps a
   wall.
+- Its active Caretaker is registered in the same world, has ordered non-blank
+  dialogue, and overlaps neither the walls, player arrival position, nor exit.
 
 ## Extension points
 

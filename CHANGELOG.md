@@ -90,6 +90,8 @@ and this project adheres to
 - Temporary game-owned visual markers for active map exits.
 - Registered boundary walls around the clearing with an opening for its return
   exit.
+- A named clearing Caretaker with static dialogue that remains independent
+  from Guide progression.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

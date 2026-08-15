@@ -1,7 +1,7 @@
 import pygame
 
 from my_first_adventure_game.engine.world import Entity, World
-from my_first_adventure_game.game.entities import Player
+from my_first_adventure_game.game.entities import NPC, Player
 from my_first_adventure_game.game.levels.game_map import GameMap
 from my_first_adventure_game.game.levels.map_exit import MapExit
 
@@ -47,10 +47,25 @@ def create_clearing_map(player: Player) -> GameMap:
             size=pygame.Vector2(32.0, 528.0),
         ),
     )
+    npcs = (
+        NPC(
+            name="Caretaker",
+            entity=Entity(
+                entity_id="npc-clearing-caretaker",
+                position=pygame.Vector2(640.0, 320.0),
+                size=pygame.Vector2(24.0, 32.0),
+            ),
+            dialogue_lines=(
+                "I just finished cleaning these walls.",
+                "Please try not to leave any mysterious stains.",
+            ),
+        ),
+    )
 
     for entity in (
         player.entity,
         *walls,
+        *(npc.entity for npc in npcs),
         *(map_exit.entity for map_exit in exits),
     ):
         world.add(entity)
@@ -61,7 +76,7 @@ def create_clearing_map(player: Player) -> GameMap:
         player=player,
         walls=walls,
         enemies=(),
-        npcs=(),
+        npcs=npcs,
         destructible_obstacles=(),
         collectibles=(),
         exits=exits,

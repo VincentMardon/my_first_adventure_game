@@ -149,6 +149,8 @@ The project now provides a minimal playable top-down loop:
 25. temporary purple markers make both active map exits visible.
 26. collision-aware boundary walls give the clearing a minimal enclosed
    layout while leaving its return exit accessible.
+27. the clearing's Caretaker provides its own dialogue without starting or
+   advancing the Guide objective.
 
 Implemented foundations include:
 
@@ -190,6 +192,8 @@ Implemented foundations include:
   proximity interaction action, and a minimal dialogue scene that displays its
   speaker and advances one line per confirmation before resuming the same
   session explicitly;
+- a second map-specific NPC whose static dialogue remains independent from the
+  Guide's progression rules;
 - a game-owned dialogue panel with a distinct background, border, and balanced
   spacing around the speaker, current line, and continuation instruction;
 - word-boundary wrapping based on the selected font's measured width, with a

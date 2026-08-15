@@ -318,7 +318,8 @@ session's `DefeatScene`.
 
 The NPC interaction handler creates a new `DialogueScene` from the selected
 NPC's name and selected ordered lines and explicitly replaces gameplay with it.
-The first Guide interaction activates the initially hidden objective
+Ordinary NPCs, including the clearing's Caretaker, use their authored lines
+without changing Guide progression. The first Guide interaction activates the initially hidden objective
 collectibles and selects the NPC's introductory lines. Later interactions while
 the objective remains active select a game-owned reminder. After every
 collectible is inactive, returning to the Guide selects a completion message
@@ -463,6 +464,8 @@ Current tests verify:
   final line, and a new interaction restarts from the first line;
 - the first Guide interaction activates objective collectibles and passes the
   NPC's introductory lines;
+- the Caretaker uses its own dialogue without starting the Guide objective or
+  activating its collectibles;
 - later Guide interactions pass a reminder while the objective remains active,
   then stable completion lines after collection and return;
 - the dialogue scene renders the same injected speaker name for every line.
