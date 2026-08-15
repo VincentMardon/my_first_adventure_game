@@ -370,7 +370,7 @@ The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.
 It also records the fact in the session-local Guide objective. The objective
 advances from active to ready when its collected count reaches the required
-total supplied from the current map.
+total supplied from the demo and clearing maps.
 
 Objective collectibles initially remain inactive. The first Guide interaction
 activates them and presents the NPC's introductory lines. Further interactions

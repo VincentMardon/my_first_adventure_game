@@ -319,14 +319,14 @@ session's `DefeatScene`.
 The NPC interaction handler creates a new `DialogueScene` from the selected
 NPC's name and selected ordered lines and explicitly replaces gameplay with it.
 Ordinary NPCs, including the clearing's Caretaker, use their authored lines
-without changing Guide progression. The first Guide interaction activates the initially hidden objective
-collectibles and selects the NPC's introductory lines. Later interactions while
-the objective remains active select a game-owned reminder. After every
-collectible is inactive, returning to the Guide selects a completion message
-and preserves that completed result for later interactions. Each interaction
-starts at the first selected line. Confirmation after the final line restores
-the same gameplay scene, preserving the current session without requiring a
-scene stack.
+without changing Guide progression. The first Guide interaction activates the
+initially hidden objective collectibles on the demo and clearing maps and
+selects the NPC's introductory lines. Later interactions while the objective
+remains active select a game-owned reminder. After every objective collectible
+has been reported, returning to the Guide selects a completion message and
+preserves that completed result for later interactions. Each interaction starts
+at the first selected line. Confirmation after the final line restores the same
+gameplay scene, preserving the current session without requiring a scene stack.
 
 When interaction validates a ready Guide objective, `game.main` also applies
 the game-owned 500-point completion rule to the shared session score. Later

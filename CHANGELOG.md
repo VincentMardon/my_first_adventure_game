@@ -92,6 +92,8 @@ and this project adheres to
   exit.
 - A named clearing Caretaker with static dialogue that remains independent
   from Guide progression.
+- An initially hidden clearing collectible that extends the Guide objective
+  across both maps while preserving one session score and progress count.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

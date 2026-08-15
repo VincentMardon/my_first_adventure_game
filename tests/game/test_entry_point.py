@@ -24,6 +24,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     clearing_map = Mock()
     clearing_map.map_id = "clearing"
     clearing_map.player = game_map.player
+    clearing_collectible = Mock()
+    clearing_collectible.active = False
+    clearing_map.collectibles = (clearing_collectible,)
     first_enemy = Mock()
     first_enemy.entity.active = False
     second_enemy = Mock()
@@ -263,6 +266,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert gameplay_args[17] is player_collection_animation
     assert gameplay_args[18] is player_attack_animation
     assert isinstance(gameplay_args[19], GuideObjective)
+    assert gameplay_args[19].total_items == (
+        len(game_map.collectibles) + len(clearing_map.collectibles)
+    )
     assert gameplay_args[20] is game_map.exits
     assert callable(gameplay_args[21])
 
@@ -299,6 +305,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     )
     assert gameplay_args[19].state is GuideObjectiveState.NOT_STARTED
     assert not collectible.active
+    assert not clearing_collectible.active
 
     create_dialogue_scene.reset_mock()
 
@@ -320,6 +327,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     close_dialogue()
 
     assert collectible.active
+    assert clearing_collectible.active
 
     scene_manager.change_scene.assert_called_with(gameplay_scene)
 
@@ -346,6 +354,14 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     handle_item_collected(event)
 
     assert gameplay_args[19].collected_items == 1
+    assert gameplay_args[19].state is GuideObjectiveState.ACTIVE
+
+    clearing_event = ItemCollected(item_id="collectible-clearing-1")
+    clearing_collectible.active = False
+
+    handle_item_collected(clearing_event)
+
+    assert gameplay_args[19].collected_items == 2
     assert gameplay_args[19].state is GuideObjectiveState.READY_TO_COMPLETE
 
     player_event = PlayerDefeated(player_id="player")
@@ -431,9 +447,13 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     assert handle_obstacle_destroyed(obstacle_event) is None
 
-    score_item_collection.assert_called_once_with(event)
+    assert score_item_collection.call_args_list == [
+        call(event),
+        call(clearing_event),
+    ]
     score_guide_objective_completion.assert_called_once_with()
     assert session_score.add.call_args_list == [
+        call(100),
         call(100),
         call(500),
     ]
@@ -444,6 +464,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     second_clearing_map = Mock()
     second_clearing_map.map_id = "clearing"
     second_clearing_map.player = second_game_map.player
+    second_clearing_collectible = Mock()
+    second_clearing_collectible.active = False
+    second_clearing_map.collectibles = (second_clearing_collectible,)
     second_collectible = Mock()
     second_collectible.active = False
     second_game_map.collectibles = (second_collectible,)
@@ -498,7 +521,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert second_gameplay_args[15:19] == second_player_animations
     assert isinstance(second_gameplay_args[19], GuideObjective)
     assert second_gameplay_args[19] is not gameplay_args[19]
-    assert second_gameplay_args[19].total_items == len(second_game_map.collectibles)
+    assert second_gameplay_args[19].total_items == (
+        len(second_game_map.collectibles) + len(second_clearing_map.collectibles)
+    )
     assert second_gameplay_args[20] is second_game_map.exits
     assert callable(second_gameplay_args[21])
     assert second_gameplay_args[21] is not handle_map_exit_reached

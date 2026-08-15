@@ -73,9 +73,13 @@ def main() -> None:
     def start_game() -> None:
         game_map = create_demo_map()
         clearing_map = create_clearing_map(game_map.player)
+        objective_collectibles = (
+            *game_map.collectibles,
+            *clearing_map.collectibles,
+        )
         session_score = SessionScore()
         guide_objective = GuideObjective(
-            total_items=len(game_map.collectibles),
+            total_items=len(objective_collectibles),
         )
         player_idle_frames = tuple(
             pygame.Surface(PLAYER_FRAME_SIZE) for _ in PLAYER_IDLE_COLORS
@@ -163,7 +167,7 @@ def main() -> None:
             if npc.entity.entity_id != GUIDE_NPC_ID:
                 dialogue_lines = npc.dialogue_lines
             elif guide_objective.state is GuideObjectiveState.NOT_STARTED:
-                for collectible in game_map.collectibles:
+                for collectible in objective_collectibles:
                     collectible.active = True
 
                 dialogue_lines = npc.dialogue_lines

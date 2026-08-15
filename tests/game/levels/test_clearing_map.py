@@ -82,3 +82,25 @@ def test_clearing_map_has_registered_caretaker() -> None:
     )
     assert not caretaker.entity.bounds.overlaps(player.entity.bounds)
     assert not caretaker.entity.bounds.overlaps(game_map.exits[0].entity.bounds)
+
+
+def test_clearing_map_has_registered_hidden_collectible() -> None:
+    player = create_demo_map().player
+
+    game_map = create_clearing_map(player)
+
+    assert len(game_map.collectibles) == 1
+
+    collectible = game_map.collectibles[0]
+
+    assert collectible.entity_id == "collectible-clearing-1"
+    assert collectible.position == (960.0, 480.0)
+    assert collectible.size == (16.0, 16.0)
+    assert not collectible.active
+    assert game_map.world.get(collectible.entity_id) is collectible
+    assert all(not collectible.bounds.overlaps(wall.bounds) for wall in game_map.walls)
+    assert all(
+        not collectible.bounds.overlaps(npc.entity.bounds) for npc in game_map.npcs
+    )
+    assert not collectible.bounds.overlaps(player.entity.bounds)
+    assert not collectible.bounds.overlaps(game_map.exits[0].entity.bounds)

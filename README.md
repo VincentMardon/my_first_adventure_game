@@ -151,6 +151,8 @@ The project now provides a minimal playable top-down loop:
    layout while leaving its return exit accessible.
 27. the clearing's Caretaker provides its own dialogue without starting or
    advancing the Guide objective.
+28. the Guide activates a third collectible in the clearing, and collection
+   progress and score continue across both maps.
 
 Implemented foundations include:
 
@@ -200,6 +202,8 @@ Implemented foundations include:
   dialogue panel whose height adapts to the resulting visual lines;
 - a concrete four-state Guide collection objective that activates its items,
   selects reminder and completion dialogue, and resets with each new session;
+- a Guide objective whose concrete collectible set spans the demo and clearing
+  maps without introducing a generic quest system;
 - a gameplay objective display that observes the same session-local objective;
 - live collected and required item counts while the Guide objective is active;
 - a one-time game-owned score bonus when the Guide validates the objective;

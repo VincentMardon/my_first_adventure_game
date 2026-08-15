@@ -61,11 +61,20 @@ def create_clearing_map(player: Player) -> GameMap:
             ),
         ),
     )
+    collectibles = (
+        Entity(
+            entity_id="collectible-clearing-1",
+            position=pygame.Vector2(960.0, 480.0),
+            size=pygame.Vector2(16.0, 16.0),
+            active=False,
+        ),
+    )
 
     for entity in (
         player.entity,
         *walls,
         *(npc.entity for npc in npcs),
+        *collectibles,
         *(map_exit.entity for map_exit in exits),
     ):
         world.add(entity)
@@ -78,6 +87,6 @@ def create_clearing_map(player: Player) -> GameMap:
         enemies=(),
         npcs=npcs,
         destructible_obstacles=(),
-        collectibles=(),
+        collectibles=collectibles,
         exits=exits,
     )

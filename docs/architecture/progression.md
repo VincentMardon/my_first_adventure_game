@@ -73,11 +73,12 @@ stateDiagram-v2
 
 `game.main` creates a fresh `GuideObjective` for every new game and injects the
 same instance into `GameplayScene`. The scene reads `status_text` for display
-without changing progression. The first Guide
-interaction activates the map collectibles and uses the NPC's introductory
-lines. Later interactions while the objective is active use a reminder. The
-collection handler records each `ItemCollected` fact. The objective marks itself
-ready when the recorded count reaches the total supplied from the map.
+without changing progression. The first Guide interaction activates the
+objective collectibles across the demo and clearing maps and uses the NPC's
+introductory lines. Later interactions while the objective is active use a
+reminder. The collection handler records each `ItemCollected` fact regardless
+of the active map. The objective marks itself ready when the recorded count
+reaches the combined total supplied by the composition root.
 Returning to the Guide then selects the completion message and makes that result
 stable for later interactions. That validation also awards the game-owned
 completion bonus exactly once.
@@ -86,10 +87,11 @@ completion bonus exactly once.
 
 - Every new game starts in `NOT_STARTED`.
 - Every new objective starts with zero collected items.
-- The required total equals the number of objective collectibles on that
-  session's map.
+- The required total equals the number of objective collectibles across that
+  session's demo and clearing maps.
 - Objective collectibles remain inactive until the first Guide interaction.
-- The first Guide interaction activates the objective collectibles.
+- The first Guide interaction activates the objective collectibles on both
+  maps.
 - Each reported collection increments the objective count once.
 - Reaching the required total changes `ACTIVE` to `READY_TO_COMPLETE`.
 - Only a later Guide interaction changes `READY_TO_COMPLETE` to `COMPLETED`.
@@ -127,8 +129,10 @@ reveal shared mechanics that can be separated from their content and rules.
 Current tests verify:
 
 - the four states have the expected order;
-- demo-map objective collectibles start inactive;
-- the first Guide interaction activates them and uses introductory dialogue;
+- demo and clearing objective collectibles start inactive;
+- the first Guide interaction activates them across both maps and uses
+  introductory dialogue;
+- collections before and after a map change advance the same objective;
 - interaction during collection uses the active-objective reminder;
 - collecting every item makes the completion dialogue available;
 - later interactions preserve the completed result.
