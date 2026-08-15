@@ -116,3 +116,8 @@ and this project adheres to
 - Normalized directional movement axes.
 - Default directional game actions bound to the arrow keys.
 - Automated tests, Ruff quality checks, package builds, and GitHub Actions CI.
+
+### Changed
+
+- `GameplayScene` now consumes a complete `GameMap` during construction and map
+  changes instead of receiving duplicated spatial-role arguments.

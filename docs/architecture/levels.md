@@ -117,14 +117,15 @@ flowchart TD
     GameMap --> Player
     GameMain --> DemoMap
     GameMain --> ClearingMap
-    GameMain -->|"reads entity roles"| GameMap
-    GameMain --> GameplayScene
+    GameMain --> GameMap
+    GameMain -->|"injects selected map"| GameplayScene
+    GameplayScene -->|"reads and replaces spatial content"| GameMap
 ```
 
 `game.main` creates the demo and clearing maps for each new session. Both maps
-share the same `Player`. It initially passes the demo roles and exits to
-`GameplayScene`; later changes replace the scene's spatial content from the
-selected `GameMap` while preserving the scene and session collaborators.
+share the same `Player`. It injects the complete demo `GameMap` into
+`GameplayScene`; later changes pass the selected `GameMap` through the same
+content-replacement path while preserving the scene and session collaborators.
 
 A map is spatial content managed during gameplay. It is not a scene and is not
 managed by `SceneManager`.

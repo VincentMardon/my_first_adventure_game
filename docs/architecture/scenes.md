@@ -302,12 +302,12 @@ and
 - requests a return to the title when `CONFIRM` is pressed;
 - ignores raw events.
 
-`game.main` composes `GameplayScene` from the shared font cache and session
-score, the player, walls, enemies, NPCs, destructible obstacles, and
-collectibles provided by the demo map, idle, movement, collection, and attack
-animations, and explicit interaction, collection, destruction, enemy defeat,
-player defeat, and map-exit handlers. It also receives the session-local
-`GuideObjective` as a read-only presentation collaborator.
+`game.main` composes `GameplayScene` from the complete demo `GameMap`, shared
+font cache and session score, idle, movement, collection, and attack animations,
+and explicit interaction, collection, destruction, enemy defeat, player defeat,
+and map-exit handlers. It also receives the session-local `GuideObjective` as a
+read-only presentation collaborator. Initial construction and later map changes
+use the same `change_map()` content-replacement path.
 The collection handler applies the game-owned collection point rule to the same
 session score displayed by the scene and records progress in the session-local
 Guide objective. The destruction handler currently has no additional

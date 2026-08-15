@@ -242,38 +242,33 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         ),
     ]
     create_gameplay_scene.assert_called_once()
-    gameplay_args = create_gameplay_scene.call_args.args
+    gameplay_kwargs = create_gameplay_scene.call_args.kwargs
 
-    assert gameplay_args[:4] == (
-        input_state,
-        font_cache,
-        session_score,
-        game_map.player,
-    )
-    assert callable(gameplay_args[4])
-    assert callable(gameplay_args[5])
-    assert gameplay_args[6] is game_map.walls
-    assert gameplay_args[7] is game_map.enemies
-    assert gameplay_args[8] is game_map.npcs
-    assert callable(gameplay_args[9])
-    assert callable(gameplay_args[10])
-    assert gameplay_args[11] is game_map.collectibles
-    assert callable(gameplay_args[12])
-    assert gameplay_args[13] is game_map.destructible_obstacles
-    assert callable(gameplay_args[14])
-    assert gameplay_args[15] is player_idle_animation
-    assert gameplay_args[16] is player_movement_animation
-    assert gameplay_args[17] is player_collection_animation
-    assert gameplay_args[18] is player_attack_animation
-    assert isinstance(gameplay_args[19], GuideObjective)
-    assert gameplay_args[19].total_items == (
+    assert gameplay_kwargs["input_state"] is input_state
+    assert gameplay_kwargs["font_cache"] is font_cache
+    assert gameplay_kwargs["session_score"] is session_score
+    assert gameplay_kwargs["game_map"] is game_map
+    assert callable(gameplay_kwargs["on_pause_requested"])
+    assert callable(gameplay_kwargs["on_player_defeated"])
+    assert callable(gameplay_kwargs["on_npc_interacted"])
+    assert callable(gameplay_kwargs["on_enemy_defeated"])
+    assert callable(gameplay_kwargs["on_item_collected"])
+    assert callable(gameplay_kwargs["on_obstacle_destroyed"])
+    assert gameplay_kwargs["player_idle_animation"] is player_idle_animation
+    assert gameplay_kwargs["player_movement_animation"] is player_movement_animation
+    assert gameplay_kwargs["player_collection_animation"] is player_collection_animation
+    assert gameplay_kwargs["player_attack_animation"] is player_attack_animation
+
+    guide_objective = gameplay_kwargs["guide_objective"]
+
+    assert isinstance(guide_objective, GuideObjective)
+    assert guide_objective.total_items == (
         len(game_map.collectibles) + len(clearing_map.collectibles)
     )
-    assert gameplay_args[20] is game_map.exits
-    assert callable(gameplay_args[21])
+    assert callable(gameplay_kwargs["on_map_exit_reached"])
 
-    request_pause = gameplay_args[4]
-    handle_player_defeated = gameplay_args[5]
+    request_pause = gameplay_kwargs["on_pause_requested"]
+    handle_player_defeated = gameplay_kwargs["on_player_defeated"]
     resume_game = pause_args[2]
 
     request_pause()
@@ -282,7 +277,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     resume_game()
     scene_manager.change_scene.assert_called_with(gameplay_scene)
 
-    handle_npc_interacted = gameplay_args[9]
+    handle_npc_interacted = gameplay_kwargs["on_npc_interacted"]
 
     caretaker = Mock()
     caretaker.name = "Caretaker"
@@ -303,7 +298,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         caretaker.name,
         caretaker.dialogue_lines,
     )
-    assert gameplay_args[19].state is GuideObjectiveState.NOT_STARTED
+    assert guide_objective.state is GuideObjectiveState.NOT_STARTED
     assert not collectible.active
     assert not clearing_collectible.active
 
@@ -347,29 +342,29 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     scene_manager.change_scene.assert_called_with(gameplay_scene)
 
-    handle_item_collected = gameplay_args[12]
+    handle_item_collected = gameplay_kwargs["on_item_collected"]
     event = ItemCollected(item_id="collectible-1")
 
     collectible.active = False
     handle_item_collected(event)
 
-    assert gameplay_args[19].collected_items == 1
-    assert gameplay_args[19].state is GuideObjectiveState.ACTIVE
+    assert guide_objective.collected_items == 1
+    assert guide_objective.state is GuideObjectiveState.ACTIVE
 
     clearing_event = ItemCollected(item_id="collectible-clearing-1")
     clearing_collectible.active = False
 
     handle_item_collected(clearing_event)
 
-    assert gameplay_args[19].collected_items == 2
-    assert gameplay_args[19].state is GuideObjectiveState.READY_TO_COMPLETE
+    assert guide_objective.collected_items == 2
+    assert guide_objective.state is GuideObjectiveState.READY_TO_COMPLETE
 
     player_event = PlayerDefeated(player_id="player")
     handle_player_defeated(player_event)
 
     return_to_title()
 
-    handle_enemy_defeated = gameplay_args[10]
+    handle_enemy_defeated = gameplay_kwargs["on_enemy_defeated"]
     first_enemy_event = EnemyDefeated(enemy_id="enemy-1")
 
     handle_enemy_defeated(first_enemy_event)
@@ -383,9 +378,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     assert call(victory_scene) not in (scene_manager.change_scene.call_args_list)
 
-    assert gameplay_args[19].state is GuideObjectiveState.READY_TO_COMPLETE
+    assert guide_objective.state is GuideObjectiveState.READY_TO_COMPLETE
 
-    handle_map_exit_reached = gameplay_args[21]
+    handle_map_exit_reached = gameplay_kwargs["on_map_exit_reached"]
     map_exit = Mock()
     map_exit.destination_map_id = "clearing"
     map_exit.destination_position = (128.0, 320.0)
@@ -444,7 +439,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     completed_again_dialogue_args[4]()
 
-    handle_obstacle_destroyed = gameplay_args[14]
+    handle_obstacle_destroyed = gameplay_kwargs["on_obstacle_destroyed"]
     obstacle_event = ObstacleDestroyed(obstacle_id="destructible-1")
 
     assert handle_obstacle_destroyed(obstacle_event) is None
@@ -508,30 +503,30 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         call(second_game_map.player),
     ]
 
-    second_gameplay_args = create_gameplay_scene.call_args.args
+    second_gameplay_kwargs = create_gameplay_scene.call_args.kwargs
 
-    assert second_gameplay_args[:4] == (
-        input_state,
-        font_cache,
-        second_session_score,
-        second_game_map.player,
-    )
-    assert second_gameplay_args[4] is not request_pause
-    assert second_gameplay_args[5] is not handle_player_defeated
-    assert second_gameplay_args[6] is second_game_map.walls
-    assert second_gameplay_args[7] is second_game_map.enemies
-    assert second_gameplay_args[8] is second_game_map.npcs
-    assert second_gameplay_args[11] is second_game_map.collectibles
-    assert second_gameplay_args[13] is second_game_map.destructible_obstacles
-    assert second_gameplay_args[15:19] == second_player_animations
-    assert isinstance(second_gameplay_args[19], GuideObjective)
-    assert second_gameplay_args[19] is not gameplay_args[19]
-    assert second_gameplay_args[19].total_items == (
+    assert second_gameplay_kwargs["input_state"] is input_state
+    assert second_gameplay_kwargs["font_cache"] is font_cache
+    assert second_gameplay_kwargs["session_score"] is second_session_score
+    assert second_gameplay_kwargs["game_map"] is second_game_map
+    assert second_gameplay_kwargs["on_pause_requested"] is not request_pause
+    assert second_gameplay_kwargs["on_player_defeated"] is not handle_player_defeated
+    assert (
+        second_gameplay_kwargs["player_idle_animation"],
+        second_gameplay_kwargs["player_movement_animation"],
+        second_gameplay_kwargs["player_collection_animation"],
+        second_gameplay_kwargs["player_attack_animation"],
+    ) == second_player_animations
+
+    second_guide_objective = second_gameplay_kwargs["guide_objective"]
+
+    assert isinstance(second_guide_objective, GuideObjective)
+    assert second_guide_objective is not guide_objective
+    assert second_guide_objective.total_items == (
         len(second_game_map.collectibles) + len(second_clearing_map.collectibles)
     )
-    assert second_gameplay_args[20] is second_game_map.exits
-    assert callable(second_gameplay_args[21])
-    assert second_gameplay_args[21] is not handle_map_exit_reached
+    assert callable(second_gameplay_kwargs["on_map_exit_reached"])
+    assert second_gameplay_kwargs["on_map_exit_reached"] is not handle_map_exit_reached
 
     second_defeat_args = create_defeat_scene.call_args.args
 
@@ -560,13 +555,13 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     )
     assert second_pause_args[2] is not resume_game
 
-    second_guide_objective = second_gameplay_args[19]
+    second_guide_objective = second_guide_objective
     second_guide_objective.start()
     second_guide_objective.record_item_collected()
     second_guide_objective.record_item_collected()
     second_guide_objective.complete()
 
-    second_handle_enemy_defeated = second_gameplay_args[10]
+    second_handle_enemy_defeated = second_gameplay_kwargs["on_enemy_defeated"]
     second_enemy_event = EnemyDefeated(enemy_id="second-enemy")
 
     second_handle_enemy_defeated(second_enemy_event)
@@ -597,7 +592,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         call(second_victory_scene),
     ]
 
-    second_handle_map_exit_reached = second_gameplay_args[21]
+    second_handle_map_exit_reached = second_gameplay_kwargs["on_map_exit_reached"]
     second_map_exit = Mock()
     second_map_exit.destination_map_id = "clearing"
     second_map_exit.destination.position = (128.0, 320.0)

@@ -6,7 +6,7 @@ import pygame
 from my_first_adventure_game.engine.assets import FontCache
 from my_first_adventure_game.engine.graphics import Animation
 from my_first_adventure_game.engine.input import InputState
-from my_first_adventure_game.engine.world import Entity
+from my_first_adventure_game.engine.world import Entity, World
 from my_first_adventure_game.game.entities import NPC, Enemy, Player
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
@@ -15,7 +15,11 @@ from my_first_adventure_game.game.events import (
     PlayerDefeated,
 )
 from my_first_adventure_game.game.input import GameAction
-from my_first_adventure_game.game.levels import MapExit, create_clearing_map
+from my_first_adventure_game.game.levels import (
+    GameMap,
+    MapExit,
+    create_clearing_map,
+)
 from my_first_adventure_game.game.progression import GuideObjective
 from my_first_adventure_game.game.scenes import gameplay_scene
 from my_first_adventure_game.game.scenes.gameplay_scene import (
@@ -48,6 +52,7 @@ def _create_gameplay_scene(
     input_state: InputState[GameAction] | None = None,
     font_cache: FontCache | None = None,
     session_score: SessionScore | None = None,
+    game_map: GameMap | None = None,
     player: Player | None = None,
     on_pause_requested: Callable[[], None] | None = None,
     on_player_defeated: Callable[[PlayerDefeated], None] | None = None,
@@ -83,21 +88,29 @@ def _create_gameplay_scene(
             health=3,
         )
 
+    if game_map is None:
+        game_map = GameMap(
+            map_id="test",
+            world=Mock(spec=World),
+            player=player,
+            walls=walls,
+            enemies=enemies,
+            npcs=npcs,
+            destructible_obstacles=destructible_obstacles,
+            collectibles=collectibles,
+            exits=exits,
+        )
+
     return GameplayScene(
         input_state=input_state,
         font_cache=font_cache or Mock(spec=FontCache),
         session_score=session_score or Mock(spec=SessionScore),
-        player=player,
+        game_map=game_map,
         on_pause_requested=on_pause_requested or Mock(),
         on_player_defeated=on_player_defeated or Mock(),
-        walls=walls,
-        enemies=enemies,
-        npcs=npcs,
         on_npc_interacted=on_npc_interacted or Mock(),
         on_enemy_defeated=on_enemy_defeated or Mock(),
-        collectibles=collectibles,
         on_item_collected=on_item_collected or Mock(),
-        destructible_obstacles=destructible_obstacles,
         on_obstacle_destroyed=on_obstacle_destroyed or Mock(),
         player_idle_animation=player_idle_animation or Mock(spec=Animation),
         player_movement_animation=(player_movement_animation or Mock(spec=Animation)),
@@ -106,7 +119,6 @@ def _create_gameplay_scene(
         ),
         player_attack_animation=player_attack_animation or Mock(spec=Animation),
         guide_objective=guide_objective or GuideObjective(total_items=2),
-        exits=exits,
         on_map_exit_reached=on_map_exit_reached or Mock(),
     )
 

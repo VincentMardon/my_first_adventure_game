@@ -8,7 +8,7 @@ from my_first_adventure_game.engine.graphics import Animation, draw_text
 from my_first_adventure_game.engine.input import InputState, movement_axis
 from my_first_adventure_game.engine.scenes import Scene
 from my_first_adventure_game.engine.world import Entity, move_entity
-from my_first_adventure_game.game.entities import NPC, Enemy, Player
+from my_first_adventure_game.game.entities import NPC
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
@@ -53,44 +53,29 @@ class GameplayScene(Scene):
         input_state: InputState[GameAction],
         font_cache: FontCache,
         session_score: SessionScore,
-        player: Player,
+        game_map: GameMap,
         on_pause_requested: Callable[[], None],
         on_player_defeated: Callable[[PlayerDefeated], None],
-        walls: tuple[Entity, ...],
-        enemies: tuple[Enemy, ...],
-        npcs: tuple[NPC, ...],
         on_npc_interacted: Callable[[NPC], None],
         on_enemy_defeated: Callable[[EnemyDefeated], None],
-        collectibles: tuple[Entity, ...],
         on_item_collected: Callable[[ItemCollected], None],
-        destructible_obstacles: tuple[Entity, ...],
         on_obstacle_destroyed: Callable[[ObstacleDestroyed], None],
         player_idle_animation: Animation,
         player_movement_animation: Animation,
         player_collection_animation: Animation,
         player_attack_animation: Animation,
         guide_objective: GuideObjective,
-        exits: tuple[MapExit, ...],
         on_map_exit_reached: Callable[[MapExit], None],
     ) -> None:
         self._input_state = input_state
         self._font_cache = font_cache
         self._session_score = session_score
-        self._player = player
         self._on_pause_requested = on_pause_requested
         self._player_invulnerability_remaining = 0.0
         self._on_player_defeated = on_player_defeated
-        self._walls = walls
-        self._enemies = enemies
-        self._npcs = npcs
         self._on_npc_interacted = on_npc_interacted
-        self._enemy_hit_time_remaining = {
-            enemy.entity.entity_id: 0.0 for enemy in enemies
-        }
         self._on_enemy_defeated = on_enemy_defeated
-        self._collectibles = collectibles
         self._on_item_collected = on_item_collected
-        self._destructible_obstacles = destructible_obstacles
         self._on_obstacle_destroyed = on_obstacle_destroyed
         self._player_idle_animation = player_idle_animation
         self._player_movement_animation = player_movement_animation
@@ -100,8 +85,8 @@ class GameplayScene(Scene):
         self._player_attack_animation = player_attack_animation
         self._player_is_attacking = False
         self._guide_objective = guide_objective
-        self._exits = exits
         self._on_map_exit_reached = on_map_exit_reached
+        self.change_map(game_map)
 
     def handle_event(self, event: pygame.event.Event) -> None:
         return None

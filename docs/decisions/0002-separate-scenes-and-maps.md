@@ -26,7 +26,9 @@ A map represents spatial content owned by a gameplay scene.
 Changing maps does not automatically change scenes.
 
 `SceneManager` manages the active scene. `GameplayScene` manages the current
-map-owned spatial roles and replaces them explicitly through `change_map()`.
+map-owned spatial roles. It receives a complete `GameMap` during construction
+and replaces it explicitly through the same `change_map()` path during spatial
+navigation.
 
 Concrete `MapExit` values identify a destination map and arrival position.
 `game.main` resolves the current game's destinations, updates the shared

@@ -284,7 +284,8 @@ flowchart LR
     Enemy -->|"composes"| Entity
     NPC -->|"composes"| Entity
     World -->|"stores"| Entity
-    GameMain -->|"injects and replaces map roles"| GameplayScene["GameplayScene"]
+    GameMain -->|"injects selected GameMap"| GameplayScene["GameplayScene"]
+    GameplayScene -->|"reads and replaces spatial content"| GameMap
 ```
 
 ### Gameplay collaborators and facts
@@ -317,9 +318,10 @@ flowchart LR
 `game.main` creates the demo and clearing maps around the same player, the
 current `SessionScore`, temporary two-frame idle, movement, collection, and
 attack animations, and a `GuideObjective` only after the title scene requests
-a new game, then composes
-`GameplayScene` from its gameplay entities, shared rendering services, score,
-objective, animations, and explicit collection and destruction handlers.
+a new game, then composes `GameplayScene` from the complete demo `GameMap`,
+shared rendering services, score, objective, animations, and explicit gameplay
+handlers. The scene applies that initial map through the same `change_map()`
+path used for later navigation.
 `GameplayScene`
 selects idle or
 movement presentation from directional intent, gives one-shot collection
