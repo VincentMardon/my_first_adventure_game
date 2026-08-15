@@ -63,8 +63,8 @@ and this project adheres to
   `PlayerDefeated` transition.
 - Confirmation-driven navigation from defeat back to the title.
 - Fresh map, score, animation, gameplay, and defeat state for every new game.
-- A game-owned victory scene displayed after every enemy on the current map is
-  defeated.
+- A game-owned victory scene displayed after every demo enemy is defeated and
+  the Guide objective is completed.
 - Final score display and confirmation-driven return to the title after
   victory.
 - A game-owned pause action bound to Escape.
@@ -94,6 +94,7 @@ and this project adheres to
   from Guide progression.
 - An initially hidden clearing collectible that extends the Guide objective
   across both maps while preserving one session score and progress count.
+- Order-independent final victory gating across combat and Guide progression.
 - A confirmation action bound to Enter.
 - An explicit title-to-gameplay transition composed in `game.main`.
 - Architecture documentation for collisions, world representation, game levels,

@@ -124,7 +124,8 @@ The project now provides a minimal playable top-down loop:
 9. a stationary enemy blocks movement and survives the first nearby attack;
 10. non-fatal damage briefly changes the enemy's color;
 11. a second nearby attack defeats it and opens its former position.
-12. defeating every enemy transitions to a victory screen with the final score;
+12. defeating every enemy contributes to victory but does not bypass the Guide
+   objective;
 13. touching an active enemy damages the player, with a short invulnerability
    period between hits;
 14. reaching zero health transitions to a defeat screen that displays the final
@@ -153,6 +154,8 @@ The project now provides a minimal playable top-down loop:
    advancing the Guide objective.
 28. the Guide activates a third collectible in the clearing, and collection
    progress and score continue across both maps.
+29. victory requires both every demo enemy to be defeated and the Guide
+   objective to be completed, in either order.
 
 Implemented foundations include:
 
@@ -184,8 +187,8 @@ Implemented foundations include:
 - an immutable player defeat fact delivered through an explicit callback;
 - a game-owned defeat scene reached through an explicit transition and showing
   the final session score;
-- a game-owned victory scene reached after every map enemy is defeated and
-  showing the final session score;
+- a game-owned victory scene reached only after combat and Guide progression
+  are both complete and showing the final session score;
 - an explicit return to the title followed by fresh session construction for
   every new game;
 - a game-owned pause action and opaque pause scene that suspend gameplay and

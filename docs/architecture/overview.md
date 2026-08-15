@@ -168,8 +168,9 @@ The defeat scene displays the final session score after player defeat and
 requests an explicit return to the title when confirmation is pressed. Starting
 again constructs a fresh session rather than resetting the previous objects.
 
-The victory scene displays the final session score after every enemy on the
-current map is inactive and provides the same explicit return to the title.
+The victory scene displays the final session score after every demo enemy is
+inactive and the Guide objective is completed. It provides the same explicit
+return to the title.
 
 The opaque pause scene temporarily replaces gameplay when Escape is pressed.
 Because only the active scene is updated, gameplay time and animation stop. A
@@ -304,7 +305,8 @@ flowchart LR
     GameplayScene --> EnemyDefeated["EnemyDefeated"]
     GameplayScene --> PlayerDefeated["PlayerDefeated"]
     PlayerDefeated --> DefeatScene["DefeatScene"]
-    EnemyDefeated -->|"when all enemies are inactive"| VictoryScene["VictoryScene"]
+    EnemyDefeated -->|"when combat and progression are complete"| VictoryScene["VictoryScene"]
+    GuideObjectiveState -->|"when combat and progression are complete"| VictoryScene
 
     ItemCollected --> ItemCollectionPoints["item_collection_points"]
     ItemCollectionPoints --> SessionScore
@@ -339,10 +341,13 @@ player, and calls `GameplayScene.change_map()`. This replaces only map-owned
 spatial roles and enemy timers; the gameplay scene, score, objective, and
 session callbacks remain unchanged. The `SceneManager` is not involved.
 
-The enemy defeat handler inspects the remaining map enemies after each factual
-event. It explicitly replaces gameplay with `VictoryScene` only when all of
-them are inactive. This completion rule belongs to the concrete game and may be
-replaced by a different objective in a cloned project.
+The enemy defeat handler inspects the remaining demo enemies after each factual
+event. It explicitly replaces gameplay with `VictoryScene` only when all are
+inactive and the Guide objective is completed. If combat finishes first,
+closing the later Guide completion dialogue opens victory; if progression
+finishes first, defeating the final enemy opens it immediately. This combined
+completion rule belongs to the concrete game and may be replaced in a cloned
+project.
 
 Contact with an active enemy removes one point of player health and starts a
 short invulnerability period that prevents immediate repeated damage. Fatal

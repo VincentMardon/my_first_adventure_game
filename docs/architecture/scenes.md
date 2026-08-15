@@ -312,7 +312,8 @@ The collection handler applies the game-owned collection point rule to the same
 session score displayed by the scene and records progress in the session-local
 Guide objective. The destruction handler currently has no additional
 consequence. The enemy defeat handler replaces gameplay with the current
-session's `VictoryScene` only after all map enemies become inactive.
+session's `VictoryScene` only after all demo enemies are inactive and the Guide
+objective is completed.
 The player defeat handler explicitly replaces gameplay with the current
 session's `DefeatScene`.
 
@@ -331,6 +332,9 @@ gameplay scene, preserving the current session without requiring a scene stack.
 When interaction validates a ready Guide objective, `game.main` also applies
 the game-owned 500-point completion rule to the shared session score. Later
 interactions use the stable completed branch and do not repeat the bonus.
+If every enemy was already defeated, closing that first completion dialogue
+opens `VictoryScene`; otherwise gameplay resumes and defeating the final enemy
+opens victory later.
 
 For each new session, `game.main` creates the demo map and a minimal clearing
 map around the same player. Reaching an exit selects one of those concrete
@@ -477,8 +481,11 @@ Current tests verify:
 - the panel height grows with the number of visual lines while preserving the
   configured speaker, line, instruction, and lower-edge spacing;
 - the victory scene draws its background, message, and final session score;
-- victory waits until every map enemy is inactive and confirmation explicitly
-  returns to the title;
+- victory waits until every demo enemy is inactive and the Guide objective is
+  completed, regardless of which requirement is satisfied first;
+- Guide validation closes its completion dialogue into victory when combat was
+  already complete;
+- confirmation on the victory scene explicitly returns to the title;
 - consecutive start requests construct distinct maps, scores, animations,
   gameplay scenes, pause scenes, result scenes, and callbacks;
 - the composition root connects `PlayerDefeated` to the explicit defeat

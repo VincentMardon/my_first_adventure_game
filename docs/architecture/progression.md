@@ -81,7 +81,10 @@ of the active map. The objective marks itself ready when the recorded count
 reaches the combined total supplied by the composition root.
 Returning to the Guide then selects the completion message and makes that result
 stable for later interactions. That validation also awards the game-owned
-completion bonus exactly once.
+completion bonus exactly once. Victory requires this completed state and every
+demo enemy to be inactive. Whichever condition is satisfied last triggers the
+result transition; when Guide validation is last, the completion dialogue
+closes into victory.
 
 ## Invariants
 
@@ -96,6 +99,9 @@ completion bonus exactly once.
 - Reaching the required total changes `ACTIVE` to `READY_TO_COMPLETE`.
 - Only a later Guide interaction changes `READY_TO_COMPLETE` to `COMPLETED`.
 - That transition awards the completion bonus once.
+- Victory requires both `COMPLETED` progression and every demo enemy to be
+  inactive.
+- Completing either requirement first does not bypass the other.
 - Later Guide interactions keep the objective completed.
 - Starting another game creates an independent objective state.
 - The active status text displays collected and required item counts.
@@ -136,6 +142,8 @@ Current tests verify:
 - interaction during collection uses the active-objective reminder;
 - collecting every item makes the completion dialogue available;
 - later interactions preserve the completed result.
+- victory remains blocked until combat and Guide progression are both complete,
+  in either order;
 - a new objective exposes the supplied total and starts at zero;
 - recording collection increments the count and reaching the total marks the
   objective ready;

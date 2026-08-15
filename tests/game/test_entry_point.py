@@ -381,7 +381,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     handle_enemy_defeated(second_enemy_event)
 
-    scene_manager.change_scene.assert_called_with(victory_scene)
+    assert call(victory_scene) not in (scene_manager.change_scene.call_args_list)
+
+    assert gameplay_args[19].state is GuideObjectiveState.READY_TO_COMPLETE
 
     handle_map_exit_reached = gameplay_args[21]
     map_exit = Mock()
@@ -426,7 +428,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     completed_dialogue_args[4]()
 
-    scene_manager.change_scene.assert_called_with(gameplay_scene)
+    scene_manager.change_scene.assert_called_with(victory_scene)
 
     handle_npc_interacted(npc)
 
@@ -469,6 +471,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     second_clearing_map.collectibles = (second_clearing_collectible,)
     second_collectible = Mock()
     second_collectible.active = False
+    second_enemy = Mock()
+    second_enemy.entity.active = True
+    second_game_map.enemies = (second_enemy,)
     second_game_map.collectibles = (second_collectible,)
     second_session_score = Mock()
     second_gameplay_scene = Mock()
@@ -555,6 +560,24 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     )
     assert second_pause_args[2] is not resume_game
 
+    second_guide_objective = second_gameplay_args[19]
+    second_guide_objective.start()
+    second_guide_objective.record_item_collected()
+    second_guide_objective.record_item_collected()
+    second_guide_objective.complete()
+
+    second_handle_enemy_defeated = second_gameplay_args[10]
+    second_enemy_event = EnemyDefeated(enemy_id="second-enemy")
+
+    second_handle_enemy_defeated(second_enemy_event)
+
+    assert call(second_victory_scene) not in (scene_manager.change_scene.call_args_list)
+
+    second_enemy.entity.active = False
+    second_handle_enemy_defeated(second_enemy_event)
+
+    scene_manager.change_scene.assert_called_with(second_victory_scene)
+
     assert scene_manager.change_scene.call_args_list == [
         call(gameplay_scene),
         call(pause_scene),
@@ -566,12 +589,12 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         call(gameplay_scene),
         call(defeat_scene),
         call(initial_scene),
-        call(victory_scene),
         call(dialogue_scene),  # Guide completion
-        call(gameplay_scene),
+        call(victory_scene),
         call(dialogue_scene),  # Guide after completion
         call(gameplay_scene),
         call(second_gameplay_scene),
+        call(second_victory_scene),
     ]
 
     second_handle_map_exit_reached = second_gameplay_args[21]

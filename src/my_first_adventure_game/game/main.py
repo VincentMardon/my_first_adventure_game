@@ -163,7 +163,15 @@ def main() -> None:
         def resume_game() -> None:
             scene_manager.change_scene(gameplay_scene)
 
+        def all_enemies_defeated() -> bool:
+            return all(not enemy.entity.active for enemy in game_map.enemies)
+
+        def show_victory() -> None:
+            scene_manager.change_scene(victory_scene)
+
         def handle_npc_interacted(npc: NPC) -> None:
+            close_dialogue = resume_game
+
             if npc.entity.entity_id != GUIDE_NPC_ID:
                 dialogue_lines = npc.dialogue_lines
             elif guide_objective.state is GuideObjectiveState.NOT_STARTED:
@@ -178,6 +186,9 @@ def main() -> None:
                 guide_objective.complete()
                 session_score.add(guide_objective_completion_points())
                 dialogue_lines = COLLECTION_COMPLETE_DIALOGUE_LINES
+
+                if all_enemies_defeated():
+                    close_dialogue = show_victory
             else:
                 dialogue_lines = COLLECTION_COMPLETE_DIALOGUE_LINES
 
@@ -186,7 +197,7 @@ def main() -> None:
                 input_state,
                 npc.name,
                 dialogue_lines,
-                resume_game,
+                close_dialogue,
             )
             scene_manager.change_scene(dialogue_scene)
 
@@ -204,8 +215,11 @@ def main() -> None:
         def handle_enemy_defeated(
             _event: EnemyDefeated,
         ) -> None:
-            if all(not enemy.entity.active for enemy in game_map.enemies):
-                scene_manager.change_scene(victory_scene)
+            if (
+                all_enemies_defeated()
+                and guide_objective.state is GuideObjectiveState.COMPLETED
+            ):
+                show_victory()
 
         def handle_item_collected(event: ItemCollected) -> None:
             session_score.add(item_collection_points(event))
