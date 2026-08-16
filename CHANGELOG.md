@@ -32,6 +32,9 @@ and this project adheres to
   callback.
 - A game-owned rule awarding 100 points for each collected item.
 - A mutable session score accumulated through the collection event handler.
+- Session-local counters for collected items, destroyed obstacles, and defeated
+  enemies.
+- Final activity summaries on both victory and defeat screens.
 - A gameplay score display using the shared font cache and text renderer.
 - Reusable looping and one-shot frame animations driven by elapsed time.
 - Game-owned temporary idle and movement animations selected from directional

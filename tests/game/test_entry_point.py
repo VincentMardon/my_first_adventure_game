@@ -11,6 +11,7 @@ from my_first_adventure_game.game.progression import (
     GuideObjective,
     GuideObjectiveState,
 )
+from my_first_adventure_game.game.statistics import SessionStatistics
 
 
 def test_main_builds_and_runs_application(monkeypatch) -> None:
@@ -44,6 +45,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     game_map.collectibles = (collectible,)
     game_map.npcs = (npc,)
     session_score = Mock()
+    session_statistics = Mock(spec=SessionStatistics)
     gameplay_scene = Mock()
     application = Mock()
     first_player_frame = Mock()
@@ -70,6 +72,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_demo_map = Mock(return_value=game_map)
     create_clearing_map = Mock(return_value=clearing_map)
     create_session_score = Mock(return_value=session_score)
+    create_session_statistics = Mock(return_value=session_statistics)
     score_item_collection = Mock(return_value=100)
     score_guide_objective_completion = Mock(return_value=500)
     create_gameplay_scene = Mock(return_value=gameplay_scene)
@@ -112,6 +115,11 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     monkeypatch.setattr(game_main, "SessionScore", create_session_score)
     monkeypatch.setattr(
         game_main,
+        "SessionStatistics",
+        create_session_statistics,
+    )
+    monkeypatch.setattr(
+        game_main,
         "item_collection_points",
         score_item_collection,
     )
@@ -149,8 +157,11 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     start_game = create_title_scene.call_args.args[2]
 
     create_victory_scene.assert_not_called()
+    create_session_statistics.assert_not_called()
 
     start_game()
+
+    create_session_statistics.assert_called_once_with()
 
     create_pause_scene.assert_called_once()
     pause_args = create_pause_scene.call_args.args
@@ -168,24 +179,26 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     defeat_args = create_defeat_scene.call_args.args
 
-    assert defeat_args[:3] == (
+    assert defeat_args[:4] == (
         font_cache,
         session_score,
+        session_statistics,
         input_state,
     )
-    assert callable(defeat_args[3])
+    assert callable(defeat_args[4])
 
-    return_to_title = defeat_args[3]
+    return_to_title = defeat_args[4]
 
     create_victory_scene.assert_called_once()
     victory_args = create_victory_scene.call_args.args
 
-    assert victory_args[:3] == (
+    assert victory_args[:4] == (
         font_cache,
         session_score,
+        session_statistics,
         input_state,
     )
-    assert victory_args[3] is return_to_title
+    assert victory_args[4] is return_to_title
 
     assert create_surface.call_args_list == [
         call(game_main.PLAYER_FRAME_SIZE),
@@ -358,6 +371,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     assert guide_objective.collected_items == 2
     assert guide_objective.state is GuideObjectiveState.READY_TO_COMPLETE
+    assert session_statistics.record_item_collected.call_count == 2
 
     player_event = PlayerDefeated(player_id="player")
     handle_player_defeated(player_event)
@@ -379,6 +393,8 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert call(victory_scene) not in (scene_manager.change_scene.call_args_list)
 
     assert guide_objective.state is GuideObjectiveState.READY_TO_COMPLETE
+
+    assert session_statistics.record_enemy_defeated.call_count == 2
 
     handle_map_exit_reached = gameplay_kwargs["on_map_exit_reached"]
     map_exit = Mock()
@@ -454,6 +470,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         call(100),
         call(500),
     ]
+    session_statistics.record_obstacle_destroyed.assert_called_once_with()
 
     second_game_map = Mock()
     second_game_map.map_id = "demo"
@@ -471,6 +488,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     second_game_map.enemies = (second_enemy,)
     second_game_map.collectibles = (second_collectible,)
     second_session_score = Mock()
+    second_session_statistics = Mock(spec=SessionStatistics)
     second_gameplay_scene = Mock()
     second_defeat_scene = Mock()
     second_victory_scene = Mock()
@@ -481,6 +499,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_demo_map.return_value = second_game_map
     create_clearing_map.return_value = second_clearing_map
     create_session_score.return_value = second_session_score
+    create_session_statistics.return_value = second_session_statistics
     create_gameplay_scene.return_value = second_gameplay_scene
     create_defeat_scene.return_value = second_defeat_scene
     create_victory_scene.return_value = second_victory_scene
@@ -493,6 +512,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert create_demo_map.call_count == 2
     assert create_clearing_map.call_count == 2
     assert create_session_score.call_count == 2
+    assert create_session_statistics.call_count == 2
     assert create_gameplay_scene.call_count == 2
     assert create_defeat_scene.call_count == 2
     assert create_victory_scene.call_count == 2
@@ -508,6 +528,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert second_gameplay_kwargs["input_state"] is input_state
     assert second_gameplay_kwargs["font_cache"] is font_cache
     assert second_gameplay_kwargs["session_score"] is second_session_score
+    assert second_session_statistics is not session_statistics
     assert second_gameplay_kwargs["game_map"] is second_game_map
     assert second_gameplay_kwargs["on_pause_requested"] is not request_pause
     assert second_gameplay_kwargs["on_player_defeated"] is not handle_player_defeated
@@ -530,22 +551,24 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     second_defeat_args = create_defeat_scene.call_args.args
 
-    assert second_defeat_args[:3] == (
+    assert second_defeat_args[:4] == (
         font_cache,
         second_session_score,
+        second_session_statistics,
         input_state,
     )
-    assert second_defeat_args[3] is not return_to_title
+    assert second_defeat_args[4] is not return_to_title
 
     second_victory_args = create_victory_scene.call_args.args
 
-    assert second_victory_args[:3] == (
+    assert second_victory_args[:4] == (
         font_cache,
         second_session_score,
+        second_session_statistics,
         input_state,
     )
-    assert second_victory_args[3] is second_defeat_args[3]
-    assert second_victory_args[3] is not return_to_title
+    assert second_victory_args[4] is second_defeat_args[4]
+    assert second_victory_args[4] is not return_to_title
 
     second_pause_args = create_pause_scene.call_args.args
 

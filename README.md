@@ -158,6 +158,8 @@ The project now provides a minimal playable top-down loop:
    objective to be completed, in either order.
 30. the demo map and clearing use distinct game-owned background colors that
    change with their spatial content.
+31. victory and defeat display collected-item, destroyed-obstacle, and
+   defeated-enemy totals from the current session.
 
 Implemented foundations include:
 
@@ -221,6 +223,8 @@ Implemented foundations include:
   explicit callbacks;
 - game-owned item collection scoring rules;
 - an accumulated session score displayed during gameplay;
+- fresh game-owned session statistics updated from factual events and displayed
+  on both result screens;
 - automated tests, Ruff checks, strict documentation builds, package builds,
   and GitHub Actions CI.
 

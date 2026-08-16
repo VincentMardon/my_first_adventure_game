@@ -8,18 +8,22 @@ from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.scenes import Scene
 from my_first_adventure_game.game.input import GameAction
 from my_first_adventure_game.game.scoring import SessionScore
+from my_first_adventure_game.game.statistics import SessionStatistics
 
 BACKGROUND_COLOR = (24, 28, 36)
 DEFEAT_TEXT = "Game Over"
 DEFEAT_COLOR = (248, 112, 112)
-DEFEAT_CENTER_Y = 240
+DEFEAT_CENTER_Y = 160
 DEFEAT_FONT_PATH = pygame.font.get_default_font()
 DEFEAT_FONT_SIZE = 64
-RETURN_CENTER_Y = 440
+ENEMIES_DEFEATED_CENTER_Y = 450
+ITEMS_COLLECTED_CENTER_Y = 330
+OBSTACLES_DESTROYED_CENTER_Y = 390
+RETURN_CENTER_Y = 550
 RETURN_COLOR = (184, 192, 208)
 RETURN_TEXT = "Press Enter to return to title"
 SCORE_COLOR = (240, 240, 240)
-SCORE_CENTER_Y = 340
+SCORE_CENTER_Y = 250
 
 
 class DefeatScene(Scene):
@@ -29,11 +33,13 @@ class DefeatScene(Scene):
         self,
         font_cache: FontCache,
         session_score: SessionScore,
+        session_statistics: SessionStatistics,
         input_state: InputState[GameAction],
         return_to_title: Callable[[], None],
     ) -> None:
         self._font_cache = font_cache
         self._session_score = session_score
+        self._session_statistics = session_statistics
         self._input_state = input_state
         self._return_to_title = return_to_title
 
@@ -66,7 +72,27 @@ class DefeatScene(Scene):
             SCORE_COLOR,
             center=(center_x, SCORE_CENTER_Y),
         )
-
+        draw_text(
+            surface,
+            f"Items collected: {self._session_statistics.items_collected}",
+            font,
+            SCORE_COLOR,
+            center=(center_x, ITEMS_COLLECTED_CENTER_Y),
+        )
+        draw_text(
+            surface,
+            f"Obstacles destroyed: {self._session_statistics.obstacles_destroyed}",
+            font,
+            SCORE_COLOR,
+            center=(center_x, OBSTACLES_DESTROYED_CENTER_Y),
+        )
+        draw_text(
+            surface,
+            f"Enemies defeated: {self._session_statistics.enemies_defeated}",
+            font,
+            SCORE_COLOR,
+            center=(center_x, ENEMIES_DEFEATED_CENTER_Y),
+        )
         draw_text(
             surface,
             RETURN_TEXT,

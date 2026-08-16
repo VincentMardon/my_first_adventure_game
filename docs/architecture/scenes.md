@@ -262,9 +262,10 @@ and
 
 `DefeatScene`:
 
-- receives the shared font cache, session score, action input state, and an
-  explicit return callback;
-- draws a game-owned defeat message, the final score, and a return instruction;
+- receives the shared font cache, session score, session statistics, action
+  input state, and an explicit return callback;
+- draws a game-owned defeat message, final score, collected-item,
+  destroyed-obstacle, and defeated-enemy counts, and a return instruction;
 - requests a return to the title when `CONFIRM` is pressed;
 - ignores raw events.
 
@@ -298,7 +299,8 @@ and
 `VictoryScene`:
 
 - receives the same collaborators as `DefeatScene`;
-- draws a game-owned victory message, the final score, and a return instruction;
+- draws a game-owned victory message, final score, collected-item,
+  destroyed-obstacle, and defeated-enemy counts, and a return instruction;
 - requests a return to the title when `CONFIRM` is pressed;
 - ignores raw events.
 
@@ -311,10 +313,10 @@ use the same `change_map()` content-replacement path. The scene has no default
 map theme: it draws the background color supplied by the active `GameMap`.
 The collection handler applies the game-owned collection point rule to the same
 session score displayed by the scene and records progress in the session-local
-Guide objective. The destruction handler currently has no additional
-consequence. The enemy defeat handler replaces gameplay with the current
-session's `VictoryScene` only after all demo enemies are inactive and the Guide
-objective is completed.
+Guide objective. Collection, destruction, and enemy defeat handlers increment
+their matching session statistics. The enemy defeat handler replaces gameplay
+with the current session's `VictoryScene` only after all demo enemies are
+inactive and the Guide objective is completed.
 The player defeat handler explicitly replaces gameplay with the current
 session's `DefeatScene`.
 
@@ -344,11 +346,11 @@ maps, applies the exit's arrival position, and asks the existing
 so score and progression remain unchanged across the round trip.
 
 `game.main` retains the title scene and shared application services across the
-application lifetime. Each start request creates a fresh map, score, animation
-set, gameplay scene, pause scene, defeat scene, victory scene, and session-local
-callbacks. Pause and resume preserve the same session objects. Returning from
-either result does not mutate the completed session back to its initial state;
-the next start replaces it with new objects.
+application lifetime. Each start request creates fresh maps, score, statistics,
+animation set, gameplay scene, pause scene, defeat scene, victory scene, and
+session-local callbacks. Pause and resume preserve the same session objects.
+Returning from either result does not mutate the completed session back to its
+initial state; the next start replaces it with new objects.
 
 The current idle, movement, collection, and attack animations each use two
 game-owned colored surfaces as temporary frames. This validates animation
@@ -460,7 +462,8 @@ Current tests verify:
   hidden;
 - the composition root preserves one gameplay scene and player while moving
   between the demo map and clearing in both directions;
-- the defeat scene draws its background, message, and final session score;
+- the defeat scene draws its background, message, final session score, and
+  factual session counters;
 - confirmation on the defeat scene explicitly returns to the title;
 - pause requests stop the current gameplay update immediately, replace gameplay
   with an opaque pause scene, and resume the same gameplay scene explicitly;
@@ -482,13 +485,14 @@ Current tests verify:
   original NPC content;
 - the panel height grows with the number of visual lines while preserving the
   configured speaker, line, instruction, and lower-edge spacing;
-- the victory scene draws its background, message, and final session score;
+- the victory scene draws its background, message, final session score, and
+  factual session counters;
 - victory waits until every demo enemy is inactive and the Guide objective is
   completed, regardless of which requirement is satisfied first;
 - Guide validation closes its completion dialogue into victory when combat was
   already complete;
 - confirmation on the victory scene explicitly returns to the title;
-- consecutive start requests construct distinct maps, scores, animations,
-  gameplay scenes, pause scenes, result scenes, and callbacks;
+- consecutive start requests construct distinct maps, scores, statistics,
+  animations, gameplay scenes, pause scenes, result scenes, and callbacks;
 - the composition root connects `PlayerDefeated` to the explicit defeat
   transition.

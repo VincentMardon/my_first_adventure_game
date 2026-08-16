@@ -22,6 +22,7 @@ PACKAGES = (
     "my_first_adventure_game.game.profile",
     "my_first_adventure_game.game.scenes",
     "my_first_adventure_game.game.scoring",
+    "my_first_adventure_game.game.statistics",
 )
 
 

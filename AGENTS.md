@@ -317,7 +317,10 @@ Implemented game foundations:
 - Python-authored demo and clearing maps with concrete gameplay roles;
 - bidirectional spatial exits that preserve one gameplay scene and session
   player;
-- a session-local four-state Guide collection objective.
+- a session-local four-state Guide collection objective;
+- factual collection, destruction, enemy defeat, and player defeat events;
+- session-local score and activity statistics;
+- victory and defeat summaries with fresh state for each new game.
 
 Reserved but not implemented:
 

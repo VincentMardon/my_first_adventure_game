@@ -13,6 +13,9 @@ from my_first_adventure_game.game.scenes.defeat_scene import (
     DEFEAT_FONT_PATH,
     DEFEAT_FONT_SIZE,
     DEFEAT_TEXT,
+    ENEMIES_DEFEATED_CENTER_Y,
+    ITEMS_COLLECTED_CENTER_Y,
+    OBSTACLES_DESTROYED_CENTER_Y,
     RETURN_CENTER_Y,
     RETURN_COLOR,
     RETURN_TEXT,
@@ -21,6 +24,7 @@ from my_first_adventure_game.game.scenes.defeat_scene import (
     DefeatScene,
 )
 from my_first_adventure_game.game.scoring import SessionScore
+from my_first_adventure_game.game.statistics import SessionStatistics
 
 
 def test_defeat_scene_draws_background() -> None:
@@ -28,11 +32,13 @@ def test_defeat_scene_draws_background() -> None:
     surface.get_width.return_value = 1280
     font_cache = Mock(spec=FontCache)
     session_score = Mock(spec=SessionScore)
+    session_statistics = Mock(spec=SessionStatistics)
     input_state = Mock(spec=InputState)
     return_to_title = Mock()
     scene = DefeatScene(
         font_cache,
         session_score,
+        session_statistics,
         input_state,
         return_to_title,
     )
@@ -42,11 +48,15 @@ def test_defeat_scene_draws_background() -> None:
     surface.fill.assert_called_once_with(BACKGROUND_COLOR)
 
 
-def test_defeat_scene_draws_message_and_final_score(monkeypatch) -> None:
+def test_defeat_scene_draws_session_summary(monkeypatch) -> None:
     surface = Mock()
     surface.get_width.return_value = 1280
     font_cache = Mock(spec=FontCache)
     session_score = Mock(spec=SessionScore)
+    session_statistics = Mock(spec=SessionStatistics)
+    session_statistics.items_collected = 2
+    session_statistics.obstacles_destroyed = 1
+    session_statistics.enemies_defeated = 1
     session_score.value = 300
     input_state = Mock(spec=InputState)
     return_to_title = Mock()
@@ -59,6 +69,7 @@ def test_defeat_scene_draws_message_and_final_score(monkeypatch) -> None:
     scene = DefeatScene(
         font_cache,
         session_score,
+        session_statistics,
         input_state,
         return_to_title,
     )
@@ -86,6 +97,27 @@ def test_defeat_scene_draws_message_and_final_score(monkeypatch) -> None:
         ),
         call(
             surface,
+            "Items collected: 2",
+            font,
+            SCORE_COLOR,
+            center=(640, ITEMS_COLLECTED_CENTER_Y),
+        ),
+        call(
+            surface,
+            "Obstacles destroyed: 1",
+            font,
+            SCORE_COLOR,
+            center=(640, OBSTACLES_DESTROYED_CENTER_Y),
+        ),
+        call(
+            surface,
+            "Enemies defeated: 1",
+            font,
+            SCORE_COLOR,
+            center=(640, ENEMIES_DEFEATED_CENTER_Y),
+        ),
+        call(
+            surface,
             RETURN_TEXT,
             font,
             RETURN_COLOR,
@@ -97,12 +129,14 @@ def test_defeat_scene_draws_message_and_final_score(monkeypatch) -> None:
 def test_defeat_scene_returns_to_title_when_confirm_is_pressed() -> None:
     font_cache = Mock(spec=FontCache)
     session_score = Mock(spec=SessionScore)
+    session_statistics = Mock(spec=SessionStatistics)
     input_state = Mock(spec=InputState)
     input_state.is_pressed.return_value = True
     return_to_title = Mock()
     scene = DefeatScene(
         font_cache,
         session_score,
+        session_statistics,
         input_state,
         return_to_title,
     )
@@ -116,12 +150,14 @@ def test_defeat_scene_returns_to_title_when_confirm_is_pressed() -> None:
 def test_defeat_scene_does_not_return_without_confirmation() -> None:
     font_cache = Mock(spec=FontCache)
     session_score = Mock(spec=SessionScore)
+    session_statistics = Mock(spec=SessionStatistics)
     input_state = Mock(spec=InputState)
     input_state.is_pressed.return_value = False
     return_to_title = Mock()
     scene = DefeatScene(
         font_cache,
         session_score,
+        session_statistics,
         input_state,
         return_to_title,
     )

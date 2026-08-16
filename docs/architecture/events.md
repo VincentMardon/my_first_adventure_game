@@ -105,11 +105,12 @@ Guide interaction validates that state and selects the completion message. This
 rule consumes the factual event without adding progression data to
 `ItemCollected` or introducing a global event system.
 
-The destruction handler currently has no additional consequence. The enemy
-defeat handler replaces gameplay with `VictoryScene` only when every enemy on
-the current map is inactive. The player defeat handler explicitly replaces
-gameplay with the current session's `DefeatScene`. The gameplay scene
-deactivates the corresponding entity before reporting each factual event.
+The collection, destruction, and enemy defeat handlers also increment their
+matching counters in the session-local `SessionStatistics`. The enemy defeat
+handler replaces gameplay with `VictoryScene` only when every enemy on the
+current map is inactive. The player defeat handler explicitly replaces gameplay
+with the current session's `DefeatScene`. The gameplay scene deactivates the
+corresponding entity before reporting each factual event.
 
 ## Delivery semantics
 

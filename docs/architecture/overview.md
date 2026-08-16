@@ -135,6 +135,16 @@ An item collection currently awards 100 points. `game.main` converts each
 that score with `GameplayScene` for display. Validating the ready Guide
 objective awards a fixed 500-point bonus exactly once.
 
+### Statistics
+
+Tracks concrete factual counters for the current game session independently
+from its score.
+
+`game.main` records collected items, destroyed obstacles, and defeated enemies
+in one session-local `SessionStatistics`. Victory and defeat scenes read that
+same object to display a final activity summary. Starting a new game creates
+fresh counters; persistence and cross-session aggregation are not implemented.
+
 ### Progression
 
 Owns the session-local state, required and collected item counts, and status
@@ -164,13 +174,14 @@ prioritizes one-shot collection and attack animations over movement and idle
 presentation, applies contact damage with temporary player invulnerability,
 and displays the current session score and player health.
 
-The defeat scene displays the final session score after player defeat and
-requests an explicit return to the title when confirmation is pressed. Starting
-again constructs a fresh session rather than resetting the previous objects.
+The defeat scene displays the final session score and factual session counters
+after player defeat, then requests an explicit return to the title when
+confirmation is pressed. Starting again constructs a fresh session rather than
+resetting the previous objects.
 
-The victory scene displays the final session score after every demo enemy is
-inactive and the Guide objective is completed. It provides the same explicit
-return to the title.
+The victory scene displays the final session score and factual session counters
+after every demo enemy is inactive and the Guide objective is completed. It
+provides the same explicit return to the title.
 
 The opaque pause scene temporarily replaces gameplay when Escape is pressed.
 Because only the active scene is updated, gameplay time and animation stop. A
@@ -297,6 +308,8 @@ flowchart LR
 
     InputState["InputState"] --> GameplayScene
     SessionScore["SessionScore"] --> GameplayScene
+    SessionStatistics["SessionStatistics"] --> DefeatScene["DefeatScene"]
+    SessionStatistics --> VictoryScene["VictoryScene"]
     GuideObjective["GuideObjective"] -->|"provides status text"| GameplayScene
     Animation["Animation"] --> GameplayScene
     FontCache["FontCache"] --> GameplayScene
@@ -312,6 +325,9 @@ flowchart LR
 
     ItemCollected --> ItemCollectionPoints["item_collection_points"]
     ItemCollectionPoints --> SessionScore
+    ItemCollected --> SessionStatistics
+    ObstacleDestroyed --> SessionStatistics
+    EnemyDefeated --> SessionStatistics
     ItemCollected --> GuideObjectiveState["GuideObjectiveState"]
     GuideObjectiveState -->|"selects Guide dialogue"| DialogueScene["DialogueScene"]
 ```
@@ -358,7 +374,8 @@ Contact with an active enemy removes one point of player health and starts a
 short invulnerability period that prevents immediate repeated damage. Fatal
 contact deactivates the player, stops later gameplay updates, and reports a
 `PlayerDefeated` fact. The injected handler explicitly replaces gameplay with
-`DefeatScene`, which displays the final value of the shared `SessionScore`.
+`DefeatScene`, which displays the final value of the shared `SessionScore` and
+the factual counters from the shared `SessionStatistics`.
 
 When `INTERACT` is newly pressed, `GameplayScene` searches a small game-owned
 area around the player for the first active NPC. A match stops the rest of that
@@ -372,9 +389,9 @@ engine dialogue system.
 
 Confirmation on `DefeatScene` explicitly returns to the existing title scene.
 The next start request constructs new demo and clearing maps, session score,
-animation set, gameplay scene, pause scene, defeat scene, victory scene, and
-session-local callbacks. Shared application services such as input state, font
-cache, and scene manager remain alive.
+session statistics, animation set, gameplay scene, pause scene, defeat scene,
+victory scene, and session-local callbacks. Shared application services such as
+input state, font cache, and scene manager remain alive.
 
 The collection handler converts that fact through `item_collection_points()`
 and adds the result to the same `SessionScore` displayed by `GameplayScene`.

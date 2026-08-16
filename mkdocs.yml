@@ -63,6 +63,7 @@ nav:
       - Levels: architecture/levels.md
       - Events: architecture/events.md
       - Scoring: architecture/scoring.md
+      - Statistics: architecture/statistics.md
       - Progression: architecture/progression.md
   - API reference:
       - Overview: api/index.md
@@ -78,6 +79,7 @@ nav:
           - Entities: api/game-entities.md
           - Events: api/game-events.md
           - Scoring: api/game-scoring.md
+          - Statistics: api/game-statistics.md
           - Progression: api/game-progression.md
           - Input: api/game-input.md
           - Levels: api/game-levels.md

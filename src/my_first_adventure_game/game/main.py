@@ -35,6 +35,7 @@ from my_first_adventure_game.game.scoring import (
     guide_objective_completion_points,
     item_collection_points,
 )
+from my_first_adventure_game.game.statistics import SessionStatistics
 
 WINDOW_CONFIG = WindowConfig(title="My First Adventure Game", size=(1280, 720))
 COLLECTION_ACTIVE_DIALOGUE_LINES = ("Find every item and return to me.",)
@@ -78,6 +79,7 @@ def main() -> None:
             *clearing_map.collectibles,
         )
         session_score = SessionScore()
+        session_statistics = SessionStatistics()
         guide_objective = GuideObjective(
             total_items=len(objective_collectibles),
         )
@@ -146,6 +148,7 @@ def main() -> None:
         defeat_scene = DefeatScene(
             font_cache,
             session_score,
+            session_statistics,
             input_state,
             return_to_title,
         )
@@ -153,6 +156,7 @@ def main() -> None:
         victory_scene = VictoryScene(
             font_cache,
             session_score,
+            session_statistics,
             input_state,
             return_to_title,
         )
@@ -215,6 +219,8 @@ def main() -> None:
         def handle_enemy_defeated(
             _event: EnemyDefeated,
         ) -> None:
+            session_statistics.record_enemy_defeated()
+
             if (
                 all_enemies_defeated()
                 and guide_objective.state is GuideObjectiveState.COMPLETED
@@ -222,13 +228,14 @@ def main() -> None:
                 show_victory()
 
         def handle_item_collected(event: ItemCollected) -> None:
+            session_statistics.record_item_collected()
             session_score.add(item_collection_points(event))
             guide_objective.record_item_collected()
 
         def handle_obstacle_destroyed(
             _event: ObstacleDestroyed,
         ) -> None:
-            pass
+            session_statistics.record_obstacle_destroyed()
 
         def handle_map_exit_reached(map_exit: MapExit) -> None:
             if map_exit.destination_map_id == game_map.map_id:
