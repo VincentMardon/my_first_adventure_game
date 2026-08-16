@@ -12,14 +12,15 @@ It currently provides `SessionStatistics`, which counts:
 - defeated enemies.
 
 It does not calculate score, decide when events occur, persist records, or
-aggregate values across sessions.
+aggregate values across sessions. A completed session is instead supplied to
+the game-owned profile domain for long-term aggregation.
 
 ## Why this domain exists
 
 The result scenes need a concrete summary of what happened during one session.
 Keeping these counters separate from `SessionScore` prevents factual activity
-counts from becoming scoring rules and prepares a clear input for later profile
-aggregation without implementing persistence prematurely.
+counts from becoming scoring rules and provides a clear input for profile
+aggregation after a session finishes.
 
 ## Public components
 
@@ -53,6 +54,7 @@ flowchart LR
     SessionStatistics["SessionStatistics"]
     DefeatScene["DefeatScene"]
     VictoryScene["VictoryScene"]
+    PlayerProfile["PlayerProfile"]
 
     GameplayScene --> ItemCollected
     GameplayScene --> ObstacleDestroyed
@@ -63,6 +65,7 @@ flowchart LR
     GameMain -->|"records facts"| SessionStatistics
     SessionStatistics -->|"provides summary"| DefeatScene
     SessionStatistics -->|"provides summary"| VictoryScene
+    SessionStatistics -->|"aggregated after completion"| PlayerProfile
 ```
 
 `game.main` creates one `SessionStatistics` instance for each new game. Its
@@ -86,9 +89,9 @@ transition.
 Additional counters should be added only when a visible session summary or
 accepted profile requirement consumes them.
 
-Later profile work may copy completed session counters into a persistent,
-game-owned profile. Generic atomic storage remains an engine mechanism, while
-profile schemas, aggregation rules, records, and migrations remain in `game`.
+`PlayerProfile` copies completed session counters into persistent game-owned
+totals. Generic atomic storage remains an engine mechanism, while profile
+schemas, aggregation rules, records, and migrations remain in `game`.
 
 ## Change risks
 

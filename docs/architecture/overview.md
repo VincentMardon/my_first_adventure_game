@@ -106,6 +106,11 @@ immutable collision bounds.
 Concrete entity types, solid obstacle selection, and behavior belong to the
 game.
 
+### Persistence
+
+Provides UTF-8 JSON loading and atomic file replacement without knowing the
+schema, storage location, or recovery policy of concrete game data.
+
 ## Implemented game foundations
 
 ### Entities
@@ -156,6 +161,16 @@ completed when the player returns to the Guide. The transitions remain
 game-owned: `GuideObjective` records them, while `game.main` decides when they
 occur and what they change in the world. `GameplayScene` only reads the current
 status for display. This is not a generic engine quest system.
+
+### Profile
+
+Stores versioned, validated statistics accumulated across game sessions.
+
+`game.main` loads one `PlayerProfile` from the platform-specific application
+data directory, records each session start, and aggregates a completed
+session's final score and factual statistics exactly once on victory or defeat.
+Invalid or unreadable data falls back to an empty profile, while save failures
+are logged without stopping the game.
 
 ### Scenes
 
@@ -210,8 +225,6 @@ background colors, and registration order.
 The package skeleton also reserves locations for capabilities that have not yet
 been implemented:
 
-- persistence;
-- profiles;
 - localization.
 
 Reserved packages communicate intended organization, not completed features.

@@ -10,6 +10,13 @@ and this project adheres to
 
 ### Added
 
+- Atomic UTF-8 JSON loading and saving through a reusable engine persistence
+  domain.
+- A versioned player profile that persists session starts, completions,
+  victories, score records, and cumulative activity statistics across
+  application launches.
+- Platform-specific profile storage with invalid-data recovery and nonfatal
+  save-error handling.
 - A searchable MkDocs documentation site with Material navigation and Mermaid
   diagram rendering.
 - A generated public API reference backed by mkdocstrings and source docstrings.

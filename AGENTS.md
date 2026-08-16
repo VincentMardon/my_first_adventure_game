@@ -310,6 +310,7 @@ Implemented engine domains:
 - minimal game-independent text rendering;
 - floating-point AABB geometry and overlap detection;
 - lightweight spatial entities, deterministic lookup and AABB movement;
+- UTF-8 JSON loading and atomic file replacement;
 
 Implemented game foundations:
 
@@ -321,9 +322,11 @@ Implemented game foundations:
 - factual collection, destruction, enemy defeat, and player defeat events;
 - session-local score and activity statistics;
 - victory and defeat summaries with fresh state for each new game.
+- a versioned persistent player profile with cross-session score and activity
+  statistics.
 
 Reserved but not implemented:
 
-- persistence.
+- localization.
 
 Do not infer behavior from reserved package names.

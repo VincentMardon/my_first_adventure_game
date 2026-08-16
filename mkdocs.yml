@@ -65,6 +65,8 @@ nav:
       - Scoring: architecture/scoring.md
       - Statistics: architecture/statistics.md
       - Progression: architecture/progression.md
+      - Persistence: architecture/persistence.md
+      - Profile: architecture/profile.md
   - API reference:
       - Overview: api/index.md
       - Engine:
@@ -75,12 +77,14 @@ nav:
           - Input: api/input.md
           - Scenes: api/scenes.md
           - World: api/world.md
+          - Persistence: api/persistence.md
       - Game:
           - Entities: api/game-entities.md
           - Events: api/game-events.md
           - Scoring: api/game-scoring.md
           - Statistics: api/game-statistics.md
           - Progression: api/game-progression.md
+          - Profile: api/game-profile.md
           - Input: api/game-input.md
           - Levels: api/game-levels.md
           - Scenes: api/game-scenes.md

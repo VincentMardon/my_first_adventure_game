@@ -55,6 +55,8 @@ proposing changes.
 - [Scoring](architecture/scoring.md)
 - [Statistics](architecture/statistics.md)
 - [Progression](architecture/progression.md)
+- [Persistence](architecture/persistence.md)
+- [Profile](architecture/profile.md)
 
 ### Architectural decisions
 
@@ -72,11 +74,13 @@ proposing changes.
 - [Input](api/input.md)
 - [Scenes](api/scenes.md)
 - [World](api/world.md)
+- [Persistence](api/persistence.md)
 - [Game entities](api/game-entities.md)
 - [Game events](api/game-events.md)
 - [Game scoring](api/game-scoring.md)
 - [Game statistics](api/game-statistics.md)
 - [Game progression](api/game-progression.md)
+- [Game profile](api/game-profile.md)
 - [Game input](api/game-input.md)
 - [Game levels](api/game-levels.md)
 - [Game scenes](api/game-scenes.md)

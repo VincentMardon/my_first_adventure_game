@@ -1,3 +1,6 @@
+import logging
+from pathlib import Path
+
 import pygame
 
 from my_first_adventure_game.engine.application import Application, WindowConfig
@@ -17,6 +20,12 @@ from my_first_adventure_game.game.levels import (
     MapExit,
     create_clearing_map,
     create_demo_map,
+)
+from my_first_adventure_game.game.profile import (
+    PlayerProfile,
+    get_profile_path,
+    load_profile,
+    save_profile,
 )
 from my_first_adventure_game.game.progression import (
     GuideObjective,
@@ -42,6 +51,7 @@ COLLECTION_ACTIVE_DIALOGUE_LINES = ("Find every item and return to me.",)
 COLLECTION_COMPLETE_DIALOGUE_LINES = ("You found every item. Well done, traveler!",)
 FRAMES_PER_SECOND = 60
 GUIDE_NPC_ID = "npc-1"
+LOGGER = logging.getLogger(__name__)
 PLAYER_FRAME_SIZE = (32, 32)
 PLAYER_IDLE_COLORS = (
     (224, 196, 96),
@@ -65,13 +75,31 @@ PLAYER_ATTACK_COLORS = (
 PLAYER_ATTACK_FRAME_DURATION = 0.1
 
 
+def _save_player_profile(
+    path: Path,
+    profile: PlayerProfile,
+) -> None:
+    try:
+        save_profile(path, profile)
+    except OSError:
+        LOGGER.warning(
+            "Unable to save player profile to %s",
+            path,
+            exc_info=True,
+        )
+
+
 def main() -> None:
     """Compose the game services and start the application."""
 
     input_state = InputState(DEFAULT_KEYBOARD_BINDINGS)
     font_cache = FontCache(pygame)
+    profile_path = get_profile_path()
+    player_profile = load_profile(profile_path)
 
     def start_game() -> None:
+        player_profile.record_game_started()
+        _save_player_profile(profile_path, player_profile)
         game_map = create_demo_map()
         clearing_map = create_clearing_map(game_map.player)
         objective_collectibles = (
@@ -80,6 +108,7 @@ def main() -> None:
         )
         session_score = SessionScore()
         session_statistics = SessionStatistics()
+        session_finished = False
         guide_objective = GuideObjective(
             total_items=len(objective_collectibles),
         )
@@ -142,6 +171,20 @@ def main() -> None:
             loop=False,
         )
 
+        def finish_session(*, victory: bool) -> None:
+            nonlocal session_finished
+
+            if session_finished:
+                return
+
+            session_finished = True
+            player_profile.record_game_finished(
+                score=session_score.value,
+                statistics=session_statistics,
+                victory=victory,
+            )
+            _save_player_profile(profile_path, player_profile)
+
         def return_to_title() -> None:
             scene_manager.change_scene(initial_scene)
 
@@ -171,6 +214,7 @@ def main() -> None:
             return all(not enemy.entity.active for enemy in game_map.enemies)
 
         def show_victory() -> None:
+            finish_session(victory=True)
             scene_manager.change_scene(victory_scene)
 
         def handle_npc_interacted(npc: NPC) -> None:
@@ -214,6 +258,7 @@ def main() -> None:
         def handle_player_defeated(
             _event: PlayerDefeated,
         ) -> None:
+            finish_session(victory=False)
             scene_manager.change_scene(defeat_scene)
 
         def handle_enemy_defeated(

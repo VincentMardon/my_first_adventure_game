@@ -160,6 +160,8 @@ The project now provides a minimal playable top-down loop:
    change with their spatial content.
 31. victory and defeat display collected-item, destroyed-obstacle, and
    defeated-enemy totals from the current session.
+32. session starts and completed results are saved to a persistent player
+   profile in the platform-specific application data directory.
 
 Implemented foundations include:
 
@@ -225,10 +227,14 @@ Implemented foundations include:
 - an accumulated session score displayed during gameplay;
 - fresh game-owned session statistics updated from factual events and displayed
   on both result screens;
+- reusable UTF-8 JSON loading and atomic replacement in the engine persistence
+  domain;
+- a versioned, validated game-owned player profile that accumulates starts,
+  completions, victories, scores, and activity statistics across launches;
 - automated tests, Ruff checks, strict documentation builds, package builds,
   and GitHub Actions CI.
 
-Persistence, profiles, localization, and broader combat and interaction systems
+Profile presentation, localization, and broader combat and interaction systems
 have not been implemented yet.
 
 ## Documentation

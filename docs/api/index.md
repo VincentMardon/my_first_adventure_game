@@ -20,6 +20,7 @@ design decisions, and change risks.
 - [Input](input.md)
 - [Scenes](scenes.md)
 - [World](world.md)
+- [Persistence](persistence.md)
 
 ## Game domains
 
@@ -30,3 +31,4 @@ design decisions, and change risks.
 - [Scoring](game-scoring.md)
 - [Statistics](game-statistics.md)
 - [Progression](game-progression.md)
+- [Profile](game-profile.md)

@@ -14,6 +14,7 @@ authors = [
   { name = "Vincent Mardon" },
 ]
 dependencies = [
+  "platformdirs>=4,<5",
   "pygame>=2.6.1,<3",
 ]
 

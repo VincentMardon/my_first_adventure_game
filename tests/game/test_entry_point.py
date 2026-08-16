@@ -1,3 +1,4 @@
+import logging
 from unittest.mock import Mock, call
 
 from my_first_adventure_game.game import main as game_main
@@ -7,6 +8,7 @@ from my_first_adventure_game.game.events import (
     ObstacleDestroyed,
     PlayerDefeated,
 )
+from my_first_adventure_game.game.profile import PlayerProfile
 from my_first_adventure_game.game.progression import (
     GuideObjective,
     GuideObjectiveState,
@@ -45,7 +47,10 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     game_map.collectibles = (collectible,)
     game_map.npcs = (npc,)
     session_score = Mock()
+    session_score.value = 700
     session_statistics = Mock(spec=SessionStatistics)
+    profile_path = Mock()
+    player_profile = Mock(spec=PlayerProfile)
     gameplay_scene = Mock()
     application = Mock()
     first_player_frame = Mock()
@@ -75,6 +80,9 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_session_statistics = Mock(return_value=session_statistics)
     score_item_collection = Mock(return_value=100)
     score_guide_objective_completion = Mock(return_value=500)
+    resolve_profile_path = Mock(return_value=profile_path)
+    load_player_profile = Mock(return_value=player_profile)
+    persist_profile = Mock()
     create_gameplay_scene = Mock(return_value=gameplay_scene)
     create_application = Mock(return_value=application)
     create_surface = Mock(
@@ -128,6 +136,21 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         "guide_objective_completion_points",
         score_guide_objective_completion,
     )
+    monkeypatch.setattr(
+        game_main,
+        "get_profile_path",
+        resolve_profile_path,
+    )
+    monkeypatch.setattr(
+        game_main,
+        "load_profile",
+        load_player_profile,
+    )
+    monkeypatch.setattr(
+        game_main,
+        "save_profile",
+        persist_profile,
+    )
     monkeypatch.setattr(game_main, "GameplayScene", create_gameplay_scene)
     monkeypatch.setattr(game_main, "Application", create_application)
     monkeypatch.setattr(game_main.pygame, "Surface", create_surface)
@@ -159,7 +182,18 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_victory_scene.assert_not_called()
     create_session_statistics.assert_not_called()
 
+    resolve_profile_path.assert_called_once_with()
+    load_player_profile.assert_called_once_with(profile_path)
+    player_profile.record_game_started.assert_not_called()
+    persist_profile.assert_not_called()
+
     start_game()
+
+    player_profile.record_game_started.assert_called_once_with()
+    persist_profile.assert_called_once_with(
+        profile_path,
+        player_profile,
+    )
 
     create_session_statistics.assert_called_once_with()
 
@@ -376,6 +410,16 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     player_event = PlayerDefeated(player_id="player")
     handle_player_defeated(player_event)
 
+    player_profile.record_game_finished.assert_called_once_with(
+        score=700,
+        statistics=session_statistics,
+        victory=False,
+    )
+    assert persist_profile.call_args_list == [
+        call(profile_path, player_profile),  # Session started
+        call(profile_path, player_profile),  # Session finished
+    ]
+
     return_to_title()
 
     handle_enemy_defeated = gameplay_kwargs["on_enemy_defeated"]
@@ -441,6 +485,8 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     scene_manager.change_scene.assert_called_with(victory_scene)
 
+    assert player_profile.record_game_finished.call_count == 1
+
     handle_npc_interacted(npc)
 
     assert create_dialogue_scene.call_count == 4
@@ -488,6 +534,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     second_game_map.enemies = (second_enemy,)
     second_game_map.collectibles = (second_collectible,)
     second_session_score = Mock()
+    second_session_score.value = 400
     second_session_statistics = Mock(spec=SessionStatistics)
     second_gameplay_scene = Mock()
     second_defeat_scene = Mock()
@@ -509,6 +556,12 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     start_game()
 
+    assert player_profile.record_game_started.call_count == 2
+    assert persist_profile.call_args_list == [
+        call(profile_path, player_profile),  # First session started
+        call(profile_path, player_profile),  # First session finished
+        call(profile_path, player_profile),  # Second session started
+    ]
     assert create_demo_map.call_count == 2
     assert create_clearing_map.call_count == 2
     assert create_session_score.call_count == 2
@@ -596,6 +649,25 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     scene_manager.change_scene.assert_called_with(second_victory_scene)
 
+    assert player_profile.record_game_finished.call_args_list == [
+        call(
+            score=700,
+            statistics=session_statistics,
+            victory=False,
+        ),
+        call(
+            score=400,
+            statistics=second_session_statistics,
+            victory=True,
+        ),
+    ]
+    assert persist_profile.call_args_list == [
+        call(profile_path, player_profile),
+        call(profile_path, player_profile),
+        call(profile_path, player_profile),
+        call(profile_path, player_profile),
+    ]
+
     assert scene_manager.change_scene.call_args_list == [
         call(gameplay_scene),
         call(pause_scene),
@@ -635,3 +707,33 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         frames_per_second=game_main.FRAMES_PER_SECOND,
     )
     application.run.assert_called_once_with()
+
+
+def test_save_player_profile_logs_storage_error(
+    monkeypatch,
+    caplog,
+) -> None:
+    profile_path = Mock()
+    player_profile = Mock(spec=PlayerProfile)
+    persist_profile = Mock(side_effect=OSError("disk full"))
+
+    monkeypatch.setattr(
+        game_main,
+        "save_profile",
+        persist_profile,
+    )
+
+    with caplog.at_level(
+        logging.WARNING,
+        logger=game_main.__name__,
+    ):
+        game_main._save_player_profile(
+            profile_path,
+            player_profile,
+        )
+
+    persist_profile.assert_called_once_with(
+        profile_path,
+        player_profile,
+    )
+    assert "Unable to save player profile" in caplog.text
