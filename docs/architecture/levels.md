@@ -67,10 +67,11 @@ map to load.
 Creates the current minimal clearing map with the player supplied by the
 active session. Its return exit leads back to the demo map. The clearing is a
 technical navigation target bounded by game-owned walls around an opening for
-that exit. It also contains a named Caretaker with static dialogue that does
-not affect Guide progression. One initially hidden collectible extends the
-Guide's objective into this map. The clearing does not yet represent finished
-game content.
+that exit. It also contains a named Caretaker with dialogue that does not affect
+Guide progression. The Caretaker initially moves diagonally from its authored
+position toward one concrete destination. One initially hidden collectible
+extends the Guide's objective into this map. The clearing does not yet
+represent finished game content.
 
 ## Ownership
 
@@ -170,6 +171,8 @@ The clearing map additionally guarantees:
   wall.
 - Its active Caretaker is registered in the same world, has ordered non-blank
   dialogue, and overlaps neither the walls, player arrival position, nor exit.
+- The Caretaker has a positive movement speed and a map-authored destination
+  inside the clearing.
 - Its objective collectible starts inactive, is registered in the same world,
   and overlaps neither walls, NPCs, the player arrival position, nor exit.
 

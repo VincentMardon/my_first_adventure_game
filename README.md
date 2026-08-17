@@ -165,6 +165,8 @@ The project now provides a minimal playable top-down loop:
    profile in the platform-specific application data directory.
 33. pressing P on the title opens the accumulated profile statistics, and
    Enter returns to the title.
+34. the clearing Caretaker moves diagonally toward a map-authored destination,
+   respects solid entities, and stops without overshooting.
 
 Implemented foundations include:
 
@@ -211,6 +213,10 @@ Implemented foundations include:
   session explicitly;
 - a second map-specific NPC whose static dialogue remains independent from the
   Guide's progression rules;
+- optional game-owned NPC movement targets and speeds, with the Caretaker as
+  the first direct-navigation consumer;
+- elapsed-time NPC movement against active walls, the player, enemies, and
+  other NPCs without pathfinding;
 - a game-owned dialogue panel with a distinct background, border, and balanced
   spacing around the speaker, current line, and continuation instruction;
 - word-boundary wrapping based on the selected font's measured width, with a

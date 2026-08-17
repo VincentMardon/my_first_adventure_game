@@ -77,3 +77,58 @@ def test_npc_requires_non_blank_name(name: str) -> None:
             entity=_create_entity(),
             dialogue_lines=("Welcome, traveler!",),
         )
+
+
+def test_npc_is_stationary_by_default() -> None:
+    npc = NPC(
+        name="Guide",
+        entity=_create_entity(),
+        dialogue_lines=("Welcome, traveler!",),
+    )
+
+    assert npc.movement_target is None
+    assert npc.movement_speed == 0.0
+
+
+def test_npc_copies_movement_target() -> None:
+    movement_target = pygame.Vector2(320.0, 240.0)
+
+    npc = NPC(
+        name="Caretaker",
+        entity=_create_entity(),
+        dialogue_lines=("I have work to do.",),
+        movement_target=movement_target,
+        movement_speed=80.0,
+    )
+
+    movement_target.update(0.0, 0.0)
+
+    assert npc.movement_target == pygame.Vector2(320.0, 240.0)
+    assert npc.movement_target is not movement_target
+    assert npc.movement_speed == 80.0
+
+
+def test_npc_rejects_negative_movement_speed() -> None:
+    with pytest.raises(
+        ValueError,
+        match="movement_speed must not be negative",
+    ):
+        NPC(
+            name="Caretaker",
+            entity=_create_entity(),
+            dialogue_lines=("I have work to do.",),
+            movement_speed=-1.0,
+        )
+
+
+def test_npc_requires_positive_speed_for_movement_target() -> None:
+    with pytest.raises(
+        ValueError,
+        match="movement_speed must be positive when movement_target is set",
+    ):
+        NPC(
+            name="Caretaker",
+            entity=_create_entity(),
+            dialogue_lines=("I have work to do.",),
+            movement_target=pygame.Vector2(320.0, 240.0),
+        )

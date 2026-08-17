@@ -8,7 +8,7 @@ from my_first_adventure_game.engine.graphics import Animation, draw_text
 from my_first_adventure_game.engine.input import InputState, movement_axis
 from my_first_adventure_game.engine.scenes import Scene
 from my_first_adventure_game.engine.world import Entity, move_entity
-from my_first_adventure_game.game.entities import NPC
+from my_first_adventure_game.game.entities import NPC, move_npc_towards
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
@@ -153,6 +153,35 @@ class GameplayScene(Scene):
         )
 
         move_entity(self._player.entity, movement, solid_bounds)
+
+        for npc in self._npcs:
+            target = npc.movement_target
+
+            if not npc.entity.active or target is None:
+                continue
+
+            npc_solid_bounds = (
+                *(wall.bounds for wall in self._walls if wall.active),
+                *((self._player.entity.bounds,) if self._player.entity.active else ()),
+                *(
+                    enemy.entity.bounds
+                    for enemy in self._enemies
+                    if enemy.entity.active
+                ),
+                *(
+                    other_npc.entity.bounds
+                    for other_npc in self._npcs
+                    if other_npc is not npc and other_npc.entity.active
+                ),
+            )
+
+            move_npc_towards(
+                npc,
+                target,
+                speed=npc.movement_speed,
+                delta_time=delta_time,
+                solid_bounds=npc_solid_bounds,
+            )
 
         player_bounds = self._player.entity.bounds
 

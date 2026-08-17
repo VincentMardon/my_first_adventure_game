@@ -1,3 +1,5 @@
+import pygame
+
 from my_first_adventure_game.game.levels import (
     create_clearing_map,
     create_demo_map,
@@ -71,6 +73,8 @@ def test_clearing_map_has_registered_caretaker() -> None:
     assert caretaker.entity.entity_id == "npc-clearing-caretaker"
     assert caretaker.entity.position == (640.0, 320.0)
     assert caretaker.entity.size == (24.0, 32.0)
+    assert caretaker.movement_target == pygame.Vector2(800.0, 480.0)
+    assert caretaker.movement_speed == 80.0
     assert caretaker.entity.active
     assert caretaker.dialogue_lines == (
         "I just finished cleaning these walls.",

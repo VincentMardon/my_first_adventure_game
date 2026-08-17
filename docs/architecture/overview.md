@@ -124,7 +124,9 @@ Defines concrete gameplay objects that compose reusable engine entities.
 The current `Enemy` and `Player` own mutable integer health, apply positive
 damage, deactivate their spatial entities on the fatal hit, and report whether
 that hit caused the defeat. `NPC` composes the same reusable spatial state with
-a game-owned display name and ordered dialogue lines.
+a game-owned display name, ordered dialogue lines, and optional target-directed
+movement configuration. The gameplay scene advances configured NPCs against
+selected solid bounds but performs no pathfinding.
 
 ### Events
 
@@ -218,6 +220,11 @@ the selected font, wrapped at word boundaries, and given additional panel
 height without changing the original NPC line. Confirmation advances the
 dialogue, then explicitly restores the same gameplay scene and session state
 after the final line.
+
+The clearing's Caretaker is the first autonomous NPC consumer. It follows one
+map-authored diagonal destination at a fixed speed and stops at the target. Its
+collision movement may slide along one free axis, but it does not plan a route
+around obstacles.
 
 ### Levels
 

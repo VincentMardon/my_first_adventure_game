@@ -202,6 +202,66 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
     )
 
 
+def test_update_moves_npc_with_configured_target(monkeypatch) -> None:
+    wall = Entity(
+        entity_id="wall",
+        position=pygame.Vector2(200.0, 200.0),
+        size=pygame.Vector2(32.0, 32.0),
+    )
+    moving_npc = NPC(
+        name="Caretaker",
+        entity=Entity(
+            entity_id="moving-npc",
+            position=pygame.Vector2(400.0, 300.0),
+            size=pygame.Vector2(24.0, 32.0),
+        ),
+        dialogue_lines=("I have work to do.",),
+        movement_target=pygame.Vector2(500.0, 400.0),
+        movement_speed=80.0,
+    )
+    stationary_npc = NPC(
+        name="Guide",
+        entity=Entity(
+            entity_id="stationary-npc",
+            position=pygame.Vector2(600.0, 300.0),
+            size=pygame.Vector2(24.0, 32.0),
+        ),
+        dialogue_lines=("Welcome, traveler!",),
+    )
+    move_npc_towards = Mock()
+
+    monkeypatch.setattr(
+        gameplay_scene,
+        "movement_axis",
+        Mock(return_value=pygame.Vector2()),
+    )
+    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+    monkeypatch.setattr(
+        gameplay_scene,
+        "move_npc_towards",
+        move_npc_towards,
+    )
+
+    scene = _create_gameplay_scene(
+        walls=(wall,),
+        npcs=(moving_npc, stationary_npc),
+    )
+
+    scene.update(0.5)
+
+    move_npc_towards.assert_called_once_with(
+        moving_npc,
+        moving_npc.movement_target,
+        speed=80.0,
+        delta_time=0.5,
+        solid_bounds=(
+            wall.bounds,
+            scene._player.entity.bounds,
+            stationary_npc.entity.bounds,
+        ),
+    )
+
+
 def test_draw_renders_spatial_content_and_player(
     monkeypatch,
 ) -> None:

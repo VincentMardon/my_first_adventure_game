@@ -326,6 +326,8 @@ Implemented game foundations:
 - a versioned persistent player profile with cross-session score and activity
   statistics.
 - a profile scene that presents accumulated statistics without owning storage.
+- optional NPC target movement demonstrated by the clearing Caretaker without
+  pathfinding.
 
 Reserved but not implemented:
 

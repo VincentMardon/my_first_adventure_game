@@ -250,6 +250,12 @@ It also provides
 - applies the game-owned movement speed using delta time;
 - selects active wall, enemy, and NPC bounds as solid obstacles;
 - delegates collision-aware movement to the engine;
+- moves each active NPC with a configured target using its game-owned speed and
+  the frame delta time;
+- treats active walls, the player, enemies, and other NPCs as solid during NPC
+  movement while excluding the moving NPC from its own obstacles;
+- relies on axis-separated collision sliding and does not calculate paths or
+  obstacle detours;
 - detects overlap with active map exits after movement, reports the selected
   exit, and stops the old map's update immediately;
 - replaces its player and map-owned spatial roles through `change_map()` while

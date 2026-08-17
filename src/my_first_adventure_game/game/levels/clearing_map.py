@@ -59,6 +59,8 @@ def create_clearing_map(player: Player) -> GameMap:
                 "I just finished cleaning these walls.",
                 "Please try not to leave any mysterious stains.",
             ),
+            movement_target=pygame.Vector2(800.0, 480.0),
+            movement_speed=80.0,
         ),
     )
     collectibles = (

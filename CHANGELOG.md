@@ -10,6 +10,10 @@ and this project adheres to
 
 ### Added
 
+- Optional NPC movement targets and speeds with elapsed-time movement against
+  selected solid bounds.
+- An autonomous clearing Caretaker that moves diagonally toward a concrete
+  map-authored destination without pathfinding.
 - Reusable target-directed movement calculation with normalized diagonals and
   exact arrival without overshooting.
 - Atomic UTF-8 JSON loading and saving through a reusable engine persistence

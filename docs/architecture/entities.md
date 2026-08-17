@@ -5,8 +5,9 @@
 The game entities domain defines concrete objects whose gameplay state extends
 the reusable spatial state provided by the engine.
 
-It currently provides `Enemy`, `NPC`, and `Player`. Each composes an engine
-`Entity` with the additional state required by its concrete game role.
+It currently provides `Enemy`, `NPC`, `Player`, and target-directed NPC
+movement. Each concrete entity composes an engine `Entity` with the additional
+state required by its game role.
 
 ## Why this domain exists
 
@@ -43,12 +44,23 @@ scene transitions or session consequences.
 
 ### [`NPC`](../api/game-entities.md#my_first_adventure_game.game.entities.NPC)
 
-Composes an engine-owned `Entity` with a non-blank display name and a non-empty
-tuple of ordered, non-blank dialogue lines.
+Composes an engine-owned `Entity` with a non-blank display name, a non-empty
+tuple of ordered, non-blank dialogue lines, an optional copied movement target,
+and a nonnegative movement speed.
 
 The NPC owns concrete game content but does not detect interaction, display its
-text, or decide scene transitions. Those responsibilities remain with the
-gameplay scene and the composition root.
+text, select destinations, or decide scene transitions. Those responsibilities
+remain with the gameplay scene, level content, and composition root. NPCs are
+stationary by default; a configured target requires a positive speed.
+
+### [`move_npc_towards`](../api/game-entities.md#my_first_adventure_game.game.entities.move_npc_towards)
+
+Combines elapsed-time movement, the engine's target-directed calculation, and
+axis-separated collision resolution for one NPC. It returns the movement
+actually applied.
+
+The caller still owns the destination, speed, frame duration, and selection of
+solid bounds. The function performs no pathfinding.
 
 ## Relationships
 
@@ -78,6 +90,8 @@ classDiagram
         +name
         +entity
         +dialogue_lines
+        +movement_target
+        +movement_speed
     }
 
     Enemy *-- Entity : spatial state
@@ -116,6 +130,10 @@ invulnerability period. The scene displays current health and emits
 - Every NPC has at least one dialogue line.
 - Every NPC has a non-blank display name.
 - NPC dialogue lines are ordered and none are blank.
+- NPC movement speed cannot be negative.
+- NPCs without a target are stationary by default.
+- A configured target requires a positive movement speed and is copied during
+  construction.
 - The engine never imports or constructs `NPC`.
 
 ## Extension points
@@ -153,3 +171,6 @@ Current tests verify:
 - storage of an NPC display name, spatial state, and ordered dialogue lines;
 - rejection of blank NPC names;
 - rejection of empty dialogue sequences and blank dialogue lines.
+- stationary movement defaults, copied targets, and movement-speed validation;
+- elapsed-time NPC movement, exact arrival, and collision against selected
+  solid bounds.
