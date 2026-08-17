@@ -310,6 +310,7 @@ Implemented engine domains:
 - minimal game-independent text rendering;
 - floating-point AABB geometry and overlap detection;
 - lightweight spatial entities, deterministic lookup and AABB movement;
+- normalized target-directed movement with capped travel distance;
 - UTF-8 JSON loading and atomic file replacement;
 
 Implemented game foundations:

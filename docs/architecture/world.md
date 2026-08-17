@@ -6,7 +6,8 @@ The world domain provides the minimal spatial state shared by entities in a
 top-down game world.
 
 It currently defines a lightweight entity representation, a deterministic
-entity container, and axis-separated movement against solid bounds.
+entity container, target-directed movement calculation, and axis-separated
+movement against solid bounds.
 
 It does not provide maps or gameplay behavior.
 
@@ -75,6 +76,20 @@ overlaps are not resolved.
 The current concrete consumer is `game.scenes.GameplayScene`, which selects its
 wall bounds as solid obstacles and owns the movement speed.
 
+### [`movement_towards`](../api/world.md#my_first_adventure_game.engine.world.movement_towards)
+
+Calculates a movement vector from a position toward a target without exceeding
+a supplied maximum distance.
+
+The result follows horizontal, vertical, or normalized diagonal directions and
+stops exactly at the target when it is closer than the permitted distance. A
+position already at its target produces a zero vector. Negative maximum
+distances are rejected, and neither input vector is mutated.
+
+This pure calculation does not move an entity or resolve collisions. A caller
+may pass its result to `move_entity()` after selecting a speed, frame duration,
+target, and solid obstacles.
+
 ## Ownership
 
 The engine owns common spatial state.
@@ -118,6 +133,10 @@ The collisions domain must not import the world domain.
 - The returned vector describes the movement actually applied.
 - Requested movement vectors are not mutated.
 - Existing overlaps are not depenetrated.
+- Target-directed movement never exceeds its maximum distance or the remaining
+  distance to the target.
+- Target-directed diagonal movement is normalized.
+- Target-directed movement does not mutate its position or target inputs.
 
 ## Extension points
 
@@ -133,7 +152,16 @@ without going through its owned state.
 
 Adding concrete behavior would couple the engine to the current game.
 
+Combining target selection with movement calculation would leak concrete
+behavior or pathfinding policy into the engine.
+
 Changing axis order would change corner and sliding behavior.
 
 Adding automatic depenetration would require explicit semantics for entities
 that begin inside multiple obstacles.
+
+## Verification
+
+Current tests verify axis-aligned and normalized diagonal movement toward a
+target, exact arrival without overshooting, zero movement at the target,
+negative-distance rejection, and input preservation.

@@ -1,7 +1,12 @@
 import pygame
+import pytest
 
 from my_first_adventure_game.engine.collisions import AABB
-from my_first_adventure_game.engine.world import Entity, move_entity
+from my_first_adventure_game.engine.world import (
+    Entity,
+    move_entity,
+    movement_towards,
+)
 
 
 def make_entity(
@@ -139,3 +144,64 @@ def test_move_entity_resolves_both_axes_with_one_pass_iterable() -> None:
 
     assert entity.position == pygame.Vector2(5.0, 5.0)
     assert actual == pygame.Vector2(5.0, 5.0)
+
+
+def test_movement_towards_moves_along_one_axis() -> None:
+    movement = movement_towards(
+        pygame.Vector2(2.0, 4.0),
+        pygame.Vector2(12.0, 4.0),
+        max_distance=3.0,
+    )
+
+    assert movement == pygame.Vector2(3.0, 0.0)
+
+
+def test_movement_towards_normalizes_diagonal_movement() -> None:
+    movement = movement_towards(
+        pygame.Vector2(0.0, 0.0),
+        pygame.Vector2(3.0, 4.0),
+        max_distance=2.0,
+    )
+
+    assert movement.x == pytest.approx(1.2)
+    assert movement.y == pytest.approx(1.6)
+    assert movement.length() == pytest.approx(2.0)
+
+
+def test_movement_towards_stops_at_target() -> None:
+    movement = movement_towards(
+        pygame.Vector2(0.0, 0.0),
+        pygame.Vector2(3.0, 4.0),
+        max_distance=10.0,
+    )
+
+    assert movement == pygame.Vector2(3.0, 4.0)
+
+
+def test_movement_towards_returns_zero_at_target() -> None:
+    movement = movement_towards(
+        pygame.Vector2(3.0, 4.0),
+        pygame.Vector2(3.0, 4.0),
+        max_distance=2.0,
+    )
+
+    assert movement == pygame.Vector2()
+
+
+def test_movement_towards_rejects_negative_max_distance() -> None:
+    with pytest.raises(ValueError, match="max_distance must not be negative"):
+        movement_towards(
+            pygame.Vector2(),
+            pygame.Vector2(10.0, 0.0),
+            max_distance=-1.0,
+        )
+
+
+def test_movement_towards_does_not_mutate_inputs() -> None:
+    position = pygame.Vector2(1.0, 2.0)
+    target = pygame.Vector2(5.0, 8.0)
+
+    movement_towards(position, target, max_distance=2.0)
+
+    assert position == pygame.Vector2(1.0, 2.0)
+    assert target == pygame.Vector2(5.0, 8.0)

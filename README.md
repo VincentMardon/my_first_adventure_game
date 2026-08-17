@@ -181,6 +181,7 @@ Implemented foundations include:
 - immutable floating-point collision bounds;
 - lightweight spatial entities and deterministic world storage;
 - axis-separated movement against solid obstacles;
+- normalized target-directed movement that stops without overshooting;
 - a game-owned Python-authored demo map with collectible objects;
 - a minimal second map and bidirectional exits that preserve the same gameplay
   scene and session player;

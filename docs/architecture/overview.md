@@ -103,6 +103,10 @@ Provides lightweight entities with stable identity, floating-point geometry,
 active state, deterministic lookup, and axis-separated movement against
 immutable collision bounds.
 
+It also calculates normalized movement toward a target while capping travel at
+the target or a caller-supplied maximum distance. Concrete behavior still owns
+the target, speed, timing, and obstacle selection.
+
 Concrete entity types, solid obstacle selection, and behavior belong to the
 game.
 

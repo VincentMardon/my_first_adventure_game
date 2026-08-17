@@ -10,6 +10,8 @@ and this project adheres to
 
 ### Added
 
+- Reusable target-directed movement calculation with normalized diagonals and
+  exact arrival without overshooting.
 - Atomic UTF-8 JSON loading and saving through a reusable engine persistence
   domain.
 - A versioned player profile that persists session starts, completions,

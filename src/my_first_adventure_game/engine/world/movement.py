@@ -6,6 +6,28 @@ from my_first_adventure_game.engine.collisions import AABB
 from my_first_adventure_game.engine.world.entity import Entity
 
 
+def movement_towards(
+    position: pygame.Vector2,
+    target: pygame.Vector2,
+    *,
+    max_distance: float,
+) -> pygame.Vector2:
+    """Return movement toward a target without exceeding a maximum distance."""
+    if max_distance < 0.0:
+        raise ValueError("max_distance must not be negative")
+
+    difference = target - position
+    distance = difference.length()
+
+    if distance == 0.0 or max_distance == 0.0:
+        return pygame.Vector2()
+
+    if distance <= max_distance:
+        return difference
+
+    return difference.normalize() * max_distance
+
+
 def move_entity(
     entity: Entity,
     movement: pygame.Vector2,
