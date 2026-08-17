@@ -9,6 +9,13 @@ from my_first_adventure_game.engine.scenes import Scene
 from my_first_adventure_game.game.input import GameAction
 
 BACKGROUND_COLOR = (24, 28, 36)
+INSTRUCTION_COLOR = (184, 192, 208)
+INSTRUCTION_FONT_PATH = pygame.font.get_default_font()
+INSTRUCTION_FONT_SIZE = 40
+PROFILE_CENTER_Y = 340
+PROFILE_TEXT = "Press P to view profile"
+START_CENTER_Y = 280
+START_TEXT = "Press Enter to start"
 TITLE_TEXT = "My First Adventure Game"
 TITLE_COLOR = (240, 240, 240)
 TITLE_CENTER_Y = 160
@@ -24,10 +31,12 @@ class TitleScene(Scene):
         font_cache: FontCache,
         input_state: InputState[GameAction],
         start_game: Callable[[], None],
+        show_profile: Callable[[], None],
     ) -> None:
         self._font_cache = font_cache
         self._input_state = input_state
         self._start_game = start_game
+        self._show_profile = show_profile
 
     def handle_event(self, event: pygame.event.Event) -> None:
         return None
@@ -35,6 +44,10 @@ class TitleScene(Scene):
     def update(self, delta_time: float) -> None:
         if self._input_state.is_pressed(GameAction.CONFIRM):
             self._start_game()
+            return
+
+        if self._input_state.is_pressed(GameAction.SHOW_PROFILE):
+            self._show_profile()
 
     def draw(self, surface: pygame.Surface) -> None:
         surface.fill(BACKGROUND_COLOR)
@@ -42,10 +55,29 @@ class TitleScene(Scene):
             TITLE_FONT_PATH,
             TITLE_FONT_SIZE,
         )
+        instruction_font = self._font_cache.load(
+            INSTRUCTION_FONT_PATH,
+            INSTRUCTION_FONT_SIZE,
+        )
+
         draw_text(
             surface,
             TITLE_TEXT,
             title_font,
             TITLE_COLOR,
             center=(surface.get_width() // 2, TITLE_CENTER_Y),
+        )
+        draw_text(
+            surface,
+            START_TEXT,
+            instruction_font,
+            INSTRUCTION_COLOR,
+            center=(surface.get_width() // 2, START_CENTER_Y),
+        )
+        draw_text(
+            surface,
+            PROFILE_TEXT,
+            instruction_font,
+            INSTRUCTION_COLOR,
+            center=(surface.get_width() // 2, PROFILE_CENTER_Y),
         )

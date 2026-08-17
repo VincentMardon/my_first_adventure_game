@@ -324,6 +324,7 @@ Implemented game foundations:
 - victory and defeat summaries with fresh state for each new game.
 - a versioned persistent player profile with cross-session score and activity
   statistics.
+- a profile scene that presents accumulated statistics without owning storage.
 
 Reserved but not implemented:
 

@@ -69,6 +69,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     victory_scene = Mock()
     pause_scene = Mock()
     dialogue_scene = Mock()
+    profile_scene = Mock()
 
     create_input_state = Mock(return_value=input_state)
     create_title_scene = Mock(return_value=initial_scene)
@@ -109,6 +110,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_victory_scene = Mock(return_value=victory_scene)
     create_pause_scene = Mock(return_value=pause_scene)
     create_dialogue_scene = Mock(return_value=dialogue_scene)
+    create_profile_scene = Mock(return_value=profile_scene)
 
     monkeypatch.setattr(game_main, "TitleScene", create_title_scene)
     monkeypatch.setattr(game_main, "SceneManager", create_scene_manager)
@@ -159,6 +161,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     monkeypatch.setattr(game_main, "VictoryScene", create_victory_scene)
     monkeypatch.setattr(game_main, "PauseScene", create_pause_scene)
     monkeypatch.setattr(game_main, "DialogueScene", create_dialogue_scene)
+    monkeypatch.setattr(game_main, "ProfileScene", create_profile_scene)
 
     game_main.main()
 
@@ -178,6 +181,23 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         input_state,
     )
     start_game = create_title_scene.call_args.args[2]
+
+    show_profile = create_title_scene.call_args.args[3]
+
+    create_profile_scene.assert_called_once()
+    profile_args = create_profile_scene.call_args.args
+
+    assert profile_args[:3] == (
+        font_cache,
+        player_profile,
+        input_state,
+    )
+    assert callable(profile_args[3])
+
+    show_profile()
+
+    scene_manager.change_scene.assert_called_once_with(profile_scene)
+    scene_manager.change_scene.reset_mock()
 
     create_victory_scene.assert_not_called()
     create_session_statistics.assert_not_called()
@@ -610,7 +630,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         second_session_statistics,
         input_state,
     )
-    assert second_defeat_args[4] is not return_to_title
+    assert second_defeat_args[4] is return_to_title
 
     second_victory_args = create_victory_scene.call_args.args
 
@@ -621,7 +641,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         input_state,
     )
     assert second_victory_args[4] is second_defeat_args[4]
-    assert second_victory_args[4] is not return_to_title
+    assert second_victory_args[4] is return_to_title
 
     second_pause_args = create_pause_scene.call_args.args
 

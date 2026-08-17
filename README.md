@@ -64,6 +64,7 @@ my-first-adventure-game
 ### Controls
 
 - press Enter on the title screen to start;
+- press P on the title screen to view the persistent player profile;
 - use the arrow keys to move the player;
 - press Space near a destructible obstacle or enemy to attack;
 - press E near the non-player character to speak;
@@ -162,6 +163,8 @@ The project now provides a minimal playable top-down loop:
    defeated-enemy totals from the current session.
 32. session starts and completed results are saved to a persistent player
    profile in the platform-specific application data directory.
+33. pressing P on the title opens the accumulated profile statistics, and
+   Enter returns to the title.
 
 Implemented foundations include:
 
@@ -231,11 +234,13 @@ Implemented foundations include:
   domain;
 - a versioned, validated game-owned player profile that accumulates starts,
   completions, victories, scores, and activity statistics across launches;
+- a profile scene accessible from the title that presents every accumulated
+  counter without owning storage behavior;
 - automated tests, Ruff checks, strict documentation builds, package builds,
   and GitHub Actions CI.
 
-Profile presentation, localization, and broader combat and interaction systems
-have not been implemented yet.
+Localization and broader combat and interaction systems have not been
+implemented yet.
 
 ## Documentation
 

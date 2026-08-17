@@ -127,6 +127,12 @@ classDiagram
         +draw(surface)
     }
 
+    class ProfileScene {
+        +handle_event(event)
+        +update(delta_time)
+        +draw(surface)
+    }
+
     SceneManager o-- Scene : active scene
     Scene <|-- GameplayScene
     Scene <|-- PauseScene
@@ -134,6 +140,7 @@ classDiagram
     Scene <|-- TitleScene
     Scene <|-- DefeatScene
     Scene <|-- VictoryScene
+    Scene <|-- ProfileScene
     Application --> SceneManager : delegates frame work
 ```
 
@@ -200,6 +207,8 @@ It also provides
 [`PauseScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.PauseScene)
 and
 [`DialogueScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.DialogueScene).
+It also provides
+[`ProfileScene`](../api/game-scenes.md#my_first_adventure_game.game.scenes.ProfileScene).
 
 `TitleScene`:
 
@@ -207,7 +216,22 @@ and
 - queries the action input state during updates;
 - draws the game-owned background and centered title;
 - loads its selected font lazily through `FontCache`;
-- requests gameplay through an injected callback when `CONFIRM` is pressed.
+- displays explicit instructions for starting and viewing the profile;
+- requests gameplay through an injected callback when `CONFIRM` is pressed;
+- requests the profile through a separate injected callback when
+  `SHOW_PROFILE` is pressed;
+- gives confirmation priority when both navigation actions are pressed in the
+  same frame.
+
+`ProfileScene`:
+
+- receives the shared font cache, loaded player profile, action input state,
+  and an explicit return callback;
+- displays games started, games finished, victories, best score, cumulative
+  score, collected items, destroyed obstacles, and defeated enemies;
+- reads the existing mutable profile without loading, saving, or changing it;
+- requests a return to the title when `CONFIRM` is pressed;
+- ignores raw events.
 
 `GameplayScene`:
 
@@ -351,6 +375,12 @@ animation set, gameplay scene, pause scene, defeat scene, victory scene, and
 session-local callbacks. Pause and resume preserve the same session objects.
 Returning from either result does not mutate the completed session back to its
 initial state; the next start replaces it with new objects.
+
+`game.main` creates one `ProfileScene` from the profile loaded at application
+startup. The title's `SHOW_PROFILE` callback explicitly selects that scene, and
+the scene's confirmation callback restores the retained title scene. Because
+the profile object is shared, reopening the scene after a completed session
+shows the newly aggregated values without reloading the file.
 
 The current idle, movement, collection, and attack animations each use two
 game-owned colored surfaces as temporary frames. This validates animation

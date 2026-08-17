@@ -213,16 +213,20 @@ Current concrete actions are:
 - `ATTACK`;
 - `PAUSE`;
 - `INTERACT`;
-- `CONFIRM`.
+- `CONFIRM`;
+- `SHOW_PROFILE`.
 
 Directional actions are bound to the arrow keys. `ATTACK` is bound to Space and
-`PAUSE` to Escape. `INTERACT` is bound to E and `CONFIRM` to Enter.
+`PAUSE` to Escape. `INTERACT` is bound to E, `CONFIRM` to Enter, and
+`SHOW_PROFILE` to P.
 
 `game.main` creates the concrete `InputState` and passes it to `Application` as
 an `InputProcessor`.
 
 `TitleScene` queries the pressed state of `CONFIRM` to request the transition to
-gameplay. `GameplayScene` queries held directional actions to move the player
+gameplay and `SHOW_PROFILE` to request the profile screen. Confirmation takes
+priority if both actions are pressed during the same frame. `GameplayScene`
+queries held directional actions to move the player
 and the pressed state of `ATTACK` to apply the game-owned proximity attack. It
 queries `PAUSE` before advancing gameplay and requests an immediate transition
 when that action is pressed. It queries `INTERACT` to find a nearby active NPC
@@ -298,7 +302,8 @@ Current tests verify:
 - cardinal direction conventions;
 - cancellation of opposite directions;
 - diagonal normalization;
-- concrete default arrow-key, attack, pause, interaction, and confirmation
-  bindings;
-- title navigation triggered only by a newly pressed confirmation action;
+- concrete default arrow-key, attack, pause, interaction, confirmation, and
+  profile bindings;
+- title navigation triggered only by newly pressed confirmation or profile
+  actions, with confirmation taking priority;
 - integration of the input lifecycle into `Application`.

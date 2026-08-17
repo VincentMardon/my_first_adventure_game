@@ -17,6 +17,8 @@ and this project adheres to
   application launches.
 - Platform-specific profile storage with invalid-data recovery and nonfatal
   save-error handling.
+- A title-screen profile action bound to P and a profile scene displaying all
+  accumulated counters with explicit return navigation.
 - A searchable MkDocs documentation site with Material navigation and Mermaid
   diagram rendering.
 - A generated public API reference backed by mkdocstrings and source docstrings.

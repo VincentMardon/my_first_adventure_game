@@ -13,6 +13,7 @@ DEFAULT_KEYBOARD_BINDINGS = KeyboardBindings(
         GameAction.ATTACK: (pygame.K_SPACE,),
         GameAction.PAUSE: (pygame.K_ESCAPE,),
         GameAction.INTERACT: (pygame.K_e,),
+        GameAction.SHOW_PROFILE: (pygame.K_p,),
     }
 )
 """Default keyboard mapping for the concrete game actions."""

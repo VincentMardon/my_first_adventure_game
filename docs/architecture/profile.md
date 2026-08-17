@@ -65,6 +65,7 @@ The engine supplies only generic JSON storage and never imports this domain.
 ```mermaid
 flowchart LR
     GameMain["game.main"] --> PlayerProfile["PlayerProfile"]
+    PlayerProfile --> ProfileScene["ProfileScene"]
     SessionScore["SessionScore"] --> GameMain
     SessionStatistics["SessionStatistics"] --> GameMain
     GameMain --> ProfileStore["profile store"]
@@ -77,7 +78,9 @@ flowchart LR
 session start when the title scene starts a game. Victory and defeat both pass
 the final session score and statistics to one guarded completion operation, so
 the same session cannot be aggregated twice. Save failures are logged and do
-not stop scene transitions or gameplay.
+not stop scene transitions or gameplay. The same mutable profile is injected
+into `ProfileScene`, which reads its current values without loading, saving, or
+changing them.
 
 ## Invariants
 
@@ -92,9 +95,9 @@ not stop scene transitions or gameplay.
 
 ## Extension points
 
-A later profile scene may display the persisted values without changing their
-storage contract. Schema evolution should increment the profile version and
-define an explicit compatibility or migration policy.
+Profile presentation may evolve without changing the storage contract. Schema
+evolution should increment the profile version and define an explicit
+compatibility or migration policy.
 
 Additional long-term fields should be added only when a concrete game feature
 consumes them.
@@ -117,3 +120,5 @@ victories, best and cumulative scores, serialization, strict validation,
 fallback loading, platform-specific path construction, atomic-save delegation,
 write-error propagation, single application startup loading, per-session saves,
 duplicate-completion protection, and nonfatal save logging.
+Scene tests also verify that every persisted counter is displayed and that
+confirmation explicitly returns to the title.

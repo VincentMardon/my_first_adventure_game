@@ -13,6 +13,7 @@ class GameAction(Enum):
         ATTACK: Request the player's current attack action.
         PAUSE: Pause or resume the current gameplay session.
         INTERACT: Request interaction with nearby game content.
+        SHOW_PROFILE: Request navigation to the player profile.
     """
 
     MOVE_LEFT = auto()
@@ -23,3 +24,4 @@ class GameAction(Enum):
     ATTACK = auto()
     PAUSE = auto()
     INTERACT = auto()
+    SHOW_PROFILE = auto()

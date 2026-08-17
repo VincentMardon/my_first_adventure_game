@@ -18,6 +18,7 @@ from my_first_adventure_game.game.input import (
         (GameAction.ATTACK, pygame.K_SPACE),
         (GameAction.PAUSE, pygame.K_ESCAPE),
         (GameAction.INTERACT, pygame.K_e),
+        (GameAction.SHOW_PROFILE, pygame.K_p),
     ],
 )
 def test_action_has_default_key(

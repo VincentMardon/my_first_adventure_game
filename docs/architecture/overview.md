@@ -148,7 +148,8 @@ from its score.
 `game.main` records collected items, destroyed obstacles, and defeated enemies
 in one session-local `SessionStatistics`. Victory and defeat scenes read that
 same object to display a final activity summary. Starting a new game creates
-fresh counters; persistence and cross-session aggregation are not implemented.
+fresh counters. On completion, `PlayerProfile` copies their values into its
+persistent cross-session totals rather than reusing the session object.
 
 ### Progression
 
@@ -174,11 +175,16 @@ are logged without stopping the game.
 
 ### Scenes
 
-Provides the concrete title, gameplay, pause, dialogue, defeat, and victory
-scenes.
+Provides the concrete title, gameplay, pause, dialogue, profile, defeat, and
+victory scenes.
 
 The title scene requests an explicit transition to gameplay when the
-confirmation action is pressed.
+confirmation action is pressed or to the persistent profile when the profile
+action is pressed.
+
+The profile scene displays every accumulated profile counter and explicitly
+returns to the title on confirmation. It observes the already loaded profile
+without owning persistence.
 
 The gameplay scene converts game actions into player movement, selects active
 walls, enemies, and NPCs as solid obstacles, opens dialogue for a nearby active
@@ -253,6 +259,7 @@ flowchart TD
     DialogueScene["DialogueScene"]
     DefeatScene["DefeatScene"]
     VictoryScene["VictoryScene"]
+    ProfileScene["ProfileScene"]
 
     GameMain --> Application
     GameMain --> InputState
@@ -263,6 +270,7 @@ flowchart TD
     GameMain -->|"creates on interaction"| DialogueScene
     GameMain -->|"creates per session"| DefeatScene
     GameMain -->|"creates per session"| VictoryScene
+    GameMain -->|"creates once"| ProfileScene
 
     Application --> WindowConfig
     Application --> InputProcessor
@@ -279,6 +287,9 @@ flowchart TD
     DefeatScene -->|"requests return"| TitleScene
     VictoryScene --> InputState
     VictoryScene -->|"requests return"| TitleScene
+    TitleScene -->|"requests profile"| ProfileScene
+    ProfileScene --> InputState
+    ProfileScene -->|"requests return"| TitleScene
 
     InputState -. "implements structurally" .-> InputProcessor
     InputState --> KeyboardBindings
@@ -289,6 +300,7 @@ flowchart TD
     DialogueScene -. "implements" .-> Scene
     DefeatScene -. "implements" .-> Scene
     VictoryScene -. "implements" .-> Scene
+    ProfileScene -. "implements" .-> Scene
 ```
 
 ### Gameplay map composition
@@ -425,10 +437,11 @@ The ready-to-completed interaction also applies the game-owned objective bonus
 to the shared session score. Reopening completed dialogue does not apply it
 again.
 
-`game.main` also injects a callback into `TitleScene` that explicitly replaces
-the active scene when confirmation is pressed. It configures the shared
-`FontCache` with Pygame's resource package, and both concrete scenes load their
-selected fonts lazily during drawing after Pygame initialization.
+`game.main` also injects separate callbacks into `TitleScene` that explicitly
+replace the active scene when confirmation or profile navigation is pressed.
+It creates one `ProfileScene` around the loaded mutable profile, so later visits
+observe results aggregated during the same application run. The shared
+`FontCache` supplies fonts lazily during drawing after Pygame initialization.
 
 ## Main frame flow
 

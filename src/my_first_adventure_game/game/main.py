@@ -36,6 +36,7 @@ from my_first_adventure_game.game.scenes import (
     DialogueScene,
     GameplayScene,
     PauseScene,
+    ProfileScene,
     TitleScene,
     VictoryScene,
 )
@@ -96,6 +97,19 @@ def main() -> None:
     font_cache = FontCache(pygame)
     profile_path = get_profile_path()
     player_profile = load_profile(profile_path)
+
+    def return_to_title() -> None:
+        scene_manager.change_scene(initial_scene)
+
+    profile_scene = ProfileScene(
+        font_cache,
+        player_profile,
+        input_state,
+        return_to_title,
+    )
+
+    def show_profile() -> None:
+        scene_manager.change_scene(profile_scene)
 
     def start_game() -> None:
         player_profile.record_game_started()
@@ -184,9 +198,6 @@ def main() -> None:
                 victory=victory,
             )
             _save_player_profile(profile_path, player_profile)
-
-        def return_to_title() -> None:
-            scene_manager.change_scene(initial_scene)
 
         defeat_scene = DefeatScene(
             font_cache,
@@ -320,6 +331,7 @@ def main() -> None:
         font_cache,
         input_state,
         start_game,
+        show_profile,
     )
     scene_manager = SceneManager(initial_scene)
 
