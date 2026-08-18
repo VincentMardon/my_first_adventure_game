@@ -14,7 +14,7 @@ class NPC:
         entity: Spatial entity used for identity, geometry, and active state.
         dialogue_lines: Ordered text lines displayed during interaction.
         movement_target: Optional destination for autonomous movement.
-        movement_target_entity: Optional spatial entity followed during 
+        movement_target_entity: Optional spatial entity followed during
             autonomous movement.
         movement_speed: Movement speed expressed in pixels per second.
     """
