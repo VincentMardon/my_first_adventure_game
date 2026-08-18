@@ -167,6 +167,9 @@ The project now provides a minimal playable top-down loop:
    Enter returns to the title.
 34. the clearing Caretaker moves diagonally toward a map-authored destination,
    respects solid entities, and stops without overshooting.
+35. touching a clearing wall makes the Caretaker abandon that destination and
+   pursue the player's current position, even after leaving and returning to
+   the map.
 
 Implemented foundations include:
 
@@ -215,8 +218,11 @@ Implemented foundations include:
   Guide's progression rules;
 - optional game-owned NPC movement targets and speeds, with the Caretaker as
   the first direct-navigation consumer;
+- mutually exclusive fixed-position and live-entity NPC targets;
 - elapsed-time NPC movement against active walls, the player, enemies, and
   other NPCs without pathfinding;
+- factual wall-contact reporting and a concrete clearing rule that turns wall
+  contact into persistent Caretaker pursuit;
 - a game-owned dialogue panel with a distinct background, border, and balanced
   spacing around the speaker, current line, and continuation instruction;
 - word-boundary wrapping based on the selected font's measured width, with a

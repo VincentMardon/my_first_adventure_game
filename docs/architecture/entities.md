@@ -45,13 +45,15 @@ scene transitions or session consequences.
 ### [`NPC`](../api/game-entities.md#my_first_adventure_game.game.entities.NPC)
 
 Composes an engine-owned `Entity` with a non-blank display name, a non-empty
-tuple of ordered, non-blank dialogue lines, an optional copied movement target,
-and a nonnegative movement speed.
+tuple of ordered, non-blank dialogue lines, an optional movement target, and a
+nonnegative movement speed. A target may be either a copied fixed position or a
+live engine `Entity` reference whose current position is read during each
+update. These target forms are mutually exclusive.
 
 The NPC owns concrete game content but does not detect interaction, display its
 text, select destinations, or decide scene transitions. Those responsibilities
 remain with the gameplay scene, level content, and composition root. NPCs are
-stationary by default; a configured target requires a positive speed.
+stationary by default; either configured target requires a positive speed.
 
 ### [`move_npc_towards`](../api/game-entities.md#my_first_adventure_game.game.entities.move_npc_towards)
 
@@ -91,6 +93,7 @@ classDiagram
         +entity
         +dialogue_lines
         +movement_target
+        +movement_target_entity
         +movement_speed
     }
 
@@ -132,8 +135,11 @@ invulnerability period. The scene displays current health and emits
 - NPC dialogue lines are ordered and none are blank.
 - NPC movement speed cannot be negative.
 - NPCs without a target are stationary by default.
-- A configured target requires a positive movement speed and is copied during
-  construction.
+- Fixed and entity movement targets are mutually exclusive.
+- A configured target requires a positive movement speed.
+- A fixed target is copied during construction.
+- A target entity remains the same object so its current position can be read
+  during later updates.
 - The engine never imports or constructs `NPC`.
 
 ## Extension points
@@ -171,6 +177,7 @@ Current tests verify:
 - storage of an NPC display name, spatial state, and ordered dialogue lines;
 - rejection of blank NPC names;
 - rejection of empty dialogue sequences and blank dialogue lines.
-- stationary movement defaults, copied targets, and movement-speed validation;
+- stationary movement defaults, fixed-target copying, live target-entity
+  references, mutually exclusive target forms, and movement-speed validation;
 - elapsed-time NPC movement, exact arrival, and collision against selected
   solid bounds.

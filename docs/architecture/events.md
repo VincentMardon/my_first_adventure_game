@@ -7,8 +7,9 @@ behavior.
 
 It currently provides `ItemCollected`, which identifies an item collected by
 the player, `ObstacleDestroyed`, which identifies a destructible obstacle
-removed by an attack, `EnemyDefeated`, which identifies a defeated enemy, and
-`PlayerDefeated`, which identifies the defeated player.
+removed by an attack, `EnemyDefeated`, which identifies a defeated enemy,
+`PlayerDefeated`, which identifies the defeated player, and `WallTouched`,
+which identifies a wall that blocked requested player movement.
 
 The domain does not calculate score, update session state, persist statistics,
 or provide a general event dispatcher.
@@ -49,6 +50,12 @@ not define score, experience, loot, or progression consequences.
 Reports that the player was defeated. It contains only the stable player
 identifier and does not decide navigation, retry, or session consequences.
 
+### [`WallTouched`](../api/game-events.md#my_first_adventure_game.game.events.WallTouched)
+
+Reports that requested player movement touched an active wall. It contains only
+the stable wall identifier and does not decide whether the contact stains a
+wall, changes an NPC destination, starts dialogue, or affects statistics.
+
 ## Ownership
 
 These events belong to `game` because collection, attacks, destruction, and
@@ -69,10 +76,12 @@ flowchart LR
     ObstacleDestroyed["game.events.ObstacleDestroyed"]
     EnemyDefeated["game.events.EnemyDefeated"]
     PlayerDefeated["game.events.PlayerDefeated"]
+    WallTouched["game.events.WallTouched"]
     Handler["injected collection handler"]
     DestructionHandler["injected destruction handler"]
     DefeatHandler["injected enemy defeat handler"]
     PlayerDefeatHandler["injected player defeat handler"]
+    WallHandler["injected wall contact handler"]
 
     GameMain -->|"injects"| Handler
     GameMain --> GameplayScene
@@ -91,6 +100,10 @@ flowchart LR
     GameplayScene -->|"creates after fatal contact"| PlayerDefeated
     GameplayScene -->|"delivers synchronously"| PlayerDefeatHandler
     PlayerDefeated --> PlayerDefeatHandler
+    GameMain -->|"injects"| WallHandler
+    GameplayScene -->|"creates after blocked wall movement"| WallTouched
+    GameplayScene -->|"delivers synchronously"| WallHandler
+    WallTouched --> WallHandler
 ```
 
 The handler composed in `game.main` converts `ItemCollected` into points through
@@ -112,6 +125,11 @@ current map is inactive. The player defeat handler explicitly replaces gameplay
 with the current session's `DefeatScene`. The gameplay scene deactivates the
 corresponding entity before reporting each factual event.
 
+The wall contact handler composed in `game.main` ignores walls outside the
+clearing. A clearing wall contact removes the Caretaker's fixed destination and
+makes the shared player entity its live movement target. This concrete reaction
+does not add Caretaker behavior to the event or the engine.
+
 ## Delivery semantics
 
 - `GameplayScene` detects collection after player movement.
@@ -128,6 +146,11 @@ corresponding entity before reporting each factual event.
 - Fatal enemy contact deactivates the player before one `PlayerDefeated` value
   is delivered.
 - An inactive player cannot emit another defeat event on later frames.
+- `GameplayScene` compares requested and applied player movement and reports an
+  active wall only when that wall caused the blocked axis.
+- Movement blocked by an NPC does not emit `WallTouched`.
+- Continued movement into the same wall may deliver `WallTouched` on later
+  frames; consumers own any required deduplication or state transition.
 
 There is no global event bus, subscription registry, or runtime event queue.
 
@@ -149,6 +172,8 @@ consequences without changing the factual events themselves.
   demonstrates a need for multiple dynamic subscribers.
 - Emitting events for inactive items would repeat one gameplay fact across
   multiple frames.
+- Treating every blocked movement as wall contact would confuse walls with
+  enemies or NPCs that also act as solid obstacles.
 
 ## Verification
 
@@ -170,3 +195,6 @@ Current tests verify:
 - distant enemies remain active.
 - `PlayerDefeated` stores the defeated player identifier and is immutable;
 - fatal enemy contact delivers player defeat exactly once.
+- `WallTouched` stores the wall identifier and is immutable;
+- wall-blocked player movement delivers the matching wall identifier;
+- movement blocked by an NPC does not deliver wall contact.

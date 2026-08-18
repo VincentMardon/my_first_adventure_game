@@ -10,6 +10,12 @@ and this project adheres to
 
 ### Added
 
+- Immutable wall-contact facts emitted when an active wall blocks requested
+  player movement without confusing other solid roles with walls.
+- Live entity targets for NPC movement, mutually exclusive with copied fixed
+  destinations and resolved from the target's current position each frame.
+- Persistent Caretaker pursuit after the player touches a clearing wall,
+  including after leaving and returning to the map.
 - Optional NPC movement targets and speeds with elapsed-time movement against
   selected solid bounds.
 - An autonomous clearing Caretaker that moves diagonally toward a concrete

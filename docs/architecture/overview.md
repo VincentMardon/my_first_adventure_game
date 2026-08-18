@@ -124,9 +124,10 @@ Defines concrete gameplay objects that compose reusable engine entities.
 The current `Enemy` and `Player` own mutable integer health, apply positive
 damage, deactivate their spatial entities on the fatal hit, and report whether
 that hit caused the defeat. `NPC` composes the same reusable spatial state with
-a game-owned display name, ordered dialogue lines, and optional target-directed
-movement configuration. The gameplay scene advances configured NPCs against
-selected solid bounds but performs no pathfinding.
+a game-owned display name, ordered dialogue lines, and an optional fixed
+position or live entity movement target. The two target forms are mutually
+exclusive. The gameplay scene advances configured NPCs against selected solid
+bounds and reads live target positions each frame, but performs no pathfinding.
 
 ### Events
 
@@ -196,7 +197,7 @@ The gameplay scene converts game actions into player movement, selects active
 walls, enemies, and NPCs as solid obstacles, opens dialogue for a nearby active
 NPC when interaction is requested, deactivates collectibles overlapping the
 player, destroys nearby destructible obstacles and defeats nearby enemies when
-attacking, emits factual events,
+attacking, reports wall-blocked movement, emits factual events,
 prioritizes one-shot collection and attack animations over movement and idle
 presentation, applies contact damage with temporary player invulnerability,
 and displays the current session score and player health.
@@ -221,10 +222,13 @@ height without changing the original NPC line. Confirmation advances the
 dialogue, then explicitly restores the same gameplay scene and session state
 after the final line.
 
-The clearing's Caretaker is the first autonomous NPC consumer. It follows one
-map-authored diagonal destination at a fixed speed and stops at the target. Its
-collision movement may slide along one free axis, but it does not plan a route
-around obstacles.
+The clearing's Caretaker is the first autonomous NPC consumer. It initially
+follows one map-authored diagonal destination at a fixed speed. Touching a
+clearing wall makes the shared player entity its live target, so the Caretaker
+continues pursuing the player's current position. That target persists through
+map changes until another rule clears it. Collision movement may slide along
+one free axis, but it does not plan a route around obstacles. Automatic arrival
+dialogue and wall cleaning are not implemented yet.
 
 ### Levels
 

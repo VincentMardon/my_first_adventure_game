@@ -14,6 +14,7 @@ from my_first_adventure_game.game.events import (
     ItemCollected,
     ObstacleDestroyed,
     PlayerDefeated,
+    WallTouched,
 )
 from my_first_adventure_game.game.input import DEFAULT_KEYBOARD_BINDINGS
 from my_first_adventure_game.game.levels import (
@@ -48,6 +49,7 @@ from my_first_adventure_game.game.scoring import (
 from my_first_adventure_game.game.statistics import SessionStatistics
 
 WINDOW_CONFIG = WindowConfig(title="My First Adventure Game", size=(1280, 720))
+CARETAKER_NPC_ID = "npc-clearing-caretaker"
 COLLECTION_ACTIVE_DIALOGUE_LINES = ("Find every item and return to me.",)
 COLLECTION_COMPLETE_DIALOGUE_LINES = ("You found every item. Well done, traveler!",)
 FRAMES_PER_SECOND = 60
@@ -116,6 +118,10 @@ def main() -> None:
         _save_player_profile(profile_path, player_profile)
         game_map = create_demo_map()
         clearing_map = create_clearing_map(game_map.player)
+        caretaker = next(
+            npc for npc in clearing_map.npcs if npc.entity.entity_id == CARETAKER_NPC_ID
+        )
+        clearing_wall_ids = frozenset(wall.entity_id for wall in clearing_map.walls)
         objective_collectibles = (
             *game_map.collectibles,
             *clearing_map.collectibles,
@@ -293,6 +299,15 @@ def main() -> None:
         ) -> None:
             session_statistics.record_obstacle_destroyed()
 
+        def handle_wall_touched(
+            event: WallTouched,
+        ) -> None:
+            if event.wall_id not in clearing_wall_ids:
+                return
+
+            caretaker.movement_target = None
+            caretaker.movement_target_entity = game_map.player.entity
+
         def handle_map_exit_reached(map_exit: MapExit) -> None:
             if map_exit.destination_map_id == game_map.map_id:
                 destination_map = game_map
@@ -317,6 +332,7 @@ def main() -> None:
             on_enemy_defeated=handle_enemy_defeated,
             on_item_collected=handle_item_collected,
             on_obstacle_destroyed=handle_obstacle_destroyed,
+            on_wall_touched=handle_wall_touched,
             player_idle_animation=player_idle_animation,
             player_movement_animation=player_movement_animation,
             player_collection_animation=player_collection_animation,

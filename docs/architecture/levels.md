@@ -69,9 +69,11 @@ active session. Its return exit leads back to the demo map. The clearing is a
 technical navigation target bounded by game-owned walls around an opening for
 that exit. It also contains a named Caretaker with dialogue that does not affect
 Guide progression. The Caretaker initially moves diagonally from its authored
-position toward one concrete destination. One initially hidden collectible
-extends the Guide's objective into this map. The clearing does not yet
-represent finished game content.
+position toward one concrete destination. Touching one of the clearing's walls
+replaces that destination with the shared player entity, causing the Caretaker
+to pursue the player's current position without pathfinding. One initially
+hidden collectible extends the Guide's objective into this map. The clearing
+does not yet represent finished game content.
 
 ## Ownership
 
@@ -173,6 +175,9 @@ The clearing map additionally guarantees:
   dialogue, and overlaps neither the walls, player arrival position, nor exit.
 - The Caretaker has a positive movement speed and a map-authored destination
   inside the clearing.
+- Clearing wall contact can replace that fixed destination with the shared
+  player entity. The target remains configured across map changes until another
+  concrete rule removes it.
 - Its objective collectible starts inactive, is registered in the same world,
   and overlaps neither walls, NPCs, the player arrival position, nor exit.
 

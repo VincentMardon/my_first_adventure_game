@@ -13,6 +13,7 @@ from my_first_adventure_game.game.events import (
     ItemCollected,
     ObstacleDestroyed,
     PlayerDefeated,
+    WallTouched,
 )
 from my_first_adventure_game.game.input import GameAction
 from my_first_adventure_game.game.levels import (
@@ -66,6 +67,7 @@ def _create_gameplay_scene(
     on_item_collected: Callable[[ItemCollected], None] | None = None,
     destructible_obstacles: tuple[Entity, ...] = (),
     on_obstacle_destroyed: Callable[[ObstacleDestroyed], None] | None = None,
+    on_wall_touched: Callable[[WallTouched], None] | None = None,
     player_idle_animation: Animation | None = None,
     player_movement_animation: Animation | None = None,
     player_collection_animation: Animation | None = None,
@@ -114,6 +116,7 @@ def _create_gameplay_scene(
         on_enemy_defeated=on_enemy_defeated or Mock(),
         on_item_collected=on_item_collected or Mock(),
         on_obstacle_destroyed=on_obstacle_destroyed or Mock(),
+        on_wall_touched=on_wall_touched or Mock(),
         player_idle_animation=player_idle_animation or Mock(spec=Animation),
         player_movement_animation=(player_movement_animation or Mock(spec=Animation)),
         player_collection_animation=(
@@ -160,7 +163,7 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
     )
 
     movement_axis = Mock(return_value=pygame.Vector2(0.6, 0.8))
-    move_entity = Mock()
+    move_entity = Mock(return_value=pygame.Vector2())
 
     player_idle_animation = Mock(spec=Animation)
     player_movement_animation = Mock(spec=Animation)
@@ -202,6 +205,82 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
     )
 
 
+def test_update_reports_wall_blocking_player_movement(monkeypatch) -> None:
+    player = Player(
+        entity=Entity(
+            entity_id="player",
+            position=pygame.Vector2(100.0, 80.0),
+            size=pygame.Vector2(24.0, 24.0),
+        ),
+        health=3,
+    )
+    wall = Entity(
+        entity_id="wall",
+        position=pygame.Vector2(130.0, 80.0),
+        size=pygame.Vector2(32.0, 32.0),
+    )
+    on_wall_touched = Mock()
+
+    monkeypatch.setattr(
+        gameplay_scene,
+        "movement_axis",
+        Mock(return_value=pygame.Vector2(1.0, 0.0)),
+    )
+
+    scene = _create_gameplay_scene(
+        player=player,
+        walls=(wall,),
+        on_wall_touched=on_wall_touched,
+    )
+
+    scene.update(0.5)
+
+    assert player.entity.position == pygame.Vector2(106.0, 80.0)
+    on_wall_touched.assert_called_once_with(
+        WallTouched(wall_id="wall"),
+    )
+
+
+def test_update_does_not_report_wall_when_npc_blocks_movement(
+    monkeypatch,
+) -> None:
+    player = Player(
+        entity=Entity(
+            entity_id="player",
+            position=pygame.Vector2(100.0, 80.0),
+            size=pygame.Vector2(24.0, 24.0),
+        ),
+        health=3,
+    )
+    blocking_npc = NPC(
+        name="Guide",
+        entity=Entity(
+            entity_id="blocking-npc",
+            position=pygame.Vector2(130.0, 80.0),
+            size=pygame.Vector2(24.0, 32.0),
+        ),
+        dialogue_lines=("You shall not pass.",),
+    )
+    on_wall_touched = Mock()
+
+    monkeypatch.setattr(
+        gameplay_scene,
+        "movement_axis",
+        Mock(return_value=pygame.Vector2(1.0, 0.0)),
+    )
+
+    scene = _create_gameplay_scene(
+        player=player,
+        npcs=(blocking_npc,),
+        on_wall_touched=on_wall_touched,
+    )
+
+    scene.update(0.5)
+
+    assert player.entity.position == pygame.Vector2(106.0, 80.0)
+    on_wall_touched.assert_not_called()
+
+
 def test_update_moves_npc_with_configured_target(monkeypatch) -> None:
     wall = Entity(
         entity_id="wall",
@@ -235,7 +314,9 @@ def test_update_moves_npc_with_configured_target(monkeypatch) -> None:
         "movement_axis",
         Mock(return_value=pygame.Vector2()),
     )
-    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+    monkeypatch.setattr(
+        gameplay_scene, "move_entity", Mock(return_value=pygame.Vector2())
+    )
     monkeypatch.setattr(
         gameplay_scene,
         "move_npc_towards",
@@ -259,6 +340,75 @@ def test_update_moves_npc_with_configured_target(monkeypatch) -> None:
             scene._player.entity.bounds,
             stationary_npc.entity.bounds,
         ),
+    )
+
+
+def test_update_moves_npc_toward_current_target_entity_position(
+    monkeypatch,
+) -> None:
+    player = Player(
+        entity=Entity(
+            entity_id="player",
+            position=pygame.Vector2(320.0, 240.0),
+            size=pygame.Vector2(24.0, 24.0),
+        ),
+        health=3,
+    )
+    moving_npc = NPC(
+        name="Caretaker",
+        entity=Entity(
+            entity_id="moving-npc",
+            position=pygame.Vector2(400.0, 300.0),
+            size=pygame.Vector2(24.0, 32.0),
+        ),
+        dialogue_lines=("Stop dirtying my walls!",),
+        movement_target_entity=player.entity,
+        movement_speed=80.0,
+    )
+    move_npc_towards = Mock()
+
+    monkeypatch.setattr(
+        gameplay_scene,
+        "movement_axis",
+        Mock(return_value=pygame.Vector2()),
+    )
+    monkeypatch.setattr(
+        gameplay_scene,
+        "move_entity",
+        Mock(return_value=pygame.Vector2()),
+    )
+    monkeypatch.setattr(
+        gameplay_scene,
+        "move_npc_towards",
+        move_npc_towards,
+    )
+
+    scene = _create_gameplay_scene(
+        player=player,
+        npcs=(moving_npc,),
+    )
+
+    scene.update(0.5)
+
+    move_npc_towards.assert_called_once_with(
+        moving_npc,
+        player.entity.position,
+        speed=80.0,
+        delta_time=0.5,
+        solid_bounds=(player.entity.bounds,),
+    )
+
+    move_npc_towards.reset_mock()
+    player.entity.position.update(480.0, 360.0)
+
+    scene.update(0.25)
+
+    move_npc_towards.assert_called_once_with(
+        moving_npc,
+        player.entity.position,
+        speed=80.0,
+        delta_time=0.25,
+        solid_bounds=(player.entity.bounds,),
     )
 
 
@@ -465,7 +615,9 @@ def test_draw_flashes_enemy_after_non_fatal_damage(
         "movement_axis",
         Mock(return_value=pygame.Vector2()),
     )
-    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+    monkeypatch.setattr(
+        gameplay_scene, "move_entity", Mock(return_value=pygame.Vector2())
+    )
     monkeypatch.setattr(gameplay_scene, "draw_text", Mock())
     monkeypatch.setattr(pygame.draw, "rect", draw_rect)
 
@@ -524,7 +676,9 @@ def test_update_deactivates_overlapping_collectible_and_reports_event_once(
         "movement_axis",
         Mock(return_value=pygame.Vector2()),
     )
-    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+    monkeypatch.setattr(
+        gameplay_scene, "move_entity", Mock(return_value=pygame.Vector2())
+    )
 
     scene = _create_gameplay_scene(
         input_state=input_state,
@@ -568,7 +722,9 @@ def test_update_resets_animation_when_movement_state_changes(
     )
 
     monkeypatch.setattr(gameplay_scene, "movement_axis", movement_axis)
-    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+    monkeypatch.setattr(
+        gameplay_scene, "move_entity", Mock(return_value=pygame.Vector2())
+    )
 
     scene = _create_gameplay_scene(
         input_state=input_state,
@@ -614,7 +770,9 @@ def test_update_returns_to_movement_after_collection_finished(
     player_collection_animation.update.side_effect = finish_collection_animation
 
     monkeypatch.setattr(gameplay_scene, "movement_axis", movement_axis)
-    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+    monkeypatch.setattr(
+        gameplay_scene, "move_entity", Mock(return_value=pygame.Vector2())
+    )
 
     scene = _create_gameplay_scene(
         input_state=input_state,
@@ -654,7 +812,7 @@ def test_update_destroys_nearby_destructible_on_attack(
         ),
         health=3,
     )
-    move_entity = Mock()
+    move_entity = Mock(return_value=pygame.Vector2())
     nearby_obstacle = Entity(
         entity_id="destructible-nearby",
         position=pygame.Vector2(124.0, 80.0),
@@ -749,7 +907,7 @@ def test_update_damages_and_defeats_nearby_enemy_on_attack(
         False,
         True,
     )
-    move_entity = Mock()
+    move_entity = Mock(return_value=pygame.Vector2())
     nearby_enemy = Enemy(
         Entity(
             entity_id="enemy-nearby",
@@ -859,7 +1017,9 @@ def test_update_returns_to_movement_after_attack_finished(
     player_attack_animation.update.side_effect = finish_attack_animation
 
     monkeypatch.setattr(gameplay_scene, "movement_axis", movement_axis)
-    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+    monkeypatch.setattr(
+        gameplay_scene, "move_entity", Mock(return_value=pygame.Vector2())
+    )
 
     scene = _create_gameplay_scene(
         input_state=input_state,
@@ -906,7 +1066,9 @@ def test_update_enemy_contact_damages_player_after_invulnerability(monkeypatch) 
         "movement_axis",
         Mock(return_value=pygame.Vector2()),
     )
-    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+    monkeypatch.setattr(
+        gameplay_scene, "move_entity", Mock(return_value=pygame.Vector2())
+    )
 
     scene = _create_gameplay_scene(
         player=player,
@@ -950,7 +1112,7 @@ def test_update_reports_player_defeat_once_on_fatal_contact(monkeypatch) -> None
         health=2,
     )
     on_player_defeated = Mock()
-    move_entity = Mock()
+    move_entity = Mock(return_value=pygame.Vector2())
 
     monkeypatch.setattr(
         gameplay_scene,
@@ -985,7 +1147,7 @@ def test_update_requests_pause_without_advancing_gameplay(monkeypatch) -> None:
     input_state.is_pressed.side_effect = lambda action: action is GameAction.PAUSE
     on_pause_requested = Mock()
     movement_axis = Mock()
-    move_entity = Mock()
+    move_entity = Mock(return_value=pygame.Vector2())
     player_idle_animation = Mock(spec=Animation)
 
     monkeypatch.setattr(gameplay_scene, "movement_axis", movement_axis)
@@ -1031,7 +1193,7 @@ def test_update_interacts_with_nearby_active_npc_without_advancing_gameplay(
     )
     on_npc_interacted = Mock()
     movement_axis = Mock()
-    move_entity = Mock()
+    move_entity = Mock(return_value=pygame.Vector2())
     player_idle_animation = Mock(spec=Animation)
 
     monkeypatch.setattr(gameplay_scene, "movement_axis", movement_axis)
@@ -1075,7 +1237,9 @@ def test_update_does_not_interact_with_distant_npc(monkeypatch) -> None:
         "movement_axis",
         Mock(return_value=pygame.Vector2()),
     )
-    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+    monkeypatch.setattr(
+        gameplay_scene, "move_entity", Mock(return_value=pygame.Vector2())
+    )
 
     scene = _create_gameplay_scene(
         input_state=input_state,
@@ -1105,7 +1269,9 @@ def test_update_reports_overlapping_map_exit(monkeypatch) -> None:
         "movement_axis",
         Mock(return_value=pygame.Vector2()),
     )
-    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+    monkeypatch.setattr(
+        gameplay_scene, "move_entity", Mock(return_value=pygame.Vector2())
+    )
 
     scene = _create_gameplay_scene(
         exits=(map_exit,),
@@ -1144,7 +1310,9 @@ def test_change_map_replaces_spatial_content(monkeypatch) -> None:
         "movement_axis",
         Mock(return_value=pygame.Vector2()),
     )
-    monkeypatch.setattr(gameplay_scene, "move_entity", Mock())
+    monkeypatch.setattr(
+        gameplay_scene, "move_entity", Mock(return_value=pygame.Vector2())
+    )
     monkeypatch.setattr(gameplay_scene, "draw_text", Mock())
     monkeypatch.setattr(pygame.draw, "rect", Mock())
 

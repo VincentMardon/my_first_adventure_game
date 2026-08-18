@@ -328,6 +328,8 @@ Implemented game foundations:
 - a profile scene that presents accumulated statistics without owning storage.
 - optional NPC target movement demonstrated by the clearing Caretaker without
   pathfinding.
+- factual player-to-wall contact and a concrete clearing rule that retargets
+  the Caretaker toward the live player entity.
 
 Reserved but not implemented:
 

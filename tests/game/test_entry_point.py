@@ -7,6 +7,7 @@ from my_first_adventure_game.game.events import (
     ItemCollected,
     ObstacleDestroyed,
     PlayerDefeated,
+    WallTouched,
 )
 from my_first_adventure_game.game.profile import PlayerProfile
 from my_first_adventure_game.game.progression import (
@@ -30,6 +31,15 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     clearing_collectible = Mock()
     clearing_collectible.active = False
     clearing_map.collectibles = (clearing_collectible,)
+    clearing_wall = Mock()
+    clearing_wall.entity_id = "clearing-wall-top"
+    clearing_map.walls = (clearing_wall,)
+    clearing_caretaker = Mock()
+    clearing_caretaker.entity.entity_id = "npc-clearing-caretaker"
+    initial_caretaker_target = Mock()
+    clearing_caretaker.movement_target = initial_caretaker_target
+    clearing_caretaker.movement_target_entity = None
+    clearing_map.npcs = (clearing_caretaker,)
     first_enemy = Mock()
     first_enemy.entity.active = False
     second_enemy = Mock()
@@ -321,6 +331,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert callable(gameplay_kwargs["on_enemy_defeated"])
     assert callable(gameplay_kwargs["on_item_collected"])
     assert callable(gameplay_kwargs["on_obstacle_destroyed"])
+    assert callable(gameplay_kwargs["on_wall_touched"])
     assert gameplay_kwargs["player_idle_animation"] is player_idle_animation
     assert gameplay_kwargs["player_movement_animation"] is player_movement_animation
     assert gameplay_kwargs["player_collection_animation"] is player_collection_animation
@@ -335,7 +346,21 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert callable(gameplay_kwargs["on_map_exit_reached"])
 
     request_pause = gameplay_kwargs["on_pause_requested"]
+
     handle_player_defeated = gameplay_kwargs["on_player_defeated"]
+
+    handle_wall_touched = gameplay_kwargs["on_wall_touched"]
+
+    handle_wall_touched(WallTouched(wall_id="wall-top"))
+
+    assert clearing_caretaker.movement_target is initial_caretaker_target
+    assert clearing_caretaker.movement_target_entity is None
+
+    handle_wall_touched(WallTouched(wall_id="clearing-wall-top"))
+
+    assert clearing_caretaker.movement_target is None
+    assert clearing_caretaker.movement_target_entity is game_map.player.entity
+
     resume_game = pause_args[2]
 
     request_pause()
@@ -547,6 +572,14 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     second_clearing_collectible = Mock()
     second_clearing_collectible.active = False
     second_clearing_map.collectibles = (second_clearing_collectible,)
+    second_clearing_wall = Mock()
+    second_clearing_wall.entity_id = "clearing-wall-top"
+    second_clearing_map.walls = (second_clearing_wall,)
+    second_clearing_caretaker = Mock()
+    second_clearing_caretaker.entity.entity_id = "npc-clearing-caretaker"
+    second_clearing_caretaker.movement_target = Mock()
+    second_clearing_caretaker.movement_target_entity = None
+    second_clearing_map.npcs = (second_clearing_caretaker,)
     second_collectible = Mock()
     second_collectible.active = False
     second_enemy = Mock()

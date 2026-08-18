@@ -238,8 +238,8 @@ It also provides
 - receives the action input state, font cache, session score, game-owned player,
   wall entities, game-owned enemies and NPCs, destructible obstacles,
   collectible entities, idle, movement, collection, and attack animations, and
-  explicit interaction, collection, destruction, enemy defeat, and player
-  defeat handlers, plus map exits and an explicit exit handler;
+  explicit interaction, collection, destruction, enemy defeat, player defeat,
+  and wall contact handlers, plus map exits and an explicit exit handler;
 - requests pause and returns immediately when `PAUSE` is pressed, before any
   gameplay timer, movement, attack, damage, collection, or animation advances;
 - converts directional actions into normalized movement;
@@ -250,8 +250,14 @@ It also provides
 - applies the game-owned movement speed using delta time;
 - selects active wall, enemy, and NPC bounds as solid obstacles;
 - delegates collision-aware movement to the engine;
-- moves each active NPC with a configured target using its game-owned speed and
-  the frame delta time;
+- identifies an active wall that reduced requested player movement and delivers
+  an immutable `WallTouched` fact through its injected handler;
+- does not report wall contact when another solid role, such as an NPC, blocks
+  movement;
+- moves each active NPC with a configured fixed position or live target entity
+  using its game-owned speed and the frame delta time;
+- reads a target entity's current position during every update rather than
+  storing a position snapshot;
 - treats active walls, the player, enemies, and other NPCs as solid during NPC
   movement while excluding the moving NPC from its own obstacles;
 - relies on axis-separated collision sliding and does not calculate paths or

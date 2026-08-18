@@ -14,6 +14,7 @@ from my_first_adventure_game.game.events import (
     ItemCollected,
     ObstacleDestroyed,
     PlayerDefeated,
+    WallTouched,
 )
 from my_first_adventure_game.game.input import GameAction
 from my_first_adventure_game.game.levels import GameMap, MapExit
@@ -59,6 +60,7 @@ class GameplayScene(Scene):
         on_enemy_defeated: Callable[[EnemyDefeated], None],
         on_item_collected: Callable[[ItemCollected], None],
         on_obstacle_destroyed: Callable[[ObstacleDestroyed], None],
+        on_wall_touched: Callable[[WallTouched], None],
         player_idle_animation: Animation,
         player_movement_animation: Animation,
         player_collection_animation: Animation,
@@ -76,6 +78,7 @@ class GameplayScene(Scene):
         self._on_enemy_defeated = on_enemy_defeated
         self._on_item_collected = on_item_collected
         self._on_obstacle_destroyed = on_obstacle_destroyed
+        self._on_wall_touched = on_wall_touched
         self._player_idle_animation = player_idle_animation
         self._player_movement_animation = player_movement_animation
         self._player_animation = player_idle_animation
@@ -151,11 +154,28 @@ class GameplayScene(Scene):
             *(enemy.entity.bounds for enemy in self._enemies if enemy.entity.active),
             *(npc.entity.bounds for npc in self._npcs if npc.entity.active),
         )
+        player_bounds_before_movement = self._player.entity.bounds
+        applied_movement = move_entity(
+            self._player.entity,
+            movement,
+            solid_bounds,
+        )
+        touched_wall = _find_touched_wall(
+            player_bounds_before_movement,
+            movement,
+            applied_movement,
+            self._walls,
+        )
 
-        move_entity(self._player.entity, movement, solid_bounds)
+        if touched_wall is not None:
+            self._on_wall_touched(WallTouched(wall_id=touched_wall.entity_id))
 
         for npc in self._npcs:
-            target = npc.movement_target
+            target = (
+                npc.movement_target_entity.position
+                if npc.movement_target_entity is not None
+                else npc.movement_target
+            )
 
             if not npc.entity.active or target is None:
                 continue
@@ -363,4 +383,78 @@ def _entity_rect(entity: Entity) -> pygame.Rect:
         round(entity.position.y),
         round(entity.size.x),
         round(entity.size.y),
+    )
+
+
+def _find_touched_wall(
+    initial_bounds: AABB,
+    requested_movement: pygame.Vector2,
+    applied_movement: pygame.Vector2,
+    walls: tuple[Entity, ...],
+) -> Entity | None:
+    horizontal_bounds = AABB(
+        x=initial_bounds.x + applied_movement.x,
+        y=initial_bounds.y,
+        width=initial_bounds.width,
+        height=initial_bounds.height,
+    )
+    final_bounds = AABB(
+        x=horizontal_bounds.x,
+        y=horizontal_bounds.y + applied_movement.y,
+        width=horizontal_bounds.width,
+        height=horizontal_bounds.height,
+    )
+
+    for wall in walls:
+        if not wall.active:
+            continue
+
+        wall_bounds = wall.bounds
+
+        if applied_movement.x != requested_movement.x and _touches_horizontally(
+            horizontal_bounds,
+            wall_bounds,
+            requested_movement.x,
+        ):
+            return wall
+
+        if applied_movement.y != requested_movement.y and _touches_vertically(
+            final_bounds,
+            wall_bounds,
+            requested_movement.y,
+        ):
+            return wall
+
+    return None
+
+
+def _touches_horizontally(
+    moving_bounds: AABB,
+    wall_bounds: AABB,
+    movement: float,
+) -> bool:
+    vertical_overlap = (
+        moving_bounds.top < wall_bounds.bottom
+        and moving_bounds.bottom > wall_bounds.top
+    )
+
+    return vertical_overlap and (
+        (movement > 0.0 and moving_bounds.right == wall_bounds.left)
+        or (movement < 0.0 and moving_bounds.left == wall_bounds.right)
+    )
+
+
+def _touches_vertically(
+    moving_bounds: AABB,
+    wall_bounds: AABB,
+    movement: float,
+) -> bool:
+    horizontal_overlap = (
+        moving_bounds.left < wall_bounds.right
+        and moving_bounds.right > wall_bounds.left
+    )
+
+    return horizontal_overlap and (
+        (movement > 0.0 and moving_bounds.bottom == wall_bounds.top)
+        or (movement < 0.0 and moving_bounds.top == wall_bounds.bottom)
     )
