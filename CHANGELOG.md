@@ -10,6 +10,10 @@ and this project adheres to
 
 ### Added
 
+- Immutable NPC target-arrival facts containing the stable identifiers of the
+  moving NPC and its live entity target.
+- Automatic Caretaker warning dialogue that stops player pursuit when the NPC
+  reaches interaction range.
 - Immutable wall-contact facts emitted when an active wall blocks requested
   player movement without confusing other solid roles with walls.
 - Live entity targets for NPC movement, mutually exclusive with copied fixed

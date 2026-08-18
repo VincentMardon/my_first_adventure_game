@@ -330,6 +330,8 @@ Implemented game foundations:
   pathfinding.
 - factual player-to-wall contact and a concrete clearing rule that retargets
   the Caretaker toward the live player entity.
+- factual NPC target arrival and a concrete Caretaker rule that stops pursuit
+  before opening a warning dialogue.
 
 Reserved but not implemented:
 

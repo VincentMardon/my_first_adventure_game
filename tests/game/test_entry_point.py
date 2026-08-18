@@ -5,6 +5,7 @@ from my_first_adventure_game.game import main as game_main
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
+    NPCTargetReached,
     ObstacleDestroyed,
     PlayerDefeated,
     WallTouched,
@@ -25,6 +26,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     game_map = Mock()
     game_map.map_id = "demo"
     game_map.exits = ()
+    game_map.player.entity.entity_id = "player"
     clearing_map = Mock()
     clearing_map.map_id = "clearing"
     clearing_map.player = game_map.player
@@ -35,6 +37,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     clearing_wall.entity_id = "clearing-wall-top"
     clearing_map.walls = (clearing_wall,)
     clearing_caretaker = Mock()
+    clearing_caretaker.name = "Caretaker"
     clearing_caretaker.entity.entity_id = "npc-clearing-caretaker"
     initial_caretaker_target = Mock()
     clearing_caretaker.movement_target = initial_caretaker_target
@@ -328,6 +331,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert callable(gameplay_kwargs["on_pause_requested"])
     assert callable(gameplay_kwargs["on_player_defeated"])
     assert callable(gameplay_kwargs["on_npc_interacted"])
+    assert callable(gameplay_kwargs["on_npc_target_reached"])
     assert callable(gameplay_kwargs["on_enemy_defeated"])
     assert callable(gameplay_kwargs["on_item_collected"])
     assert callable(gameplay_kwargs["on_obstacle_destroyed"])
@@ -360,6 +364,41 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     assert clearing_caretaker.movement_target is None
     assert clearing_caretaker.movement_target_entity is game_map.player.entity
+
+    handle_npc_target_reached = gameplay_kwargs["on_npc_target_reached"]
+
+    handle_npc_target_reached(
+        NPCTargetReached(
+            npc_id="npc-1",
+            target_id="player",
+        )
+    )
+
+    assert clearing_caretaker.movement_target_entity is game_map.player.entity
+    create_dialogue_scene.assert_not_called()
+
+    handle_npc_target_reached(
+        NPCTargetReached(
+            npc_id="npc-clearing-caretaker",
+            target_id="player",
+        )
+    )
+
+    assert clearing_caretaker.movement_target_entity is None
+    create_dialogue_scene.assert_called_once()
+
+    caretaker_arrival_dialogue_args = create_dialogue_scene.call_args.args
+
+    assert caretaker_arrival_dialogue_args[:4] == (
+        font_cache,
+        input_state,
+        clearing_caretaker.name,
+        game_main.CARETAKER_WALL_TOUCHED_DIALOGUE_LINES,
+    )
+    assert callable(caretaker_arrival_dialogue_args[4])
+    scene_manager.change_scene.assert_called_with(dialogue_scene)
+
+    create_dialogue_scene.reset_mock()
 
     resume_game = pause_args[2]
 
@@ -723,6 +762,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     assert scene_manager.change_scene.call_args_list == [
         call(gameplay_scene),
+        call(dialogue_scene),  # Caretaker arrival
         call(pause_scene),
         call(gameplay_scene),
         call(dialogue_scene),  # Caretaker

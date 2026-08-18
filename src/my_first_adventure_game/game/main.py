@@ -12,6 +12,7 @@ from my_first_adventure_game.game.entities import NPC
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
+    NPCTargetReached,
     ObstacleDestroyed,
     PlayerDefeated,
     WallTouched,
@@ -50,6 +51,10 @@ from my_first_adventure_game.game.statistics import SessionStatistics
 
 WINDOW_CONFIG = WindowConfig(title="My First Adventure Game", size=(1280, 720))
 CARETAKER_NPC_ID = "npc-clearing-caretaker"
+CARETAKER_WALL_TOUCHED_DIALOGUE_LINES = (
+    "You stained one of my freshly cleaned walls.",
+    "Now I have to clean it all over again.",
+)
 COLLECTION_ACTIVE_DIALOGUE_LINES = ("Find every item and return to me.",)
 COLLECTION_COMPLETE_DIALOGUE_LINES = ("You found every item. Well done, traveler!",)
 FRAMES_PER_SECOND = 60
@@ -308,6 +313,26 @@ def main() -> None:
             caretaker.movement_target = None
             caretaker.movement_target_entity = game_map.player.entity
 
+        def handle_npc_target_reached(
+            event: NPCTargetReached,
+        ) -> None:
+            if (
+                event.npc_id != CARETAKER_NPC_ID
+                or event.target_id != game_map.player.entity.entity_id
+            ):
+                return
+
+            caretaker.movement_target_entity = None
+
+            dialogue_scene = DialogueScene(
+                font_cache,
+                input_state,
+                caretaker.name,
+                CARETAKER_WALL_TOUCHED_DIALOGUE_LINES,
+                resume_game,
+            )
+            scene_manager.change_scene(dialogue_scene)
+
         def handle_map_exit_reached(map_exit: MapExit) -> None:
             if map_exit.destination_map_id == game_map.map_id:
                 destination_map = game_map
@@ -329,6 +354,7 @@ def main() -> None:
             on_pause_requested=request_pause,
             on_player_defeated=handle_player_defeated,
             on_npc_interacted=handle_npc_interacted,
+            on_npc_target_reached=handle_npc_target_reached,
             on_enemy_defeated=handle_enemy_defeated,
             on_item_collected=handle_item_collected,
             on_obstacle_destroyed=handle_obstacle_destroyed,

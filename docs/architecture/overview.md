@@ -226,9 +226,11 @@ The clearing's Caretaker is the first autonomous NPC consumer. It initially
 follows one map-authored diagonal destination at a fixed speed. Touching a
 clearing wall makes the shared player entity its live target, so the Caretaker
 continues pursuing the player's current position. That target persists through
-map changes until another rule clears it. Collision movement may slide along
-one free axis, but it does not plan a route around obstacles. Automatic arrival
-dialogue and wall cleaning are not implemented yet.
+map changes until the Caretaker reaches interaction range. The gameplay scene
+then reports the factual arrival, and the composition root clears the target
+before opening a dedicated warning dialogue. Collision movement may slide along
+one free axis, but it does not plan a route around obstacles. Returning to the
+wall and cleaning it are not implemented yet.
 
 ### Levels
 

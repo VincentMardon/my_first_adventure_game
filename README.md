@@ -170,6 +170,8 @@ The project now provides a minimal playable top-down loop:
 35. touching a clearing wall makes the Caretaker abandon that destination and
    pursue the player's current position, even after leaving and returning to
    the map.
+36. reaching the player stops the Caretaker's pursuit and automatically opens
+   a dedicated warning dialogue without affecting Guide progression.
 
 Implemented foundations include:
 
@@ -223,6 +225,8 @@ Implemented foundations include:
   other NPCs without pathfinding;
 - factual wall-contact reporting and a concrete clearing rule that turns wall
   contact into persistent Caretaker pursuit;
+- factual live-target arrival reporting and a concrete Caretaker rule that
+  stops pursuit before opening warning dialogue;
 - a game-owned dialogue panel with a distinct background, border, and balanced
   spacing around the speaker, current line, and continuation instruction;
 - word-boundary wrapping based on the selected font's measured width, with a

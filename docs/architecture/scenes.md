@@ -239,7 +239,8 @@ It also provides
   wall entities, game-owned enemies and NPCs, destructible obstacles,
   collectible entities, idle, movement, collection, and attack animations, and
   explicit interaction, collection, destruction, enemy defeat, player defeat,
-  and wall contact handlers, plus map exits and an explicit exit handler;
+  wall contact, and NPC target arrival handlers, plus map exits and an explicit
+  exit handler;
 - requests pause and returns immediately when `PAUSE` is pressed, before any
   gameplay timer, movement, attack, damage, collection, or animation advances;
 - converts directional actions into normalized movement;
@@ -258,6 +259,9 @@ It also provides
   using its game-owned speed and the frame delta time;
 - reads a target entity's current position during every update rather than
   storing a position snapshot;
+- reports `NPCTargetReached` when the moving NPC reaches interaction range of
+  its live target, then stops that gameplay update because the handler may
+  replace the active scene;
 - treats active walls, the player, enemies, and other NPCs as solid during NPC
   movement while excluding the moving NPC from its own obstacles;
 - relies on axis-separated collision sliding and does not calculate paths or
@@ -367,6 +371,12 @@ has been reported, returning to the Guide selects a completion message and
 preserves that completed result for later interactions. Each interaction starts
 at the first selected line. Confirmation after the final line restores the same
 gameplay scene, preserving the current session without requiring a scene stack.
+
+The NPC target arrival handler filters both the NPC and target identifiers. A
+Caretaker arrival at the shared player removes its live movement target before
+opening a dedicated warning dialogue. This stops the pursuit and prevents the
+same arrival from reopening dialogue on the next gameplay update. Returning to
+the stained wall and cleaning it are not implemented yet.
 
 When interaction validates a ready Guide objective, `game.main` also applies
 the game-owned 500-point completion rule to the shared session score. Later
@@ -517,6 +527,8 @@ Current tests verify:
   NPC's introductory lines;
 - the Caretaker uses its own dialogue without starting the Guide objective or
   activating its collectibles;
+- a live-target NPC arrival is reported after movement, and the concrete
+  Caretaker handler stops pursuit before opening its warning dialogue;
 - later Guide interactions pass a reminder while the objective remains active,
   then stable completion lines after collection and return;
 - the dialogue scene renders the same injected speaker name for every line.

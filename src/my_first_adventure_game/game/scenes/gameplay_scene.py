@@ -12,6 +12,7 @@ from my_first_adventure_game.game.entities import NPC, move_npc_towards
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
+    NPCTargetReached,
     ObstacleDestroyed,
     PlayerDefeated,
     WallTouched,
@@ -57,6 +58,7 @@ class GameplayScene(Scene):
         on_pause_requested: Callable[[], None],
         on_player_defeated: Callable[[PlayerDefeated], None],
         on_npc_interacted: Callable[[NPC], None],
+        on_npc_target_reached: Callable[[NPCTargetReached], None],
         on_enemy_defeated: Callable[[EnemyDefeated], None],
         on_item_collected: Callable[[ItemCollected], None],
         on_obstacle_destroyed: Callable[[ObstacleDestroyed], None],
@@ -75,6 +77,7 @@ class GameplayScene(Scene):
         self._player_invulnerability_remaining = 0.0
         self._on_player_defeated = on_player_defeated
         self._on_npc_interacted = on_npc_interacted
+        self._on_npc_target_reached = on_npc_target_reached
         self._on_enemy_defeated = on_enemy_defeated
         self._on_item_collected = on_item_collected
         self._on_obstacle_destroyed = on_obstacle_destroyed
@@ -118,15 +121,11 @@ class GameplayScene(Scene):
         if self._input_state.is_pressed(GameAction.INTERACT):
             player_bounds = self._player.entity.bounds
 
-            interaction_bounds = AABB(
-                x=player_bounds.x - INTERACTION_REACH,
-                y=player_bounds.y - INTERACTION_REACH,
-                width=player_bounds.width + INTERACTION_REACH * 2.0,
-                height=player_bounds.height + INTERACTION_REACH * 2.0,
-            )
-
             for npc in self._npcs:
-                if npc.entity.active and interaction_bounds.overlaps(npc.entity.bounds):
+                if npc.entity.active and _within_interaction_rached(
+                    player_bounds,
+                    npc.entity.bounds,
+                ):
                     self._on_npc_interacted(npc)
                     return
 
@@ -171,9 +170,10 @@ class GameplayScene(Scene):
             self._on_wall_touched(WallTouched(wall_id=touched_wall.entity_id))
 
         for npc in self._npcs:
+            target_entity = npc.movement_target_entity
             target = (
-                npc.movement_target_entity.position
-                if npc.movement_target_entity is not None
+                target_entity.position
+                if target_entity is not None
                 else npc.movement_target
             )
 
@@ -202,6 +202,18 @@ class GameplayScene(Scene):
                 delta_time=delta_time,
                 solid_bounds=npc_solid_bounds,
             )
+
+            if target_entity is not None and _within_interaction_rached(
+                npc.entity.bounds,
+                target_entity.bounds,
+            ):
+                self._on_npc_target_reached(
+                    NPCTargetReached(
+                        npc_id=npc.entity.entity_id,
+                        target_id=target_entity.entity_id,
+                    )
+                )
+                return
 
         player_bounds = self._player.entity.bounds
 
@@ -458,3 +470,17 @@ def _touches_vertically(
         (movement > 0.0 and moving_bounds.bottom == wall_bounds.top)
         or (movement < 0.0 and moving_bounds.top == wall_bounds.bottom)
     )
+
+
+def _within_interaction_rached(
+    source_bounds: AABB,
+    target_bounds: AABB,
+) -> bool:
+    reach_bounds = AABB(
+        x=source_bounds.x - INTERACTION_REACH,
+        y=source_bounds.y - INTERACTION_REACH,
+        width=source_bounds.width + INTERACTION_REACH * 2.0,
+        height=source_bounds.height + INTERACTION_REACH * 2.0,
+    )
+
+    return reach_bounds.overlaps(target_bounds)

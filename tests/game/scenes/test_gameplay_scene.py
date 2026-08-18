@@ -11,6 +11,7 @@ from my_first_adventure_game.game.entities import NPC, Enemy, Player
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
+    NPCTargetReached,
     ObstacleDestroyed,
     PlayerDefeated,
     WallTouched,
@@ -62,6 +63,7 @@ def _create_gameplay_scene(
     enemies: tuple[Enemy, ...] = (),
     npcs: tuple[NPC, ...] = (),
     on_npc_interacted: Callable[[NPC], None] | None = None,
+    on_npc_target_reached: Callable[[NPCTargetReached], None] | None = None,
     on_enemy_defeated: Callable[[EnemyDefeated], None] | None = None,
     collectibles: tuple[Entity, ...] = (),
     on_item_collected: Callable[[ItemCollected], None] | None = None,
@@ -113,6 +115,7 @@ def _create_gameplay_scene(
         on_pause_requested=on_pause_requested or Mock(),
         on_player_defeated=on_player_defeated or Mock(),
         on_npc_interacted=on_npc_interacted or Mock(),
+        on_npc_target_reached=on_npc_target_reached or Mock(),
         on_enemy_defeated=on_enemy_defeated or Mock(),
         on_item_collected=on_item_collected or Mock(),
         on_obstacle_destroyed=on_obstacle_destroyed or Mock(),
@@ -409,6 +412,58 @@ def test_update_moves_npc_toward_current_target_entity_position(
         speed=80.0,
         delta_time=0.25,
         solid_bounds=(player.entity.bounds,),
+    )
+
+
+def test_update_reports_when_npc_reaches_target_entity(
+    monkeypatch,
+) -> None:
+    player = Player(
+        entity=Entity(
+            entity_id="player",
+            position=pygame.Vector2(320.0, 240.0),
+            size=pygame.Vector2(24.0, 24.0),
+        ),
+        health=3,
+    )
+    moving_npc = NPC(
+        name="Caretaker",
+        entity=Entity(
+            entity_id="npc-clearing-caretaker",
+            position=pygame.Vector2(400.0, 240.0),
+            size=pygame.Vector2(24.0, 32.0),
+        ),
+        dialogue_lines=("Stop dirtying my walls!",),
+        movement_target_entity=player.entity,
+        movement_speed=80.0,
+    )
+    on_npc_target_reached = Mock()
+
+    monkeypatch.setattr(
+        gameplay_scene,
+        "movement_axis",
+        Mock(return_value=pygame.Vector2()),
+    )
+    monkeypatch.setattr(
+        gameplay_scene,
+        "move_entity",
+        Mock(return_value=pygame.Vector2()),
+    )
+
+    scene = _create_gameplay_scene(
+        player=player,
+        npcs=(moving_npc,),
+        on_npc_target_reached=on_npc_target_reached,
+    )
+
+    scene.update(1.0)
+
+    assert moving_npc.entity.position == pygame.Vector2(344.0, 240.0)
+    on_npc_target_reached.assert_called_once_with(
+        NPCTargetReached(
+            npc_id="npc-clearing-caretaker",
+            target_id="player",
+        )
     )
 
 

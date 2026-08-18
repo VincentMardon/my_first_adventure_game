@@ -8,8 +8,10 @@ behavior.
 It currently provides `ItemCollected`, which identifies an item collected by
 the player, `ObstacleDestroyed`, which identifies a destructible obstacle
 removed by an attack, `EnemyDefeated`, which identifies a defeated enemy,
-`PlayerDefeated`, which identifies the defeated player, and `WallTouched`,
-which identifies a wall that blocked requested player movement.
+`PlayerDefeated`, which identifies the defeated player, `WallTouched`, which
+identifies a wall that blocked requested player movement, and
+`NPCTargetReached`, which identifies an NPC and the live entity target it
+reached.
 
 The domain does not calculate score, update session state, persist statistics,
 or provide a general event dispatcher.
@@ -56,6 +58,12 @@ Reports that requested player movement touched an active wall. It contains only
 the stable wall identifier and does not decide whether the contact stains a
 wall, changes an NPC destination, starts dialogue, or affects statistics.
 
+### [`NPCTargetReached`](../api/game-events.md#my_first_adventure_game.game.events.NPCTargetReached)
+
+Reports that an NPC reached interaction range of its live movement target. It
+contains the stable identifiers of both entities and does not decide whether
+movement stops, dialogue opens, or another behavior begins.
+
 ## Ownership
 
 These events belong to `game` because collection, attacks, destruction, and
@@ -77,11 +85,13 @@ flowchart LR
     EnemyDefeated["game.events.EnemyDefeated"]
     PlayerDefeated["game.events.PlayerDefeated"]
     WallTouched["game.events.WallTouched"]
+    NPCTargetReached["game.events.NPCTargetReached"]
     Handler["injected collection handler"]
     DestructionHandler["injected destruction handler"]
     DefeatHandler["injected enemy defeat handler"]
     PlayerDefeatHandler["injected player defeat handler"]
     WallHandler["injected wall contact handler"]
+    TargetHandler["injected NPC target handler"]
 
     GameMain -->|"injects"| Handler
     GameMain --> GameplayScene
@@ -104,6 +114,10 @@ flowchart LR
     GameplayScene -->|"creates after blocked wall movement"| WallTouched
     GameplayScene -->|"delivers synchronously"| WallHandler
     WallTouched --> WallHandler
+    GameMain -->|"injects"| TargetHandler
+    GameplayScene -->|"creates within interaction reach"| NPCTargetReached
+    GameplayScene -->|"delivers synchronously"| TargetHandler
+    NPCTargetReached --> TargetHandler
 ```
 
 The handler composed in `game.main` converts `ItemCollected` into points through
@@ -130,6 +144,10 @@ clearing. A clearing wall contact removes the Caretaker's fixed destination and
 makes the shared player entity its live movement target. This concrete reaction
 does not add Caretaker behavior to the event or the engine.
 
+When the Caretaker reaches the shared player entity, the target handler removes
+that live target before opening a game-owned warning dialogue. Events involving
+another NPC or target are ignored by this concrete rule.
+
 ## Delivery semantics
 
 - `GameplayScene` detects collection after player movement.
@@ -151,6 +169,11 @@ does not add Caretaker behavior to the event or the engine.
 - Movement blocked by an NPC does not emit `WallTouched`.
 - Continued movement into the same wall may deliver `WallTouched` on later
   frames; consumers own any required deduplication or state transition.
+- After moving an NPC toward a live entity target, `GameplayScene` reports
+  `NPCTargetReached` when their bounds are within the same game-owned reach used
+  for manual NPC interaction.
+- Delivery stops the remainder of that gameplay update because the injected
+  handler may synchronously replace the active scene.
 
 There is no global event bus, subscription registry, or runtime event queue.
 
@@ -174,6 +197,8 @@ consequences without changing the factual events themselves.
   multiple frames.
 - Treating every blocked movement as wall contact would confuse walls with
   enemies or NPCs that also act as solid obstacles.
+- Encoding dialogue or Caretaker identity in `NPCTargetReached` would mix a
+  factual movement result with one concrete consequence.
 
 ## Verification
 
@@ -198,3 +223,5 @@ Current tests verify:
 - `WallTouched` stores the wall identifier and is immutable;
 - wall-blocked player movement delivers the matching wall identifier;
 - movement blocked by an NPC does not deliver wall contact.
+- `NPCTargetReached` stores both stable identifiers and is immutable;
+- reaching a live target after collision-aware movement delivers the event.
