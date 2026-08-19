@@ -231,9 +231,10 @@ then reports the factual arrival, and the composition root clears the target
 before opening a dedicated warning dialogue. Closing the dialogue makes the
 remembered wall entity its next live target. Reaching that wall stops movement
 and clears the task without another dialogue. Collision movement may slide
-along one free axis, but it does not plan a route around obstacles. The wall's
-entity position is currently targeted rather than the player's exact contact
-point; visible cleaning and its statistic are not implemented yet.
+along one free axis, but it does not plan a route around obstacles. Immutable
+`WallStain` state now retains the player's exact surface contact point and its
+outward normal, but the wall entity remains the current return target. Precise
+contact placement, visible cleaning, and its statistic are not implemented yet.
 
 ### Levels
 

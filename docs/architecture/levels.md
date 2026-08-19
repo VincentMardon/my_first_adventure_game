@@ -74,8 +74,10 @@ replaces that destination with the shared player entity, causing the Caretaker
 to pursue the player's current position without pathfinding. Reaching the
 player stops that pursuit and opens a warning dialogue. Closing it sends the
 Caretaker back toward the remembered wall entity, where it stops and clears the
-task. One initially hidden collectible extends the Guide's objective into this
-map. The clearing does not yet represent finished game content.
+task. Session-local `WallStain` state retains the original surface point and
+normal, although that exact geometry does not yet drive the return movement.
+One initially hidden collectible extends the Guide's objective into this map.
+The clearing does not yet represent finished game content.
 
 ## Ownership
 

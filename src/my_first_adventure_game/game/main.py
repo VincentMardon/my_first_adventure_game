@@ -8,7 +8,7 @@ from my_first_adventure_game.engine.assets import FontCache
 from my_first_adventure_game.engine.graphics import Animation
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.scenes import SceneManager
-from my_first_adventure_game.game.entities import NPC
+from my_first_adventure_game.game.entities import NPC, WallStain
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
@@ -127,7 +127,7 @@ def main() -> None:
             npc for npc in clearing_map.npcs if npc.entity.entity_id == CARETAKER_NPC_ID
         )
         clearing_wall_by_id = {wall.entity_id: wall for wall in clearing_map.walls}
-        dirty_wall_id: str | None = None
+        dirty_wall_stain: WallStain | None = None
         objective_collectibles = (
             *game_map.collectibles,
             *clearing_map.collectibles,
@@ -308,26 +308,33 @@ def main() -> None:
         def handle_wall_touched(
             event: WallTouched,
         ) -> None:
-            nonlocal dirty_wall_id
+            nonlocal dirty_wall_stain
 
             if event.wall_id not in clearing_wall_by_id:
                 return
 
-            dirty_wall_id = event.wall_id
+            dirty_wall_stain = WallStain(
+                wall_id=event.wall_id,
+                contact_position=event.contact_position,
+                surface_normal=event.surface_normal,
+            )
             caretaker.movement_target = None
             caretaker.movement_target_entity = game_map.player.entity
 
         def handle_npc_target_reached(
             event: NPCTargetReached,
         ) -> None:
-            nonlocal dirty_wall_id
+            nonlocal dirty_wall_stain
 
             if event.npc_id != CARETAKER_NPC_ID:
                 return
 
-            if event.target_id == dirty_wall_id:
+            if (
+                dirty_wall_stain is not None
+                and event.target_id == dirty_wall_stain.wall_id
+            ):
                 caretaker.movement_target_entity = None
-                dirty_wall_id = None
+                dirty_wall_stain = None
                 return
 
             if event.target_id != game_map.player.entity.entity_id:
@@ -336,9 +343,9 @@ def main() -> None:
             caretaker.movement_target_entity = None
 
             def return_to_dirty_wall() -> None:
-                if dirty_wall_id is not None:
+                if dirty_wall_stain is not None:
                     caretaker.movement_target_entity = clearing_wall_by_id[
-                        dirty_wall_id
+                        dirty_wall_stain.wall_id
                     ]
 
                 resume_game()

@@ -252,7 +252,8 @@ It also provides
 - selects active wall, enemy, and NPC bounds as solid obstacles;
 - delegates collision-aware movement to the engine;
 - identifies an active wall that reduced requested player movement and delivers
-  an immutable `WallTouched` fact through its injected handler;
+  an immutable `WallTouched` fact containing the wall identifier, clamped
+  surface point, and outward axis-aligned normal through its injected handler;
 - does not report wall contact when another solid role, such as an NPC, blocks
   movement;
 - moves each active NPC with a configured fixed position or live target entity
@@ -378,9 +379,10 @@ opening a dedicated warning dialogue. This stops the pursuit and prevents the
 same arrival from reopening dialogue on the next gameplay update. Closing that
 dialogue assigns the remembered wall entity as the next target and resumes
 gameplay. Reaching the wall clears the target and task without opening another
-dialogue. The current destination is the wall entity's authored position, not
-the exact contact point; visible cleaning and its statistic are not implemented
-yet.
+dialogue. The remembered `WallStain` already preserves the exact contact point
+and surface normal, but the current destination remains the wall entity's
+authored position. Precise return movement, visible cleaning, and its statistic
+are not implemented yet.
 
 When interaction validates a ready Guide objective, `game.main` also applies
 the game-owned 500-point completion rule to the shared session score. Later
@@ -535,6 +537,8 @@ Current tests verify:
   Caretaker handler stops pursuit before opening its warning dialogue;
 - closing that dialogue resumes gameplay with the remembered wall as the
   Caretaker's target, and reaching it clears the task without repeated events;
+- wall contact reports the matching surface point and outward normal on all
+  four axis-aligned wall faces;
 - later Guide interactions pass a reminder while the objective remains active,
   then stable completion lines after collection and return;
 - the dialogue scene renders the same injected speaker name for every line.

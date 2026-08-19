@@ -225,12 +225,13 @@ Implemented foundations include:
 - mutually exclusive fixed-position and live-entity NPC targets;
 - elapsed-time NPC movement against active walls, the player, enemies, and
   other NPCs without pathfinding;
-- factual wall-contact reporting and a concrete clearing rule that turns wall
-  contact into persistent Caretaker pursuit;
+- factual wall-contact reporting with exact surface points and outward normals,
+  plus a concrete clearing rule that turns contact into persistent Caretaker
+  pursuit;
 - factual live-target arrival reporting and a concrete Caretaker rule that
   stops pursuit before opening warning dialogue;
-- session-local dirty-wall memory that retargets the Caretaker after dialogue
-  and clears the task on arrival;
+- immutable session-local wall-stain geometry that retargets the Caretaker
+  after dialogue and clears the task on arrival;
 - a game-owned dialogue panel with a distinct background, border, and balanced
   spacing around the speaker, current line, and continuation instruction;
 - word-boundary wrapping based on the selected font's measured width, with a

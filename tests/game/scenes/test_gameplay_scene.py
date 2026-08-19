@@ -2,6 +2,7 @@ from collections.abc import Callable
 from unittest.mock import Mock, call
 
 import pygame
+import pytest
 
 from my_first_adventure_game.engine.assets import FontCache
 from my_first_adventure_game.engine.graphics import Animation
@@ -208,18 +209,70 @@ def test_update_moves_player_from_directional_actions(monkeypatch) -> None:
     )
 
 
-def test_update_reports_wall_blocking_player_movement(monkeypatch) -> None:
+@pytest.mark.parametrize(
+    (
+        "player_position",
+        "wall_position",
+        "axis",
+        "expected_player_position",
+        "contact_position",
+        "surface_normal",
+    ),
+    [
+        (
+            (100.0, 80.0),
+            (130.0, 80.0),
+            (1.0, 0.0),
+            (106.0, 80.0),
+            (130.0, 92.0),
+            (-1.0, 0.0),
+        ),
+        (
+            (140.0, 80.0),
+            (100.0, 80.0),
+            (-1.0, 0.0),
+            (132.0, 80.0),
+            (132.0, 92.0),
+            (1.0, 0.0),
+        ),
+        (
+            (100.0, 80.0),
+            (100.0, 110.0),
+            (0.0, 1.0),
+            (100.0, 86.0),
+            (112.0, 110.0),
+            (0.0, -1.0),
+        ),
+        (
+            (100.0, 120.0),
+            (100.0, 80.0),
+            (0.0, -1.0),
+            (100.0, 112.0),
+            (112.0, 112.0),
+            (0.0, 1.0),
+        ),
+    ],
+)
+def test_update_reports_wall_contacts(
+    monkeypatch,
+    player_position: tuple[float, float],
+    wall_position: tuple[float, float],
+    axis: tuple[float, float],
+    expected_player_position: tuple[float, float],
+    contact_position: tuple[float, float],
+    surface_normal: tuple[float, float],
+) -> None:
     player = Player(
         entity=Entity(
             entity_id="player",
-            position=pygame.Vector2(100.0, 80.0),
+            position=pygame.Vector2(player_position),
             size=pygame.Vector2(24.0, 24.0),
         ),
         health=3,
     )
     wall = Entity(
         entity_id="wall",
-        position=pygame.Vector2(130.0, 80.0),
+        position=pygame.Vector2(wall_position),
         size=pygame.Vector2(32.0, 32.0),
     )
     on_wall_touched = Mock()
@@ -227,7 +280,7 @@ def test_update_reports_wall_blocking_player_movement(monkeypatch) -> None:
     monkeypatch.setattr(
         gameplay_scene,
         "movement_axis",
-        Mock(return_value=pygame.Vector2(1.0, 0.0)),
+        Mock(return_value=pygame.Vector2(axis)),
     )
 
     scene = _create_gameplay_scene(
@@ -238,9 +291,13 @@ def test_update_reports_wall_blocking_player_movement(monkeypatch) -> None:
 
     scene.update(0.5)
 
-    assert player.entity.position == pygame.Vector2(106.0, 80.0)
+    assert player.entity.position == pygame.Vector2(expected_player_position)
     on_wall_touched.assert_called_once_with(
-        WallTouched(wall_id="wall"),
+        WallTouched(
+            wall_id="wall",
+            contact_position=contact_position,
+            surface_normal=surface_normal,
+        )
     )
 
 

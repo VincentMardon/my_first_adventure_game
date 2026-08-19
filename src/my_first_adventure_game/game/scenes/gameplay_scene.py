@@ -122,7 +122,7 @@ class GameplayScene(Scene):
             player_bounds = self._player.entity.bounds
 
             for npc in self._npcs:
-                if npc.entity.active and _within_interaction_rached(
+                if npc.entity.active and _within_interaction_reach(
                     player_bounds,
                     npc.entity.bounds,
                 ):
@@ -159,15 +159,15 @@ class GameplayScene(Scene):
             movement,
             solid_bounds,
         )
-        touched_wall = _find_touched_wall(
+        wall_contact = _find_wall_contact(
             player_bounds_before_movement,
             movement,
             applied_movement,
             self._walls,
         )
 
-        if touched_wall is not None:
-            self._on_wall_touched(WallTouched(wall_id=touched_wall.entity_id))
+        if wall_contact is not None:
+            self._on_wall_touched(wall_contact)
 
         for npc in self._npcs:
             target_entity = npc.movement_target_entity
@@ -203,7 +203,7 @@ class GameplayScene(Scene):
                 solid_bounds=npc_solid_bounds,
             )
 
-            if target_entity is not None and _within_interaction_rached(
+            if target_entity is not None and _within_interaction_reach(
                 npc.entity.bounds,
                 target_entity.bounds,
             ):
@@ -398,12 +398,12 @@ def _entity_rect(entity: Entity) -> pygame.Rect:
     )
 
 
-def _find_touched_wall(
+def _find_wall_contact(
     initial_bounds: AABB,
     requested_movement: pygame.Vector2,
     applied_movement: pygame.Vector2,
     walls: tuple[Entity, ...],
-) -> Entity | None:
+) -> WallTouched | None:
     horizontal_bounds = AABB(
         x=initial_bounds.x + applied_movement.x,
         y=initial_bounds.y,
@@ -428,14 +428,45 @@ def _find_touched_wall(
             wall_bounds,
             requested_movement.x,
         ):
-            return wall
+            contact_x = (
+                wall_bounds.left if requested_movement.x > 0.0 else wall_bounds.right
+            )
+            contact_y = min(
+                max(
+                    horizontal_bounds.y + horizontal_bounds.height / 2.0,
+                    wall_bounds.top,
+                ),
+                wall_bounds.bottom,
+            )
+            surface_normal = (-1.0, 0.0) if requested_movement.x > 0.0 else (1.0, 0.0)
+
+            return WallTouched(
+                wall_id=wall.entity_id,
+                contact_position=(contact_x, contact_y),
+                surface_normal=surface_normal,
+            )
 
         if applied_movement.y != requested_movement.y and _touches_vertically(
             final_bounds,
             wall_bounds,
             requested_movement.y,
         ):
-            return wall
+            contact_x = min(
+                max(
+                    final_bounds.x + final_bounds.width / 2.0,
+                    wall_bounds.left,
+                ),
+                wall_bounds.right,
+            )
+            contact_y = (
+                wall_bounds.top if requested_movement.y > 0.0 else wall_bounds.bottom
+            )
+            surface_normal = (0.0, -1.0) if requested_movement.y > 0.0 else (0.0, 1.0)
+            return WallTouched(
+                wall_id=wall.entity_id,
+                contact_position=(contact_x, contact_y),
+                surface_normal=surface_normal,
+            )
 
     return None
 
@@ -472,7 +503,7 @@ def _touches_vertically(
     )
 
 
-def _within_interaction_rached(
+def _within_interaction_reach(
     source_bounds: AABB,
     target_bounds: AABB,
 ) -> bool:

@@ -36,6 +36,8 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     clearing_wall = Mock()
     clearing_wall.entity_id = "clearing-wall-top"
     clearing_map.walls = (clearing_wall,)
+    wall_stain = Mock()
+    wall_stain.wall_id = "clearing-wall-top"
     clearing_caretaker = Mock()
     clearing_caretaker.name = "Caretaker"
     clearing_caretaker.entity.entity_id = "npc-clearing-caretaker"
@@ -90,6 +92,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_font_cache = Mock(return_value=font_cache)
     create_demo_map = Mock(return_value=game_map)
     create_clearing_map = Mock(return_value=clearing_map)
+    create_wall_stain = Mock(return_value=wall_stain)
     create_session_score = Mock(return_value=session_score)
     create_session_statistics = Mock(return_value=session_statistics)
     score_item_collection = Mock(return_value=100)
@@ -135,6 +138,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         "create_clearing_map",
         create_clearing_map,
     )
+    monkeypatch.setattr(game_main, "WallStain", create_wall_stain)
     monkeypatch.setattr(game_main, "SessionScore", create_session_score)
     monkeypatch.setattr(
         game_main,
@@ -355,13 +359,31 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     handle_wall_touched = gameplay_kwargs["on_wall_touched"]
 
-    handle_wall_touched(WallTouched(wall_id="wall-top"))
+    handle_wall_touched(
+        WallTouched(
+            wall_id="wall-top",
+            contact_position=(320.0, 96.0),
+            surface_normal=(0.0, 1.0),
+        )
+    )
 
+    create_wall_stain.assert_not_called()
     assert clearing_caretaker.movement_target is initial_caretaker_target
     assert clearing_caretaker.movement_target_entity is None
 
-    handle_wall_touched(WallTouched(wall_id="clearing-wall-top"))
+    handle_wall_touched(
+        WallTouched(
+            wall_id="clearing-wall-top",
+            contact_position=(640.0, 96.0),
+            surface_normal=(0.0, 1.0),
+        ),
+    )
 
+    create_wall_stain.assert_called_once_with(
+        wall_id="clearing-wall-top",
+        contact_position=(640.0, 96.0),
+        surface_normal=(0.0, 1.0),
+    )
     assert clearing_caretaker.movement_target is None
     assert clearing_caretaker.movement_target_entity is game_map.player.entity
 

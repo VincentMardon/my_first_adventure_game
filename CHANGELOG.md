@@ -10,14 +10,18 @@ and this project adheres to
 
 ### Added
 
-- Session-local dirty-wall memory that sends the Caretaker back to the
+- Immutable session-local wall-stain geometry containing the exact contact
+  point and outward surface normal, with approach-position calculation for an
+  entity of a given size.
+- Session-local dirty-wall behavior that sends the Caretaker back to the
   remembered wall after its warning dialogue and stops it on arrival.
 - Immutable NPC target-arrival facts containing the stable identifiers of the
   moving NPC and its live entity target.
 - Automatic Caretaker warning dialogue that stops player pursuit when the NPC
   reaches interaction range.
-- Immutable wall-contact facts emitted when an active wall blocks requested
-  player movement without confusing other solid roles with walls.
+- Immutable wall-contact facts containing exact surface points and outward
+  normals, emitted when an active wall blocks requested player movement without
+  confusing other solid roles with walls.
 - Live entity targets for NPC movement, mutually exclusive with copied fixed
   destinations and resolved from the target's current position each frame.
 - Persistent Caretaker pursuit after the player touches a clearing wall,

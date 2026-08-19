@@ -5,9 +5,10 @@
 The game entities domain defines concrete objects whose gameplay state extends
 the reusable spatial state provided by the engine.
 
-It currently provides `Enemy`, `NPC`, `Player`, and target-directed NPC
-movement. Each concrete entity composes an engine `Entity` with the additional
-state required by its game role.
+It currently provides `Enemy`, `NPC`, `Player`, `WallStain`, and
+target-directed NPC movement. Concrete spatial actors compose an engine
+`Entity` with the additional state required by their game role. `WallStain`
+instead records game-owned surface state without entering the engine world.
 
 ## Why this domain exists
 
@@ -64,6 +65,16 @@ actually applied.
 The caller still owns the destination, speed, frame duration, and selection of
 solid bounds. The function performs no pathfinding.
 
+### [`WallStain`](../api/game-entities.md#my_first_adventure_game.game.entities.WallStain)
+
+Stores the stable identifier of a dirty wall, the exact contact point on its
+surface, and an axis-aligned normal pointing toward the playable side. It is an
+immutable game-owned fact rather than an engine spatial entity.
+
+`approach_position()` derives the top-left position that places an entity of a
+given size against the dirty point. The calculation does not move that entity,
+inspect obstacles, choose a route, or decide what cleaning means.
+
 ## Relationships
 
 ```mermaid
@@ -97,6 +108,13 @@ classDiagram
         +movement_speed
     }
 
+    class WallStain {
+        +wall_id
+        +contact_position
+        +surface_normal
+        +approach_position(entity_size) Vector2
+    }
+
     Enemy *-- Entity : spatial state
     Player *-- Entity : spatial state
     NPC *-- Entity : spatial state
@@ -106,6 +124,7 @@ classDiagram
     GameplayScene --> Enemy : collision, damage, rendering
     GameplayScene --> NPC : collision, interaction, rendering
     GameplayScene --> Player : movement, damage, rendering
+    GameMain --> WallStain : session-local dirty surface
 ```
 
 `create_demo_map()` creates the current enemy with two health points and
@@ -141,6 +160,9 @@ invulnerability period. The scene displays current health and emits
 - A target entity remains the same object so its current position can be read
   during later updates.
 - The engine never imports or constructs `NPC`.
+- A wall stain is immutable and remains outside the engine world.
+- Its approach position depends only on the recorded contact geometry and the
+  supplied entity size.
 
 ## Extension points
 
@@ -180,4 +202,6 @@ Current tests verify:
 - stationary movement defaults, fixed-target copying, live target-entity
   references, mutually exclusive target forms, and movement-speed validation;
 - elapsed-time NPC movement, exact arrival, and collision against selected
-  solid bounds.
+  solid bounds;
+- immutable wall-stain geometry and approach positions for all four
+  axis-aligned surface normals.

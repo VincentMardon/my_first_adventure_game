@@ -9,7 +9,7 @@ It currently provides `ItemCollected`, which identifies an item collected by
 the player, `ObstacleDestroyed`, which identifies a destructible obstacle
 removed by an attack, `EnemyDefeated`, which identifies a defeated enemy,
 `PlayerDefeated`, which identifies the defeated player, `WallTouched`, which
-identifies a wall that blocked requested player movement, and
+describes where a wall blocked requested player movement, and
 `NPCTargetReached`, which identifies an NPC and the live entity target it
 reached.
 
@@ -54,9 +54,11 @@ identifier and does not decide navigation, retry, or session consequences.
 
 ### [`WallTouched`](../api/game-events.md#my_first_adventure_game.game.events.WallTouched)
 
-Reports that requested player movement touched an active wall. It contains only
-the stable wall identifier and does not decide whether the contact stains a
-wall, changes an NPC destination, starts dialogue, or affects statistics.
+Reports that requested player movement touched an active wall. It contains the
+stable wall identifier, the exact point on the wall surface, and an
+axis-aligned unit normal pointing away from that surface. It does not decide
+whether the contact stains a wall, changes an NPC destination, starts dialogue,
+or affects statistics.
 
 ### [`NPCTargetReached`](../api/game-events.md#my_first_adventure_game.game.events.NPCTargetReached)
 
@@ -140,9 +142,10 @@ with the current session's `DefeatScene`. The gameplay scene deactivates the
 corresponding entity before reporting each factual event.
 
 The wall contact handler composed in `game.main` ignores walls outside the
-clearing. A clearing wall contact removes the Caretaker's fixed destination and
-makes the shared player entity its live movement target. This concrete reaction
-does not add Caretaker behavior to the event or the engine.
+clearing. A clearing wall contact creates session-local `WallStain` state from
+the event geometry, removes the Caretaker's fixed destination, and makes the
+shared player entity its live movement target. This concrete reaction does not
+add Caretaker behavior to the event or the engine.
 
 When the Caretaker reaches the shared player entity, the target handler removes
 that live target before opening a game-owned warning dialogue. Closing the
@@ -167,7 +170,8 @@ dialogue. Events involving another NPC or target are ignored.
   is delivered.
 - An inactive player cannot emit another defeat event on later frames.
 - `GameplayScene` compares requested and applied player movement and reports an
-  active wall only when that wall caused the blocked axis.
+  active wall only when that wall caused the blocked axis. The contact point is
+  clamped to the touched surface and its normal points toward the player side.
 - Movement blocked by an NPC does not emit `WallTouched`.
 - Continued movement into the same wall may deliver `WallTouched` on later
   frames; consumers own any required deduplication or state transition.
@@ -222,8 +226,10 @@ Current tests verify:
 - distant enemies remain active.
 - `PlayerDefeated` stores the defeated player identifier and is immutable;
 - fatal enemy contact delivers player defeat exactly once.
-- `WallTouched` stores the wall identifier and is immutable;
-- wall-blocked player movement delivers the matching wall identifier;
+- `WallTouched` stores the wall identifier, surface contact point, and outward
+  axis-aligned normal and is immutable;
+- wall-blocked player movement delivers matching geometry for all four wall
+  faces;
 - movement blocked by an NPC does not deliver wall contact.
 - `NPCTargetReached` stores both stable identifiers and is immutable;
 - reaching a live target after collision-aware movement delivers the event.
