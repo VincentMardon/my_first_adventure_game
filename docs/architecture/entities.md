@@ -49,7 +49,8 @@ Composes an engine-owned `Entity` with a non-blank display name, a non-empty
 tuple of ordered, non-blank dialogue lines, an optional movement target, and a
 nonnegative movement speed. A target may be either a copied fixed position or a
 live engine `Entity` reference whose current position is read during each
-update. These target forms are mutually exclusive.
+update. These target forms are mutually exclusive. A fixed position may also
+carry an optional non-blank identifier so its exact arrival can be reported.
 
 The NPC owns concrete game content but does not detect interaction, display its
 text, select destinations, or decide scene transitions. Those responsibilities
@@ -104,6 +105,7 @@ classDiagram
         +entity
         +dialogue_lines
         +movement_target
+        +movement_target_id
         +movement_target_entity
         +movement_speed
     }
@@ -155,6 +157,8 @@ invulnerability period. The scene displays current health and emits
 - NPC movement speed cannot be negative.
 - NPCs without a target are stationary by default.
 - Fixed and entity movement targets are mutually exclusive.
+- A fixed target identifier is optional, non-blank when present, and invalid
+  without its associated fixed position.
 - A configured target requires a positive movement speed.
 - A fixed target is copied during construction.
 - A target entity remains the same object so its current position can be read
@@ -200,7 +204,8 @@ Current tests verify:
 - rejection of blank NPC names;
 - rejection of empty dialogue sequences and blank dialogue lines.
 - stationary movement defaults, fixed-target copying, live target-entity
-  references, mutually exclusive target forms, and movement-speed validation;
+  references, optional fixed-target identifiers, mutually exclusive target
+  forms, and movement-speed validation;
 - elapsed-time NPC movement, exact arrival, and collision against selected
   solid bounds;
 - immutable wall-stain geometry and approach positions for all four

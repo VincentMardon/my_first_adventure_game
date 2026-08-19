@@ -87,6 +87,7 @@ def test_npc_is_stationary_by_default() -> None:
     )
 
     assert npc.movement_target is None
+    assert npc.movement_target_id is None
     assert npc.movement_speed == 0.0
     assert npc.movement_target_entity is None
 
@@ -99,6 +100,7 @@ def test_npc_copies_movement_target() -> None:
         entity=_create_entity(),
         dialogue_lines=("I have work to do.",),
         movement_target=movement_target,
+        movement_target_id="dirty-wall",
         movement_speed=80.0,
     )
 
@@ -106,6 +108,7 @@ def test_npc_copies_movement_target() -> None:
 
     assert npc.movement_target == pygame.Vector2(320.0, 240.0)
     assert npc.movement_target is not movement_target
+    assert npc.movement_target_id == "dirty-wall"
     assert npc.movement_speed == 80.0
 
 
@@ -188,5 +191,36 @@ def test_npc_rejects_multiple_movement_targets() -> None:
                 position=pygame.Vector2(480.0, 360.0),
                 size=pygame.Vector2(24.0, 24.0),
             ),
+            movement_speed=80.0,
+        )
+
+
+def test_npc_requires_fixed_target_for_movement_target_id() -> None:
+    with pytest.raises(
+        ValueError,
+        match="movement_target_id requires a fixed movement target",
+    ):
+        NPC(
+            name="Caretaker",
+            entity=_create_entity(),
+            dialogue_lines=("I have work to do.",),
+            movement_target_id="dirty-wall",
+        )
+
+
+@pytest.mark.parametrize("movement_target_id", ["", "   "])
+def test_nep_requires_non_blank_movement_target_id(
+    movement_target_id: str,
+) -> None:
+    with pytest.raises(
+        ValueError,
+        match="movement_target_id must not be blank",
+    ):
+        NPC(
+            name="Caretaker",
+            entity=_create_entity(),
+            dialogue_lines=("I have work to do.",),
+            movement_target=pygame.Vector2(320.0, 240.0),
+            movement_target_id=movement_target_id,
             movement_speed=80.0,
         )

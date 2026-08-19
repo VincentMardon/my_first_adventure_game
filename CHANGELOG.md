@@ -10,6 +10,10 @@ and this project adheres to
 
 ### Added
 
+- Optional identifiers and exact arrival reporting for fixed NPC movement
+  targets, without reporting destinations blocked by collision.
+- Precise Caretaker return movement to the remembered wall-stain approach
+  position after its warning dialogue.
 - Immutable session-local wall-stain geometry containing the exact contact
   point and outward surface normal, with approach-position calculation for an
   entity of a given size.

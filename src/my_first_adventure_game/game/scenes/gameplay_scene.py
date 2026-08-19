@@ -203,6 +203,19 @@ class GameplayScene(Scene):
                 solid_bounds=npc_solid_bounds,
             )
 
+            if (
+                target_entity is None
+                and npc.movement_target_id is not None
+                and npc.entity.position == target
+            ):
+                self._on_npc_target_reached(
+                    NPCTargetReached(
+                        npc_id=npc.entity.entity_id,
+                        target_id=npc.movement_target_id,
+                    )
+                )
+                return
+
             if target_entity is not None and _within_interaction_reach(
                 npc.entity.bounds,
                 target_entity.bounds,

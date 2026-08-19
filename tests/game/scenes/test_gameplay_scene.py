@@ -403,6 +403,95 @@ def test_update_moves_npc_with_configured_target(monkeypatch) -> None:
     )
 
 
+def test_update_reports_when_npc_reaches_named_fixed_target(
+    monkeypatch,
+) -> None:
+    moving_npc = NPC(
+        name="Caretaker",
+        entity=Entity(
+            entity_id="npc-clearing-caretaker",
+            position=pygame.Vector2(400.0, 300.0),
+            size=pygame.Vector2(24.0, 32.0),
+        ),
+        dialogue_lines=("I have work to do.",),
+        movement_target=pygame.Vector2(440.0, 300.0),
+        movement_target_id="clearing-wall-top",
+        movement_speed=80.0,
+    )
+    on_npc_target_reached = Mock()
+
+    monkeypatch.setattr(
+        gameplay_scene,
+        "movement_axis",
+        Mock(return_value=pygame.Vector2()),
+    )
+    monkeypatch.setattr(
+        gameplay_scene,
+        "move_entity",
+        Mock(return_value=pygame.Vector2()),
+    )
+
+    scene = _create_gameplay_scene(
+        npcs=(moving_npc,),
+        on_npc_target_reached=on_npc_target_reached,
+    )
+
+    scene.update(0.5)
+
+    assert moving_npc.entity.position == pygame.Vector2(440.0, 300.0)
+    on_npc_target_reached.assert_called_once_with(
+        NPCTargetReached(
+            npc_id="npc-clearing-caretaker",
+            target_id="clearing-wall-top",
+        )
+    )
+
+
+def test_update_does_not_report_blocked_named_fixed_target(
+    monkeypatch,
+) -> None:
+    wall = Entity(
+        entity_id="wall",
+        position=pygame.Vector2(430.0, 300.0),
+        size=pygame.Vector2(32.0, 32.0),
+    )
+    moving_npc = NPC(
+        name="Caretaker",
+        entity=Entity(
+            entity_id="npc-clearing-caretaker",
+            position=pygame.Vector2(400.0, 300.0),
+            size=pygame.Vector2(24.0, 32.0),
+        ),
+        dialogue_lines=("I have work to do.",),
+        movement_target=pygame.Vector2(500.0, 300.0),
+        movement_target_id="dirty-wall",
+        movement_speed=80.0,
+    )
+    on_npc_target_reached = Mock()
+
+    monkeypatch.setattr(
+        gameplay_scene,
+        "movement_axis",
+        Mock(return_value=pygame.Vector2()),
+    )
+    monkeypatch.setattr(
+        gameplay_scene,
+        "move_entity",
+        Mock(return_value=pygame.Vector2()),
+    )
+
+    scene = _create_gameplay_scene(
+        walls=(wall,),
+        npcs=(moving_npc,),
+        on_npc_target_reached=on_npc_target_reached,
+    )
+
+    scene.update(2.0)
+
+    assert moving_npc.entity.position == pygame.Vector2(406.0, 300.0)
+    on_npc_target_reached.assert_not_called()
+
+
 def test_update_moves_npc_toward_current_target_entity_position(
     monkeypatch,
 ) -> None:

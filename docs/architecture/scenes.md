@@ -257,12 +257,15 @@ It also provides
 - does not report wall contact when another solid role, such as an NPC, blocks
   movement;
 - moves each active NPC with a configured fixed position or live target entity
-  using its game-owned speed and the frame delta time;
+  using its game-owned speed and the frame delta time; fixed positions may
+  carry an optional arrival identifier;
 - reads a target entity's current position during every update rather than
   storing a position snapshot;
 - reports `NPCTargetReached` when the moving NPC reaches interaction range of
   its live target, then stops that gameplay update because the handler may
   replace the active scene;
+- reports the same factual event when a named fixed target is reached exactly,
+  but not when collision blocks the NPC before that position;
 - treats active walls, the player, enemies, and other NPCs as solid during NPC
   movement while excluding the moving NPC from its own obstacles;
 - relies on axis-separated collision sliding and does not calculate paths or
@@ -377,12 +380,13 @@ The NPC target arrival handler filters both the NPC and target identifiers. A
 Caretaker arrival at the shared player removes its live movement target before
 opening a dedicated warning dialogue. This stops the pursuit and prevents the
 same arrival from reopening dialogue on the next gameplay update. Closing that
-dialogue assigns the remembered wall entity as the next target and resumes
-gameplay. Reaching the wall clears the target and task without opening another
-dialogue. The remembered `WallStain` already preserves the exact contact point
-and surface normal, but the current destination remains the wall entity's
-authored position. Precise return movement, visible cleaning, and its statistic
-are not implemented yet.
+dialogue assigns the position derived from the remembered `WallStain` as a
+named fixed target and resumes gameplay. The position places the Caretaker
+against the exact contact point using its current size. Exact arrival clears
+the target and task without opening another dialogue. If an obstacle occupies
+that destination, collision prevents arrival and the task remains active.
+Side-stepping, pushing, visible cleaning, and its statistic are not implemented
+yet.
 
 When interaction validates a ready Guide objective, `game.main` also applies
 the game-owned 500-point completion rule to the shared session score. Later
@@ -535,8 +539,11 @@ Current tests verify:
   activating its collectibles;
 - a live-target NPC arrival is reported after movement, and the concrete
   Caretaker handler stops pursuit before opening its warning dialogue;
-- closing that dialogue resumes gameplay with the remembered wall as the
-  Caretaker's target, and reaching it clears the task without repeated events;
+- closing that dialogue resumes gameplay with the precise stain approach
+  position as a named fixed target, and reaching it clears the task without
+  repeated events;
+- blocking that fixed destination prevents both exact arrival and task
+  completion;
 - wall contact reports the matching surface point and outward normal on all
   four axis-aligned wall faces;
 - later Guide interactions pass a reminder while the objective remains active,

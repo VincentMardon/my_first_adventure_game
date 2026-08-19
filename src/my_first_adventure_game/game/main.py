@@ -319,6 +319,7 @@ def main() -> None:
                 surface_normal=event.surface_normal,
             )
             caretaker.movement_target = None
+            caretaker.movement_target_id = None
             caretaker.movement_target_entity = game_map.player.entity
 
         def handle_npc_target_reached(
@@ -333,6 +334,8 @@ def main() -> None:
                 dirty_wall_stain is not None
                 and event.target_id == dirty_wall_stain.wall_id
             ):
+                caretaker.movement_target = None
+                caretaker.movement_target_id = None
                 caretaker.movement_target_entity = None
                 dirty_wall_stain = None
                 return
@@ -344,9 +347,11 @@ def main() -> None:
 
             def return_to_dirty_wall() -> None:
                 if dirty_wall_stain is not None:
-                    caretaker.movement_target_entity = clearing_wall_by_id[
-                        dirty_wall_stain.wall_id
-                    ]
+                    caretaker.movement_target = dirty_wall_stain.approach_position(
+                        caretaker.entity.size,
+                    )
+                    caretaker.movement_target_id = dirty_wall_stain.wall_id
+                    caretaker.movement_target_entity = None
 
                 resume_game()
 

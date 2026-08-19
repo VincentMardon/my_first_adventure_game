@@ -229,12 +229,12 @@ continues pursuing the player's current position. That target persists through
 map changes until the Caretaker reaches interaction range. The gameplay scene
 then reports the factual arrival, and the composition root clears the target
 before opening a dedicated warning dialogue. Closing the dialogue makes the
-remembered wall entity its next live target. Reaching that wall stops movement
-and clears the task without another dialogue. Collision movement may slide
-along one free axis, but it does not plan a route around obstacles. Immutable
-`WallStain` state now retains the player's exact surface contact point and its
-outward normal, but the wall entity remains the current return target. Precise
-contact placement, visible cleaning, and its statistic are not implemented yet.
+remembered `WallStain` approach position its next named fixed target. Exact
+arrival stops movement and clears the task without another dialogue. Collision
+movement may slide along one free axis, but it does not plan a route around
+obstacles. If the player occupies the approach position, the Caretaker remains
+blocked and the task stays active. Side-stepping, pushing, visible cleaning,
+and its statistic are not implemented yet.
 
 ### Levels
 

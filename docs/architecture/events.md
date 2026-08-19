@@ -10,8 +10,7 @@ the player, `ObstacleDestroyed`, which identifies a destructible obstacle
 removed by an attack, `EnemyDefeated`, which identifies a defeated enemy,
 `PlayerDefeated`, which identifies the defeated player, `WallTouched`, which
 describes where a wall blocked requested player movement, and
-`NPCTargetReached`, which identifies an NPC and the live entity target it
-reached.
+`NPCTargetReached`, which identifies an NPC and the named target it reached.
 
 The domain does not calculate score, update session state, persist statistics,
 or provide a general event dispatcher.
@@ -62,9 +61,11 @@ or affects statistics.
 
 ### [`NPCTargetReached`](../api/game-events.md#my_first_adventure_game.game.events.NPCTargetReached)
 
-Reports that an NPC reached interaction range of its live movement target. It
-contains the stable identifiers of both entities and does not decide whether
-movement stops, dialogue opens, or another behavior begins.
+Reports that an NPC reached a named movement target. A live entity target is
+reached within interaction range, while a named fixed target requires exact
+positional arrival. The event contains the stable NPC and target identifiers
+and does not decide whether movement stops, dialogue opens, or another behavior
+begins.
 
 ## Ownership
 
@@ -149,9 +150,10 @@ add Caretaker behavior to the event or the engine.
 
 When the Caretaker reaches the shared player entity, the target handler removes
 that live target before opening a game-owned warning dialogue. Closing the
-dialogue makes the remembered wall entity the next live target. Reaching that
-wall clears both the target and the remembered task without opening another
-dialogue. Events involving another NPC or target are ignored.
+dialogue makes the remembered stain's approach position the next named fixed
+target. Exact arrival clears both the target and the remembered task without
+opening another dialogue. Collision before that position leaves the task
+active. Events involving another NPC or target are ignored.
 
 ## Delivery semantics
 
@@ -178,6 +180,9 @@ dialogue. Events involving another NPC or target are ignored.
 - After moving an NPC toward a live entity target, `GameplayScene` reports
   `NPCTargetReached` when their bounds are within the same game-owned reach used
   for manual NPC interaction.
+- After moving an NPC toward a named fixed target, `GameplayScene` reports
+  `NPCTargetReached` only when its position exactly equals that destination.
+  Collision before the destination does not count as arrival.
 - Delivery stops the remainder of that gameplay update because the injected
   handler may synchronously replace the active scene.
 
@@ -232,4 +237,6 @@ Current tests verify:
   faces;
 - movement blocked by an NPC does not deliver wall contact.
 - `NPCTargetReached` stores both stable identifiers and is immutable;
-- reaching a live target after collision-aware movement delivers the event.
+- reaching a live target within interaction range or a named fixed target at
+  its exact position delivers the event;
+- collision before a named fixed destination does not deliver arrival.

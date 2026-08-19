@@ -1,6 +1,8 @@
 import logging
 from unittest.mock import Mock, call
 
+import pygame
+
 from my_first_adventure_game.game import main as game_main
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
@@ -38,11 +40,15 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     clearing_map.walls = (clearing_wall,)
     wall_stain = Mock()
     wall_stain.wall_id = "clearing-wall-top"
+    stain_approach_position = pygame.Vector2(628.0, 96.0)
+    wall_stain.approach_position.return_value = stain_approach_position
     clearing_caretaker = Mock()
     clearing_caretaker.name = "Caretaker"
     clearing_caretaker.entity.entity_id = "npc-clearing-caretaker"
+    clearing_caretaker.entity.size = pygame.Vector2(24.0, 32.0)
     initial_caretaker_target = Mock()
     clearing_caretaker.movement_target = initial_caretaker_target
+    clearing_caretaker.movement_target_id = None
     clearing_caretaker.movement_target_entity = None
     clearing_map.npcs = (clearing_caretaker,)
     first_enemy = Mock()
@@ -385,6 +391,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         surface_normal=(0.0, 1.0),
     )
     assert clearing_caretaker.movement_target is None
+    assert clearing_caretaker.movement_target_id is None
     assert clearing_caretaker.movement_target_entity is game_map.player.entity
 
     handle_npc_target_reached = gameplay_kwargs["on_npc_target_reached"]
@@ -425,8 +432,12 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     return_to_dirty_wall()
 
-    assert clearing_caretaker.movement_target is None
-    assert clearing_caretaker.movement_target_entity is clearing_wall
+    wall_stain.approach_position.assert_called_once_with(
+        clearing_caretaker.entity.size,
+    )
+    assert clearing_caretaker.movement_target is stain_approach_position
+    assert clearing_caretaker.movement_target_id == "clearing-wall-top"
+    assert clearing_caretaker.movement_target_entity is None
 
     handle_npc_target_reached(
         NPCTargetReached(
@@ -435,6 +446,8 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         )
     )
 
+    assert clearing_caretaker.movement_target is None
+    assert clearing_caretaker.movement_target_id is None
     assert clearing_caretaker.movement_target_entity is None
     assert create_dialogue_scene.call_count == 1
     scene_manager.change_scene.assert_called_with(gameplay_scene)
