@@ -172,6 +172,8 @@ The project now provides a minimal playable top-down loop:
    the map.
 36. reaching the player stops the Caretaker's pursuit and automatically opens
    a dedicated warning dialogue without affecting Guide progression.
+37. closing that dialogue sends the Caretaker back toward the remembered wall,
+   where it stops without opening another dialogue.
 
 Implemented foundations include:
 
@@ -227,6 +229,8 @@ Implemented foundations include:
   contact into persistent Caretaker pursuit;
 - factual live-target arrival reporting and a concrete Caretaker rule that
   stops pursuit before opening warning dialogue;
+- session-local dirty-wall memory that retargets the Caretaker after dialogue
+  and clears the task on arrival;
 - a game-owned dialogue panel with a distinct background, border, and balanced
   spacing around the speaker, current line, and continuation instruction;
 - word-boundary wrapping based on the selected font's measured width, with a

@@ -10,6 +10,8 @@ and this project adheres to
 
 ### Added
 
+- Session-local dirty-wall memory that sends the Caretaker back to the
+  remembered wall after its warning dialogue and stops it on arrival.
 - Immutable NPC target-arrival facts containing the stable identifiers of the
   moving NPC and its live entity target.
 - Automatic Caretaker warning dialogue that stops player pursuit when the NPC

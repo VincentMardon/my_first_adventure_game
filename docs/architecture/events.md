@@ -145,8 +145,10 @@ makes the shared player entity its live movement target. This concrete reaction
 does not add Caretaker behavior to the event or the engine.
 
 When the Caretaker reaches the shared player entity, the target handler removes
-that live target before opening a game-owned warning dialogue. Events involving
-another NPC or target are ignored by this concrete rule.
+that live target before opening a game-owned warning dialogue. Closing the
+dialogue makes the remembered wall entity the next live target. Reaching that
+wall clears both the target and the remembered task without opening another
+dialogue. Events involving another NPC or target are ignored.
 
 ## Delivery semantics
 

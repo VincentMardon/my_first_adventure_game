@@ -72,9 +72,10 @@ Guide progression. The Caretaker initially moves diagonally from its authored
 position toward one concrete destination. Touching one of the clearing's walls
 replaces that destination with the shared player entity, causing the Caretaker
 to pursue the player's current position without pathfinding. Reaching the
-player stops that pursuit and opens a warning dialogue. One initially hidden
-collectible extends the Guide's objective into this map. The clearing does not
-yet represent finished game content.
+player stops that pursuit and opens a warning dialogue. Closing it sends the
+Caretaker back toward the remembered wall entity, where it stops and clears the
+task. One initially hidden collectible extends the Guide's objective into this
+map. The clearing does not yet represent finished game content.
 
 ## Ownership
 
@@ -179,6 +180,9 @@ The clearing map additionally guarantees:
 - Clearing wall contact can replace that fixed destination with the shared
   player entity. The target remains configured across map changes until the
   Caretaker reaches interaction range of that player.
+- Closing the warning dialogue targets the remembered wall entity. Reaching
+  interaction range clears that target and task without opening another
+  dialogue.
 - Its objective collectible starts inactive, is registered in the same world,
   and overlaps neither walls, NPCs, the player arrival position, nor exit.
 

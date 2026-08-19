@@ -375,8 +375,12 @@ gameplay scene, preserving the current session without requiring a scene stack.
 The NPC target arrival handler filters both the NPC and target identifiers. A
 Caretaker arrival at the shared player removes its live movement target before
 opening a dedicated warning dialogue. This stops the pursuit and prevents the
-same arrival from reopening dialogue on the next gameplay update. Returning to
-the stained wall and cleaning it are not implemented yet.
+same arrival from reopening dialogue on the next gameplay update. Closing that
+dialogue assigns the remembered wall entity as the next target and resumes
+gameplay. Reaching the wall clears the target and task without opening another
+dialogue. The current destination is the wall entity's authored position, not
+the exact contact point; visible cleaning and its statistic are not implemented
+yet.
 
 When interaction validates a ready Guide objective, `game.main` also applies
 the game-owned 500-point completion rule to the shared session score. Later
@@ -529,6 +533,8 @@ Current tests verify:
   activating its collectibles;
 - a live-target NPC arrival is reported after movement, and the concrete
   Caretaker handler stops pursuit before opening its warning dialogue;
+- closing that dialogue resumes gameplay with the remembered wall as the
+  Caretaker's target, and reaching it clears the task without repeated events;
 - later Guide interactions pass a reminder while the objective remains active,
   then stable completion lines after collection and return;
 - the dialogue scene renders the same injected speaker name for every line.

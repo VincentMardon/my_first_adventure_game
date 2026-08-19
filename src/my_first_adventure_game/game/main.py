@@ -126,7 +126,8 @@ def main() -> None:
         caretaker = next(
             npc for npc in clearing_map.npcs if npc.entity.entity_id == CARETAKER_NPC_ID
         )
-        clearing_wall_ids = frozenset(wall.entity_id for wall in clearing_map.walls)
+        clearing_wall_by_id = {wall.entity_id: wall for wall in clearing_map.walls}
+        dirty_wall_id: str | None = None
         objective_collectibles = (
             *game_map.collectibles,
             *clearing_map.collectibles,
@@ -307,29 +308,47 @@ def main() -> None:
         def handle_wall_touched(
             event: WallTouched,
         ) -> None:
-            if event.wall_id not in clearing_wall_ids:
+            nonlocal dirty_wall_id
+
+            if event.wall_id not in clearing_wall_by_id:
                 return
 
+            dirty_wall_id = event.wall_id
             caretaker.movement_target = None
             caretaker.movement_target_entity = game_map.player.entity
 
         def handle_npc_target_reached(
             event: NPCTargetReached,
         ) -> None:
-            if (
-                event.npc_id != CARETAKER_NPC_ID
-                or event.target_id != game_map.player.entity.entity_id
-            ):
+            nonlocal dirty_wall_id
+
+            if event.npc_id != CARETAKER_NPC_ID:
+                return
+
+            if event.target_id == dirty_wall_id:
+                caretaker.movement_target_entity = None
+                dirty_wall_id = None
+                return
+
+            if event.target_id != game_map.player.entity.entity_id:
                 return
 
             caretaker.movement_target_entity = None
+
+            def return_to_dirty_wall() -> None:
+                if dirty_wall_id is not None:
+                    caretaker.movement_target_entity = clearing_wall_by_id[
+                        dirty_wall_id
+                    ]
+
+                resume_game()
 
             dialogue_scene = DialogueScene(
                 font_cache,
                 input_state,
                 caretaker.name,
                 CARETAKER_WALL_TOUCHED_DIALOGUE_LINES,
-                resume_game,
+                return_to_dirty_wall,
             )
             scene_manager.change_scene(dialogue_scene)
 

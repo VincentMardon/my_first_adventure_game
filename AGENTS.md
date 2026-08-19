@@ -332,6 +332,8 @@ Implemented game foundations:
   the Caretaker toward the live player entity.
 - factual NPC target arrival and a concrete Caretaker rule that stops pursuit
   before opening a warning dialogue.
+- session-local dirty-wall memory and Caretaker return movement that clears the
+  task on wall arrival without pathfinding.
 
 Reserved but not implemented:
 

@@ -228,9 +228,12 @@ clearing wall makes the shared player entity its live target, so the Caretaker
 continues pursuing the player's current position. That target persists through
 map changes until the Caretaker reaches interaction range. The gameplay scene
 then reports the factual arrival, and the composition root clears the target
-before opening a dedicated warning dialogue. Collision movement may slide along
-one free axis, but it does not plan a route around obstacles. Returning to the
-wall and cleaning it are not implemented yet.
+before opening a dedicated warning dialogue. Closing the dialogue makes the
+remembered wall entity its next live target. Reaching that wall stops movement
+and clears the task without another dialogue. Collision movement may slide
+along one free axis, but it does not plan a route around obstacles. The wall's
+entity position is currently targeted rather than the player's exact contact
+point; visible cleaning and its statistic are not implemented yet.
 
 ### Levels
 

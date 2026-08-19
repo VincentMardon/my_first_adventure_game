@@ -386,6 +386,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     assert clearing_caretaker.movement_target_entity is None
     create_dialogue_scene.assert_called_once()
+    scene_manager.change_scene.assert_called_with(dialogue_scene)
 
     caretaker_arrival_dialogue_args = create_dialogue_scene.call_args.args
 
@@ -395,8 +396,26 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         clearing_caretaker.name,
         game_main.CARETAKER_WALL_TOUCHED_DIALOGUE_LINES,
     )
-    assert callable(caretaker_arrival_dialogue_args[4])
-    scene_manager.change_scene.assert_called_with(dialogue_scene)
+
+    return_to_dirty_wall = caretaker_arrival_dialogue_args[4]
+
+    assert callable(return_to_dirty_wall)
+
+    return_to_dirty_wall()
+
+    assert clearing_caretaker.movement_target is None
+    assert clearing_caretaker.movement_target_entity is clearing_wall
+
+    handle_npc_target_reached(
+        NPCTargetReached(
+            npc_id="npc-clearing-caretaker",
+            target_id="clearing-wall-top",
+        )
+    )
+
+    assert clearing_caretaker.movement_target_entity is None
+    assert create_dialogue_scene.call_count == 1
+    scene_manager.change_scene.assert_called_with(gameplay_scene)
 
     create_dialogue_scene.reset_mock()
 
@@ -763,6 +782,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert scene_manager.change_scene.call_args_list == [
         call(gameplay_scene),
         call(dialogue_scene),  # Caretaker arrival
+        call(gameplay_scene),  # Caretaker returns to dirty
         call(pause_scene),
         call(gameplay_scene),
         call(dialogue_scene),  # Caretaker
