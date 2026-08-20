@@ -10,6 +10,8 @@ and this project adheres to
 
 ### Added
 
+- A stateless Caretaker side-step calculation that selects the closest position
+  beside the current player along horizontal or vertical stained walls.
 - Optional identifiers and exact arrival reporting for fixed NPC movement
   targets, without reporting destinations blocked by collision.
 - Precise Caretaker return movement to the remembered wall-stain approach

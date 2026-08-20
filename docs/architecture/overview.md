@@ -234,7 +234,9 @@ arrival stops movement and clears the task without another dialogue. Collision
 movement may slide along one free axis, but it does not plan a route around
 obstacles. If the player occupies the approach position, the Caretaker remains
 blocked and the task stays active. Side-stepping, pushing, visible cleaning,
-and its statistic are not implemented yet.
+and its statistic are not implemented yet. A pure game-owned calculation can
+already derive the closest position beside the player's current bounds along
+the stained wall, but no gameplay update invokes it yet.
 
 ### Levels
 
