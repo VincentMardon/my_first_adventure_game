@@ -174,6 +174,10 @@ The project now provides a minimal playable top-down loop:
    a dedicated warning dialogue without affecting Guide progression.
 37. closing that dialogue sends the Caretaker back toward the remembered wall,
    where it stops without opening another dialogue.
+38. if the player blocks the stained position, the Caretaker keeps one side,
+   moves around the player only when necessary, and aligns against the wall.
+39. the Caretaker then pushes the player continuously along the wall, moves
+   with the applied displacement, and returns to the stain when access is free.
 
 Implemented foundations include:
 
@@ -233,9 +237,9 @@ Implemented foundations include:
   stops pursuit before opening warning dialogue;
 - immutable session-local wall-stain geometry that retargets the Caretaker
   to the exact approach position after dialogue and clears the task on arrival;
-- a game-owned Caretaker controller that continually selects either the exact
-  stain approach position or the closest position beside the current player
-  along the wall;
+- a game-owned Caretaker controller that retains a chosen player side, uses an
+  outer corner only when necessary, aligns against the wall, and continuously
+  pushes the player with collision-limited coupled movement;
 - a game-owned dialogue panel with a distinct background, border, and balanced
   spacing around the speaker, current line, and continuation instruction;
 - word-boundary wrapping based on the selected font's measured width, with a

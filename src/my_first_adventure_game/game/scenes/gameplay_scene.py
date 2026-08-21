@@ -154,8 +154,9 @@ class GameplayScene(Scene):
             down=GameAction.MOVE_DOWN,
         )
         movement = axis * PLAYER_SPEED * delta_time
+        wall_solid_bounds = tuple(wall.bounds for wall in self._walls if wall.active)
         solid_bounds = (
-            *(wall.bounds for wall in self._walls if wall.active),
+            *wall_solid_bounds,
             *(enemy.entity.bounds for enemy in self._enemies if enemy.entity.active),
             *(npc.entity.bounds for npc in self._npcs if npc.entity.active),
         )
@@ -176,7 +177,10 @@ class GameplayScene(Scene):
             self._on_wall_touched(wall_contact)
 
         if self._caretaker_behavior is not None:
-            self._caretaker_behavior.update_target()
+            self._caretaker_behavior.update(
+                delta_time,
+                wall_solid_bounds,
+            )
 
         for npc in self._npcs:
             target_entity = npc.movement_target_entity

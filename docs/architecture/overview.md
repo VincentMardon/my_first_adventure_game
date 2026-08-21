@@ -233,10 +233,12 @@ remembered `WallStain` approach position its next named fixed target. Exact
 arrival stops movement and clears the task without another dialogue. Collision
 movement may slide along one free axis, but it does not plan a route around
 obstacles. A concrete game-owned controller recalculates the destination before
-each NPC movement: if the player occupies the approach position, the Caretaker
-moves toward the closest side of the player's current bounds along the wall; if
-the player moves away, it immediately targets the stain again. Pushing, visible
-cleaning, and its statistic are not implemented yet.
+each NPC movement. If the player occupies the approach position, the Caretaker
+retains the nearest side, uses an outer corner only when it must move around the
+player, then aligns against the wall. It pushes the player continuously along
+the wall while moving by the same collision-limited displacement. Once the
+approach position is clear, it targets the stain again. Visible cleaning and
+its statistic are not implemented yet.
 
 ### Levels
 

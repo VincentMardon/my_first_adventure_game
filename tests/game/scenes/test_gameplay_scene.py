@@ -5,6 +5,7 @@ import pygame
 import pytest
 
 from my_first_adventure_game.engine.assets import FontCache
+from my_first_adventure_game.engine.collisions import AABB
 from my_first_adventure_game.engine.graphics import Animation
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.world import Entity, World
@@ -620,9 +621,14 @@ def test_update_reports_when_npc_reaches_target_entity(
     )
 
 
-def test_update_recalculates_caretaker_target_before_npc_movement(
+def test_update_updates_caretaker_before_npc_movement(
     monkeypatch,
 ) -> None:
+    wall = Entity(
+        entity_id="wall",
+        position=pygame.Vector2(0.0, 0.0),
+        size=pygame.Vector2(32.0, 32.0),
+    )
     moving_npc = NPC(
         name="Caretaker",
         entity=Entity(
@@ -638,10 +644,13 @@ def test_update_recalculates_caretaker_target_before_npc_movement(
     caretaker_behavior = Mock(spec=CaretakerBehavior)
     move_npc_towards = Mock()
 
-    def update_target() -> None:
+    def update(
+        delta_time: float,
+        solid_bounds: tuple[AABB, ...],
+    ) -> None:
         moving_npc.movement_target = recalculated_target
 
-    caretaker_behavior.update_target.side_effect = update_target
+    caretaker_behavior.update.side_effect = update
 
     monkeypatch.setattr(
         gameplay_scene,
@@ -658,13 +667,17 @@ def test_update_recalculates_caretaker_target_before_npc_movement(
     )
 
     scene = _create_gameplay_scene(
+        walls=(wall,),
         npcs=(moving_npc,),
         caretaker_behavior=caretaker_behavior,
     )
 
     scene.update(0.5)
 
-    caretaker_behavior.update_target.assert_called_once_with()
+    caretaker_behavior.update.assert_called_once_with(
+        0.5,
+        (wall.bounds,),
+    )
     assert move_npc_towards.call_args.args[1] is recalculated_target
 
 

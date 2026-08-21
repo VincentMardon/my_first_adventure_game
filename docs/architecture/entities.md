@@ -6,10 +6,10 @@ The game entities domain defines concrete objects whose gameplay state extends
 the reusable spatial state provided by the engine.
 
 It currently provides `Enemy`, `NPC`, `Player`, `WallStain`, target-directed
-NPC movement, and a concrete Caretaker side-step calculation. Concrete spatial
-actors compose an engine `Entity` with the additional state required by their
-game role. `WallStain` instead records game-owned surface state without
-entering the engine world.
+NPC movement, and concrete Caretaker approach and push calculations. Concrete
+spatial actors compose an engine `Entity` with the additional state required
+by their game role. `WallStain` instead records game-owned surface state
+without entering the engine world.
 
 ## Why this domain exists
 
@@ -85,23 +85,47 @@ surfaces produce upper and lower candidates. The result is derived solely from
 the current stain, Caretaker bounds, and player bounds, so calling it again
 after player movement produces a fresh destination.
 
-This is a concrete game rule rather than general pathfinding. It does not test
-whether either candidate is reachable or free, handle corners, move an entity,
-or retain a preferred side.
+An optional [`CaretakerSide`](../api/game-entities.md#my_first_adventure_game.game.entities.CaretakerSide)
+keeps a previously selected side stable while live geometry changes. Without
+one, the nearest candidate is selected.
+
+### [`caretaker_rounding_target`](../api/game-entities.md#my_first_adventure_game.game.entities.caretaker_rounding_target)
+
+Derives the outer player corner for the chosen side and stained-wall normal.
+It gives the Caretaker enough clearance to move around a player who blocks a
+direct side-step.
+
+### [`caretaker_push_movement`](../api/game-entities.md#my_first_adventure_game.game.entities.caretaker_push_movement)
+
+Returns one player-sized movement parallel to the stained wall and away from
+the Caretaker. The behavior controller uses its direction, then scales it by
+the Caretaker speed and frame duration before collision resolution.
+
+These calculations are concrete game rules rather than general pathfinding.
+They do not inspect route obstacles, plan around room corners, or move entities
+by themselves.
 
 ### [`CaretakerBehavior`](../api/game-entities.md#my_first_adventure_game.game.entities.CaretakerBehavior)
 
 Coordinates the current Caretaker wall task from the injected Caretaker and
-session player. `return_to_stain()` starts the return phase, `update_target()`
-recalculates movement from current geometry, and `complete_task()` returns the
-controller to its inert state while clearing every NPC target form.
+session player. `return_to_stain()` starts the return phase, `update()` advances
+the current phase from live geometry and elapsed time, and `complete_task()`
+returns the controller to its inert state while clearing every NPC target form.
 
 When the stain approach position is free, the controller selects it as a named
-fixed target. When the player occupies that position, it selects the closest
-side-step target instead. A later update immediately returns to the stain if
-the player moves away. The implemented [`CaretakerPhase`](../api/game-entities.md#my_first_adventure_game.game.entities.CaretakerPhase)
-values are `IDLE`, `RETURNING_TO_STAIN`, and `SIDESTEPPING`; pushing and cleaning
-states do not exist yet.
+fixed target. When the player occupies that position, it retains the initially
+chosen side so changing distances cannot make the route oscillate. A Caretaker
+already beyond that side moves directly into alignment. Otherwise it first
+targets the matching outer corner, then aligns beside the player against the
+wall.
+
+After alignment, `start_pushing()` clears autonomous movement targets and
+enters the push phase. Each update moves the player along the wall using active
+wall collisions and applies the same resolved displacement to the Caretaker.
+The controller returns to the stain target as soon as its approach bounds are
+clear. The implemented [`CaretakerPhase`](../api/game-entities.md#my_first_adventure_game.game.entities.CaretakerPhase)
+values are `IDLE`, `RETURNING_TO_STAIN`, `ROUNDING_PLAYER`, `SIDESTEPPING`, and
+`PUSHING_PLAYER`.
 
 ## Relationships
 
@@ -147,7 +171,11 @@ classDiagram
     class CaretakerBehavior {
         +phase
         +return_to_stain(stain)
+        +update(delta_time, solid_bounds)
         +update_target()
+        +align_with_player()
+        +start_pushing()
+        +push_player(delta_time, solid_bounds) Vector2
         +complete_task()
     }
 
@@ -207,8 +235,12 @@ invulnerability period. The scene displays current health and emits
 - A wall stain is immutable and remains outside the engine world.
 - Its approach position depends only on the recorded contact geometry and the
   supplied entity size.
-- The Caretaker side-step target lies beside the player along the stained wall.
-- Recalculation uses current bounds and retains no previous destination.
+- Caretaker corner, side-step, and push calculations follow the stained wall's
+  orientation.
+- One side is retained during a blocked approach and cleared when the approach
+  becomes free or the task completes.
+- An already lateral Caretaker does not take an unnecessary outer-corner route.
+- A push moves the Caretaker by exactly the collision-resolved player movement.
 - An idle Caretaker behavior does not change movement targets.
 - Completing a wall task clears the stain, phase, and every movement target
   form so later updates cannot recreate the completed task.
@@ -255,8 +287,11 @@ Current tests verify:
   solid bounds;
 - immutable wall-stain geometry and approach positions for all four
   axis-aligned surface normals;
-- nearest-side Caretaker destinations for horizontal and vertical surfaces;
-- side-step recalculation after player movement;
-- controller transitions between returning and side-stepping as the player
-  frees or occupies the stain approach position;
+- nearest-side, outer-corner, side-step, and push calculations for horizontal
+  and vertical surfaces;
+- stable side selection while player and Caretaker geometry changes;
+- direct lateral alignment when an outer-corner detour is unnecessary;
+- controller transitions through returning, rounding, side-stepping, and
+  continuous pushing as the player occupies or frees the stain approach;
+- wall-limited coupled movement of the player and Caretaker during a push;
 - completed tasks remain idle across later target updates.

@@ -9,6 +9,8 @@ from my_first_adventure_game.engine.graphics import Animation
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.scenes import SceneManager
 from my_first_adventure_game.game.entities import (
+    CARETAKER_ROUNDING_TARGET_ID,
+    CARETAKER_SIDESTEP_TARGET_ID,
     NPC,
     CaretakerBehavior,
     WallStain,
@@ -344,6 +346,14 @@ def main() -> None:
             ):
                 caretaker_behavior.complete_task()
                 dirty_wall_stain = None
+                return
+
+            if event.target_id == CARETAKER_ROUNDING_TARGET_ID:
+                caretaker_behavior.align_with_player()
+                return
+
+            if event.target_id == CARETAKER_SIDESTEP_TARGET_ID:
+                caretaker_behavior.start_pushing()
                 return
 
             if event.target_id != game_map.player.entity.entity_id:

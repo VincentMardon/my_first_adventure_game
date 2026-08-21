@@ -38,6 +38,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     clearing_map.collectibles = (clearing_collectible,)
     clearing_wall = Mock()
     clearing_wall.entity_id = "clearing-wall-top"
+    clearing_wall.active = True
     clearing_map.walls = (clearing_wall,)
     wall_stain = Mock()
     wall_stain.wall_id = "clearing-wall-top"
@@ -447,6 +448,27 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     return_to_dirty_wall()
 
     caretaker_behavior.return_to_stain.assert_called_once_with(wall_stain)
+
+    handle_npc_target_reached(
+        NPCTargetReached(
+            npc_id="npc-clearing-caretaker",
+            target_id=game_main.CARETAKER_ROUNDING_TARGET_ID,
+        )
+    )
+
+    caretaker_behavior.align_with_player.assert_called_once_with()
+    caretaker_behavior.start_pushing.assert_not_called()
+
+    handle_npc_target_reached(
+        NPCTargetReached(
+            npc_id="npc-clearing-caretaker",
+            target_id=game_main.CARETAKER_SIDESTEP_TARGET_ID,
+        )
+    )
+
+    caretaker_behavior.start_pushing.assert_called_once_with()
+    caretaker_behavior.push_player.assert_not_called()
+    assert create_dialogue_scene.call_count == 1
 
     handle_npc_target_reached(
         NPCTargetReached(

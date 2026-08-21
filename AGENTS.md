@@ -334,6 +334,9 @@ Implemented game foundations:
   before opening a warning dialogue.
 - session-local dirty-wall memory and Caretaker return movement that clears the
   task on wall arrival without pathfinding.
+- a game-owned Caretaker controller that retains one side, uses an outer player
+  corner only when necessary, aligns along the wall, and pushes the player with
+  elapsed-time collision-limited coupled movement.
 
 Reserved but not implemented:
 
