@@ -4,6 +4,7 @@ from unittest.mock import Mock, call
 import pygame
 
 from my_first_adventure_game.game import main as game_main
+from my_first_adventure_game.game.entities import CaretakerBehavior
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
@@ -51,6 +52,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     clearing_caretaker.movement_target_id = None
     clearing_caretaker.movement_target_entity = None
     clearing_map.npcs = (clearing_caretaker,)
+    caretaker_behavior = Mock(spec=CaretakerBehavior)
     first_enemy = Mock()
     first_enemy.entity.active = False
     second_enemy = Mock()
@@ -99,6 +101,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     create_demo_map = Mock(return_value=game_map)
     create_clearing_map = Mock(return_value=clearing_map)
     create_wall_stain = Mock(return_value=wall_stain)
+    create_caretaker_behavior = Mock(return_value=caretaker_behavior)
     create_session_score = Mock(return_value=session_score)
     create_session_statistics = Mock(return_value=session_statistics)
     score_item_collection = Mock(return_value=100)
@@ -145,6 +148,11 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
         create_clearing_map,
     )
     monkeypatch.setattr(game_main, "WallStain", create_wall_stain)
+    monkeypatch.setattr(
+        game_main,
+        "CaretakerBehavior",
+        create_caretaker_behavior,
+    )
     monkeypatch.setattr(game_main, "SessionScore", create_session_score)
     monkeypatch.setattr(
         game_main,
@@ -231,6 +239,11 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     persist_profile.assert_not_called()
 
     start_game()
+
+    create_caretaker_behavior.assert_called_once_with(
+        clearing_caretaker,
+        game_map.player,
+    )
 
     player_profile.record_game_started.assert_called_once_with()
     persist_profile.assert_called_once_with(
@@ -346,6 +359,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     assert callable(gameplay_kwargs["on_item_collected"])
     assert callable(gameplay_kwargs["on_obstacle_destroyed"])
     assert callable(gameplay_kwargs["on_wall_touched"])
+    assert gameplay_kwargs["caretaker_behavior"] is caretaker_behavior
     assert gameplay_kwargs["player_idle_animation"] is player_idle_animation
     assert gameplay_kwargs["player_movement_animation"] is player_movement_animation
     assert gameplay_kwargs["player_collection_animation"] is player_collection_animation
@@ -432,12 +446,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     return_to_dirty_wall()
 
-    wall_stain.approach_position.assert_called_once_with(
-        clearing_caretaker.entity.size,
-    )
-    assert clearing_caretaker.movement_target is stain_approach_position
-    assert clearing_caretaker.movement_target_id == "clearing-wall-top"
-    assert clearing_caretaker.movement_target_entity is None
+    caretaker_behavior.return_to_stain.assert_called_once_with(wall_stain)
 
     handle_npc_target_reached(
         NPCTargetReached(
@@ -445,6 +454,8 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
             target_id="clearing-wall-top",
         )
     )
+
+    caretaker_behavior.complete_task.assert_called_once_with()
 
     assert clearing_caretaker.movement_target is None
     assert clearing_caretaker.movement_target_id is None

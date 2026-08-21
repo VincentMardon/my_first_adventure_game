@@ -87,8 +87,21 @@ after player movement produces a fresh destination.
 
 This is a concrete game rule rather than general pathfinding. It does not test
 whether either candidate is reachable or free, handle corners, move an entity,
-or retain a preferred side. The calculation is not yet connected to the live
-Caretaker behavior.
+or retain a preferred side.
+
+### [`CaretakerBehavior`](../api/game-entities.md#my_first_adventure_game.game.entities.CaretakerBehavior)
+
+Coordinates the current Caretaker wall task from the injected Caretaker and
+session player. `return_to_stain()` starts the return phase, `update_target()`
+recalculates movement from current geometry, and `complete_task()` returns the
+controller to its inert state while clearing every NPC target form.
+
+When the stain approach position is free, the controller selects it as a named
+fixed target. When the player occupies that position, it selects the closest
+side-step target instead. A later update immediately returns to the stain if
+the player moves away. The implemented [`CaretakerPhase`](../api/game-entities.md#my_first_adventure_game.game.entities.CaretakerPhase)
+values are `IDLE`, `RETURNING_TO_STAIN`, and `SIDESTEPPING`; pushing and cleaning
+states do not exist yet.
 
 ## Relationships
 
@@ -131,6 +144,13 @@ classDiagram
         +approach_position(entity_size) Vector2
     }
 
+    class CaretakerBehavior {
+        +phase
+        +return_to_stain(stain)
+        +update_target()
+        +complete_task()
+    }
+
     Enemy *-- Entity : spatial state
     Player *-- Entity : spatial state
     NPC *-- Entity : spatial state
@@ -144,6 +164,9 @@ classDiagram
     CaretakerRule --> WallStain : surface orientation
     CaretakerRule --> Player : current bounds
     CaretakerRule --> NPC : current bounds
+    CaretakerBehavior --> WallStain : current task
+    CaretakerBehavior --> Player : live geometry
+    CaretakerBehavior --> NPC : movement targets
 ```
 
 `create_demo_map()` creates the current enemy with two health points and
@@ -186,6 +209,9 @@ invulnerability period. The scene displays current health and emits
   supplied entity size.
 - The Caretaker side-step target lies beside the player along the stained wall.
 - Recalculation uses current bounds and retains no previous destination.
+- An idle Caretaker behavior does not change movement targets.
+- Completing a wall task clears the stain, phase, and every movement target
+  form so later updates cannot recreate the completed task.
 
 ## Extension points
 
@@ -230,4 +256,7 @@ Current tests verify:
 - immutable wall-stain geometry and approach positions for all four
   axis-aligned surface normals;
 - nearest-side Caretaker destinations for horizontal and vertical surfaces;
-- side-step recalculation after player movement.
+- side-step recalculation after player movement;
+- controller transitions between returning and side-stepping as the player
+  frees or occupies the stain approach position;
+- completed tasks remain idle across later target updates.

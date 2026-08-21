@@ -8,7 +8,11 @@ from my_first_adventure_game.engine.assets import FontCache
 from my_first_adventure_game.engine.graphics import Animation
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.scenes import SceneManager
-from my_first_adventure_game.game.entities import NPC, WallStain
+from my_first_adventure_game.game.entities import (
+    NPC,
+    CaretakerBehavior,
+    WallStain,
+)
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
@@ -125,6 +129,10 @@ def main() -> None:
         clearing_map = create_clearing_map(game_map.player)
         caretaker = next(
             npc for npc in clearing_map.npcs if npc.entity.entity_id == CARETAKER_NPC_ID
+        )
+        caretaker_behavior = CaretakerBehavior(
+            caretaker,
+            game_map.player,
         )
         clearing_wall_by_id = {wall.entity_id: wall for wall in clearing_map.walls}
         dirty_wall_stain: WallStain | None = None
@@ -334,9 +342,7 @@ def main() -> None:
                 dirty_wall_stain is not None
                 and event.target_id == dirty_wall_stain.wall_id
             ):
-                caretaker.movement_target = None
-                caretaker.movement_target_id = None
-                caretaker.movement_target_entity = None
+                caretaker_behavior.complete_task()
                 dirty_wall_stain = None
                 return
 
@@ -347,11 +353,7 @@ def main() -> None:
 
             def return_to_dirty_wall() -> None:
                 if dirty_wall_stain is not None:
-                    caretaker.movement_target = dirty_wall_stain.approach_position(
-                        caretaker.entity.size,
-                    )
-                    caretaker.movement_target_id = dirty_wall_stain.wall_id
-                    caretaker.movement_target_entity = None
+                    caretaker_behavior.return_to_stain(dirty_wall_stain)
 
                 resume_game()
 
@@ -390,6 +392,7 @@ def main() -> None:
             on_item_collected=handle_item_collected,
             on_obstacle_destroyed=handle_obstacle_destroyed,
             on_wall_touched=handle_wall_touched,
+            caretaker_behavior=caretaker_behavior,
             player_idle_animation=player_idle_animation,
             player_movement_animation=player_movement_animation,
             player_collection_animation=player_collection_animation,

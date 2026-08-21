@@ -266,6 +266,9 @@ It also provides
   replace the active scene;
 - reports the same factual event when a named fixed target is reached exactly,
   but not when collision blocks the NPC before that position;
+- asks its optional game-owned `CaretakerBehavior` collaborator to recalculate
+  the current target after player movement and wall-contact handling but before
+  autonomous NPC movement;
 - treats active walls, the player, enemies, and other NPCs as solid during NPC
   movement while excluding the moving NPC from its own obstacles;
 - relies on axis-separated collision sliding and does not calculate paths or
@@ -384,9 +387,10 @@ dialogue assigns the position derived from the remembered `WallStain` as a
 named fixed target and resumes gameplay. The position places the Caretaker
 against the exact contact point using its current size. Exact arrival clears
 the target and task without opening another dialogue. If an obstacle occupies
-that destination, collision prevents arrival and the task remains active.
-Side-stepping, pushing, visible cleaning, and its statistic are not implemented
-yet.
+that destination, the controller recalculates the nearest position beside the
+current player along the wall. Player movement is reflected on every gameplay
+update, and moving away from the stain returns the controller to direct return
+movement. Pushing, visible cleaning, and its statistic are not implemented yet.
 
 When interaction validates a ready Guide objective, `game.main` also applies
 the game-owned 500-point completion rule to the shared session score. Later
@@ -544,6 +548,10 @@ Current tests verify:
   repeated events;
 - blocking that fixed destination prevents both exact arrival and task
   completion;
+- occupying the stain approach position makes the Caretaker side-step toward
+  the closest side of the current player, with a fresh target each update;
+- moving away during side-stepping immediately restores the stain approach
+  target;
 - wall contact reports the matching surface point and outward normal on all
   four axis-aligned wall faces;
 - later Guide interactions pass a reminder while the objective remains active,

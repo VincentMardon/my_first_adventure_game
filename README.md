@@ -233,8 +233,9 @@ Implemented foundations include:
   stops pursuit before opening warning dialogue;
 - immutable session-local wall-stain geometry that retargets the Caretaker
   to the exact approach position after dialogue and clears the task on arrival;
-- a pure game-owned calculation for the closest Caretaker position beside the
-  current player along a stained wall, not yet connected to live behavior;
+- a game-owned Caretaker controller that continually selects either the exact
+  stain approach position or the closest position beside the current player
+  along the wall;
 - a game-owned dialogue panel with a distinct background, border, and balanced
   spacing around the speaker, current line, and continuation instruction;
 - word-boundary wrapping based on the selected font's measured width, with a

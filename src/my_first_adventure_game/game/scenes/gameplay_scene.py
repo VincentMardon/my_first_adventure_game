@@ -8,7 +8,11 @@ from my_first_adventure_game.engine.graphics import Animation, draw_text
 from my_first_adventure_game.engine.input import InputState, movement_axis
 from my_first_adventure_game.engine.scenes import Scene
 from my_first_adventure_game.engine.world import Entity, move_entity
-from my_first_adventure_game.game.entities import NPC, move_npc_towards
+from my_first_adventure_game.game.entities import (
+    NPC,
+    CaretakerBehavior,
+    move_npc_towards,
+)
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
@@ -69,6 +73,7 @@ class GameplayScene(Scene):
         player_attack_animation: Animation,
         guide_objective: GuideObjective,
         on_map_exit_reached: Callable[[MapExit], None],
+        caretaker_behavior: CaretakerBehavior | None = None,
     ) -> None:
         self._input_state = input_state
         self._font_cache = font_cache
@@ -91,6 +96,7 @@ class GameplayScene(Scene):
         self._player_is_attacking = False
         self._guide_objective = guide_objective
         self._on_map_exit_reached = on_map_exit_reached
+        self._caretaker_behavior = caretaker_behavior
         self.change_map(game_map)
 
     def handle_event(self, event: pygame.event.Event) -> None:
@@ -168,6 +174,9 @@ class GameplayScene(Scene):
 
         if wall_contact is not None:
             self._on_wall_touched(wall_contact)
+
+        if self._caretaker_behavior is not None:
+            self._caretaker_behavior.update_target()
 
         for npc in self._npcs:
             target_entity = npc.movement_target_entity

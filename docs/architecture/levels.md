@@ -75,9 +75,12 @@ to pursue the player's current position without pathfinding. Reaching the
 player stops that pursuit and opens a warning dialogue. Closing it sends the
 Caretaker toward a named fixed position derived from the remembered
 `WallStain`, where it stops and clears the task after exact arrival. An obstacle
-occupying that position prevents completion. One initially hidden collectible
-extends the Guide's objective into this map. The clearing does not yet
-represent finished game content.
+occupying that position prevents completion. If the player is that obstacle, a
+concrete controller continually retargets the Caretaker toward the closest side
+of the player's current bounds along the wall, then returns to the stain when
+the player frees it. One initially hidden collectible extends the Guide's
+objective into this map. The clearing does not yet represent finished game
+content.
 
 ## Ownership
 

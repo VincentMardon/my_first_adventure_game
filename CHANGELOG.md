@@ -10,6 +10,9 @@ and this project adheres to
 
 ### Added
 
+- A game-owned Caretaker wall-task controller with inert, returning, and
+  side-stepping phases, recalculated from current player geometry before NPC
+  movement.
 - A stateless Caretaker side-step calculation that selects the closest position
   beside the current player along horizontal or vertical stained walls.
 - Optional identifiers and exact arrival reporting for fixed NPC movement

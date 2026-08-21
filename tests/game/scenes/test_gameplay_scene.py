@@ -8,7 +8,12 @@ from my_first_adventure_game.engine.assets import FontCache
 from my_first_adventure_game.engine.graphics import Animation
 from my_first_adventure_game.engine.input import InputState
 from my_first_adventure_game.engine.world import Entity, World
-from my_first_adventure_game.game.entities import NPC, Enemy, Player
+from my_first_adventure_game.game.entities import (
+    NPC,
+    CaretakerBehavior,
+    Enemy,
+    Player,
+)
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
     ItemCollected,
@@ -71,6 +76,7 @@ def _create_gameplay_scene(
     destructible_obstacles: tuple[Entity, ...] = (),
     on_obstacle_destroyed: Callable[[ObstacleDestroyed], None] | None = None,
     on_wall_touched: Callable[[WallTouched], None] | None = None,
+    caretaker_behavior: CaretakerBehavior | None = None,
     player_idle_animation: Animation | None = None,
     player_movement_animation: Animation | None = None,
     player_collection_animation: Animation | None = None,
@@ -121,6 +127,7 @@ def _create_gameplay_scene(
         on_item_collected=on_item_collected or Mock(),
         on_obstacle_destroyed=on_obstacle_destroyed or Mock(),
         on_wall_touched=on_wall_touched or Mock(),
+        caretaker_behavior=caretaker_behavior,
         player_idle_animation=player_idle_animation or Mock(spec=Animation),
         player_movement_animation=(player_movement_animation or Mock(spec=Animation)),
         player_collection_animation=(
@@ -611,6 +618,54 @@ def test_update_reports_when_npc_reaches_target_entity(
             target_id="player",
         )
     )
+
+
+def test_update_recalculates_caretaker_target_before_npc_movement(
+    monkeypatch,
+) -> None:
+    moving_npc = NPC(
+        name="Caretaker",
+        entity=Entity(
+            entity_id="npc-clearing-caretaker",
+            position=pygame.Vector2(400.0, 300.0),
+            size=pygame.Vector2(24.0, 32.0),
+        ),
+        dialogue_lines=("I have work to do.",),
+        movement_target=pygame.Vector2(500.0, 300.0),
+        movement_speed=80.0,
+    )
+    recalculated_target = pygame.Vector2(440.0, 300.0)
+    caretaker_behavior = Mock(spec=CaretakerBehavior)
+    move_npc_towards = Mock()
+
+    def update_target() -> None:
+        moving_npc.movement_target = recalculated_target
+
+    caretaker_behavior.update_target.side_effect = update_target
+
+    monkeypatch.setattr(
+        gameplay_scene,
+        "movement_axis",
+        Mock(return_value=pygame.Vector2()),
+    )
+    monkeypatch.setattr(
+        gameplay_scene, "move_entity", Mock(return_value=pygame.Vector2())
+    )
+    monkeypatch.setattr(
+        gameplay_scene,
+        "move_npc_towards",
+        move_npc_towards,
+    )
+
+    scene = _create_gameplay_scene(
+        npcs=(moving_npc,),
+        caretaker_behavior=caretaker_behavior,
+    )
+
+    scene.update(0.5)
+
+    caretaker_behavior.update_target.assert_called_once_with()
+    assert move_npc_towards.call_args.args[1] is recalculated_target
 
 
 def test_draw_renders_spatial_content_and_player(
