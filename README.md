@@ -182,6 +182,8 @@ The project now provides a minimal playable top-down loop:
    its owning wall, and disappears after the Caretaker reaches it.
 41. completed cleanings appear in session summaries and are aggregated into the
    persistent profile only when the session ends in victory or defeat.
+42. exact Caretaker arrival visibly shrinks the wall stain over half a second
+   before the marker disappears.
 
 Implemented foundations include:
 
@@ -246,6 +248,8 @@ Implemented foundations include:
   pushes the player with collision-limited coupled movement;
 - a map-aware wall-stain marker and factual cleaned-stain statistics for the
   current session and completed-session profile totals;
+- an elapsed-time cleaning effect that shrinks the marker without introducing
+  a generic visual-effects system;
 - a game-owned dialogue panel with a distinct background, border, and balanced
   spacing around the speaker, current line, and continuation instruction;
 - word-boundary wrapping based on the selected font's measured width, with a

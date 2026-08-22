@@ -339,6 +339,8 @@ Implemented game foundations:
   elapsed-time collision-limited coupled movement.
 - a map-aware wall-stain marker and session-local cleaned-stain counter whose
   completed-session total is persisted through profile schema version 2.
+- a half-second game-owned wall-stain shrinking effect advanced by gameplay
+  delta time after exact Caretaker task completion.
 
 Reserved but not implemented:
 

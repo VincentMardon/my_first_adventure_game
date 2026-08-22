@@ -402,6 +402,7 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
     )
 
     gameplay_scene.set_wall_stain.assert_called_once_with(wall_stain)
+    gameplay_scene.start_wall_stain_cleaning.assert_not_called()
     create_wall_stain.assert_called_once_with(
         wall_id="clearing-wall-top",
         contact_position=(640.0, 96.0),
@@ -481,10 +482,8 @@ def test_main_builds_and_runs_application(monkeypatch) -> None:
 
     caretaker_behavior.complete_task.assert_called_once_with()
     session_statistics.record_wall_stain_cleaned.assert_called_once_with()
-    assert gameplay_scene.set_wall_stain.call_args_list == [
-        call(wall_stain),
-        call(None),
-    ]
+    gameplay_scene.start_wall_stain_cleaning.assert_called_once_with()
+    gameplay_scene.set_wall_stain.assert_called_once_with(wall_stain)
 
     assert clearing_caretaker.movement_target is None
     assert clearing_caretaker.movement_target_id is None

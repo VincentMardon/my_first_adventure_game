@@ -347,7 +347,7 @@ def main() -> None:
             ):
                 caretaker_behavior.complete_task()
                 session_statistics.record_wall_stain_cleaned()
-                gameplay_scene.set_wall_stain(None)
+                gameplay_scene.start_wall_stain_cleaning()
                 dirty_wall_stain = None
                 return
 

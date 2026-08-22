@@ -240,8 +240,9 @@ player, then aligns against the wall. It pushes the player continuously along
 the wall while moving by the same collision-limited displacement. Once the
 approach position is clear, it targets the stain again. The gameplay scene
 draws a game-owned marker at the exact contact point only while its owning wall
-belongs to the active map. Exact task completion removes that marker and
-records one cleaned stain. Cleaning animation is not implemented yet.
+belongs to the active map. Exact task completion records one cleaned stain and
+starts a half-second elapsed-time effect that shrinks the marker until it
+disappears.
 
 ### Levels
 

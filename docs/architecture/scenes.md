@@ -308,6 +308,8 @@ It also provides
   session score, player health, and Guide objective status;
 - draws the current game-owned wall-stain marker only when its active owning
   wall belongs to the current map;
+- advances a half-second cleaning timer during active gameplay and scales the
+  marker radius from its remaining duration before removing it at zero;
 - rounds floating-point geometry only at rendering time.
 
 `DefeatScene`:
@@ -399,10 +401,11 @@ pathfinding. Reaching that corner selects the named side-step target. Reaching
 the side starts a continuous push along the wall: the gameplay scene supplies
 active wall bounds each frame, and the Caretaker follows the player's actual
 collision-limited displacement. Freeing the stain approach position restores
-the direct return target. Exact arrival clears the marker and records one
-cleaned wall stain in the session statistics. Victory and defeat display that
-counter, while profile aggregation remains limited to completed sessions.
-Cleaning animation is not implemented yet.
+the direct return target. Exact arrival completes the task and records one
+cleaned wall stain in the session statistics, then starts a half-second visual
+effect that shrinks the retained presentation marker to disappearance. Victory
+and defeat display that counter, while profile aggregation remains limited to
+completed sessions.
 
 When interaction validates a ready Guide objective, `game.main` also applies
 the game-owned 500-point completion rule to the shared session score. Later
@@ -568,7 +571,8 @@ Current tests verify:
 - freeing the approach during rounding, side-stepping, or pushing immediately
   restores the stain approach target;
 - the stain marker appears at the exact contact point, remains hidden on maps
-  without its owning wall, and disappears after exact cleaning completion;
+  without its owning wall, shrinks at half-duration, and disappears when its
+  cleaning timer reaches zero;
 - victory, defeat, and profile scenes display the matching session or
   completed-session cleaned-stain counter;
 - wall contact reports the matching surface point and outward normal on all

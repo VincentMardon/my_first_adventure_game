@@ -16,6 +16,8 @@ and this project adheres to
   displayed on the player profile.
 - A game-owned wall-stain marker that appears at the exact contact point,
   remains hidden outside its owning map, and disappears after cleaning.
+- A half-second elapsed-time cleaning animation that shrinks the wall-stain
+  marker after exact Caretaker arrival.
 - A game-owned Caretaker wall-task controller with inert, returning, player
   rounding, side-stepping, and pushing phases, recalculated from live player
   geometry before NPC movement.

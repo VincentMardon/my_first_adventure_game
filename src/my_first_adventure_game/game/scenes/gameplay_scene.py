@@ -49,6 +49,7 @@ SCORE_CENTER = (80, 24)
 SCORE_FONT_PATH = pygame.font.get_default_font()
 SCORE_FONT_SIZE = 24
 WALL_COLOR = (84, 104, 92)
+WALL_STAIN_CLEANING_DURATION = 0.5
 WALL_STAIN_COLOR = (96, 64, 48)
 WALL_STAIN_RADIUS = 6
 
@@ -101,6 +102,7 @@ class GameplayScene(Scene):
         self._on_map_exit_reached = on_map_exit_reached
         self._caretaker_behavior = caretaker_behavior
         self._wall_stain: WallStain | None = None
+        self._wall_stain_cleaning_remaining = 0.0
         self.change_map(game_map)
 
     def handle_event(self, event: pygame.event.Event) -> None:
@@ -123,6 +125,14 @@ class GameplayScene(Scene):
     def set_wall_stain(self, wall_stain: WallStain | None) -> None:
         """Replace the wall stain displayed by the gameplay scene."""
         self._wall_stain = wall_stain
+        self._wall_stain_cleaning_remaining = 0.0
+
+    def start_wall_stain_cleaning(self) -> None:
+        """Start shrinking the current wall stain until it disappears."""
+        if self._wall_stain is None:
+            return
+
+        self._wall_stain_cleaning_remaining = WALL_STAIN_CLEANING_DURATION
 
     def update(self, delta_time: float) -> None:
         if self._input_state.is_pressed(GameAction.PAUSE):
@@ -131,6 +141,15 @@ class GameplayScene(Scene):
 
         if not self._player.entity.active:
             return
+
+        if self._wall_stain_cleaning_remaining > 0.0:
+            self._wall_stain_cleaning_remaining = max(
+                0.0,
+                self._wall_stain_cleaning_remaining - delta_time,
+            )
+
+            if self._wall_stain_cleaning_remaining == 0.0:
+                self._wall_stain = None
 
         if self._input_state.is_pressed(GameAction.INTERACT):
             player_bounds = self._player.entity.bounds
@@ -366,11 +385,23 @@ class GameplayScene(Scene):
             wall.active and wall.entity_id == self._wall_stain.wall_id
             for wall in self._walls
         ):
+            wall_stain_radius = WALL_STAIN_RADIUS
+
+            if self._wall_stain_cleaning_remaining > 0.0:
+                wall_stain_radius = max(
+                    1,
+                    round(
+                        WALL_STAIN_RADIUS
+                        * self._wall_stain_cleaning_remaining
+                        / WALL_STAIN_CLEANING_DURATION
+                    ),
+                )
+
             pygame.draw.circle(
                 surface,
                 WALL_STAIN_COLOR,
                 tuple(round(value) for value in self._wall_stain.contact_position),
-                WALL_STAIN_RADIUS,
+                wall_stain_radius,
             )
 
         for enemy in self._enemies:
