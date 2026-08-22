@@ -60,6 +60,7 @@ class ProfileScene(Scene):
             f"Items collected: {self._player_profile.items_collected}",
             f"Obstacles destroyed: {self._player_profile.obstacles_destroyed}",
             f"Enemies defeated: {self._player_profile.enemies_defeated}",
+            (f"Wall stains cleaned: {self._player_profile.wall_stains_cleaned}"),
         )
 
         draw_text(

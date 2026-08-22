@@ -19,11 +19,12 @@ DEFEAT_FONT_SIZE = 64
 ENEMIES_DEFEATED_CENTER_Y = 450
 ITEMS_COLLECTED_CENTER_Y = 330
 OBSTACLES_DESTROYED_CENTER_Y = 390
-RETURN_CENTER_Y = 550
+RETURN_CENTER_Y = 580
 RETURN_COLOR = (184, 192, 208)
 RETURN_TEXT = "Press Enter to return to title"
 SCORE_COLOR = (240, 240, 240)
 SCORE_CENTER_Y = 250
+WALL_STAINS_CLEANED_CENTER_Y = 510
 
 
 class DefeatScene(Scene):
@@ -92,6 +93,13 @@ class DefeatScene(Scene):
             font,
             SCORE_COLOR,
             center=(center_x, ENEMIES_DEFEATED_CENTER_Y),
+        )
+        draw_text(
+            surface,
+            (f"Wall stains cleaned: {self._session_statistics.wall_stains_cleaned}"),
+            font,
+            SCORE_COLOR,
+            center=(center_x, WALL_STAINS_CLEANED_CENTER_Y),
         )
         draw_text(
             surface,

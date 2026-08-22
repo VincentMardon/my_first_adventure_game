@@ -14,6 +14,7 @@ from my_first_adventure_game.game.entities import (
     CaretakerBehavior,
     Enemy,
     Player,
+    WallStain,
 )
 from my_first_adventure_game.game.events import (
     EnemyDefeated,
@@ -50,6 +51,8 @@ from my_first_adventure_game.game.scenes.gameplay_scene import (
     SCORE_FONT_PATH,
     SCORE_FONT_SIZE,
     WALL_COLOR,
+    WALL_STAIN_COLOR,
+    WALL_STAIN_RADIUS,
     GameplayScene,
 )
 from my_first_adventure_game.game.scoring import SessionScore
@@ -1597,3 +1600,60 @@ def test_change_map_replaces_spatial_content(monkeypatch) -> None:
 
     on_map_exit_reached.assert_called_once_with(destination_map.exits[0])
     surface.fill.assert_called_once_with(destination_map.background_color)
+
+
+def test_draw_renders_current_wall_stain(monkeypatch) -> None:
+    surface = Mock(spec=pygame.Surface)
+    surface.get_width.return_value = 1280
+    wall = Entity(
+        entity_id="wall",
+        position=pygame.Vector2(608.0, 64.0),
+        size=pygame.Vector2(64.0, 32.0),
+    )
+    wall_stain = WallStain(
+        wall_id="wall",
+        contact_position=(640.0, 96.0),
+        surface_normal=(0.0, 1.0),
+    )
+    draw_circle = Mock()
+
+    monkeypatch.setattr(pygame.draw, "rect", Mock())
+    monkeypatch.setattr(pygame.draw, "circle", draw_circle)
+
+    scene = _create_gameplay_scene(walls=(wall,))
+    scene.set_wall_stain(wall_stain)
+
+    scene.draw(surface)
+
+    draw_circle.assert_called_once_with(
+        surface,
+        WALL_STAIN_COLOR,
+        (640, 96),
+        WALL_STAIN_RADIUS,
+    )
+
+
+def test_draw_hides_wall_stain_outside_its_map(monkeypatch) -> None:
+    surface = Mock(spec=pygame.Surface)
+    surface.get_width.return_value = 1280
+    other_wall = Entity(
+        entity_id="other-wall",
+        position=pygame.Vector2(608.0, 64.0),
+        size=pygame.Vector2(64.0, 32.0),
+    )
+    wall_stain = WallStain(
+        wall_id="wall",
+        contact_position=(640.0, 96.0),
+        surface_normal=(0.0, 1.0),
+    )
+    draw_circle = Mock()
+
+    monkeypatch.setattr(pygame.draw, "rect", Mock())
+    monkeypatch.setattr(pygame.draw, "circle", draw_circle)
+
+    scene = _create_gameplay_scene(walls=(other_wall,))
+    scene.set_wall_stain(wall_stain)
+
+    scene.draw(surface)
+
+    draw_circle.assert_not_called()

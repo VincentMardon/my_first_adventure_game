@@ -10,6 +10,12 @@ and this project adheres to
 
 ### Added
 
+- A session-local cleaned-wall-stain counter recorded only after exact
+  Caretaker task completion and displayed on victory and defeat summaries.
+- A persistent cleaned-wall-stain total aggregated from finished sessions and
+  displayed on the player profile.
+- A game-owned wall-stain marker that appears at the exact contact point,
+  remains hidden outside its owning map, and disappears after cleaning.
 - A game-owned Caretaker wall-task controller with inert, returning, player
   rounding, side-stepping, and pushing phases, recalculated from live player
   geometry before NPC movement.
@@ -165,5 +171,7 @@ and this project adheres to
 
 ### Changed
 
+- The player profile schema is now version 2, with version 1 profiles migrated
+  in memory using a zero cleaned-wall-stain total.
 - `GameplayScene` now consumes a complete `GameMap` during construction and map
   changes instead of receiving duplicated spatial-role arguments.

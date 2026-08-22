@@ -328,6 +328,7 @@ def main() -> None:
                 contact_position=event.contact_position,
                 surface_normal=event.surface_normal,
             )
+            gameplay_scene.set_wall_stain(dirty_wall_stain)
             caretaker.movement_target = None
             caretaker.movement_target_id = None
             caretaker.movement_target_entity = game_map.player.entity
@@ -345,6 +346,8 @@ def main() -> None:
                 and event.target_id == dirty_wall_stain.wall_id
             ):
                 caretaker_behavior.complete_task()
+                session_statistics.record_wall_stain_cleaned()
+                gameplay_scene.set_wall_stain(None)
                 dirty_wall_stain = None
                 return
 

@@ -152,11 +152,12 @@ objective awards a fixed 500-point bonus exactly once.
 Tracks concrete factual counters for the current game session independently
 from its score.
 
-`game.main` records collected items, destroyed obstacles, and defeated enemies
-in one session-local `SessionStatistics`. Victory and defeat scenes read that
-same object to display a final activity summary. Starting a new game creates
-fresh counters. On completion, `PlayerProfile` copies their values into its
-persistent cross-session totals rather than reusing the session object.
+`game.main` records collected items, destroyed obstacles, defeated enemies, and
+cleaned wall stains in one session-local `SessionStatistics`. Victory and
+defeat scenes read that same object to display a final activity summary.
+Starting a new game creates fresh counters. On completion, `PlayerProfile`
+copies their values into its persistent cross-session totals rather than
+reusing the session object. Abandoned sessions are not aggregated.
 
 ### Progression
 
@@ -237,8 +238,10 @@ each NPC movement. If the player occupies the approach position, the Caretaker
 retains the nearest side, uses an outer corner only when it must move around the
 player, then aligns against the wall. It pushes the player continuously along
 the wall while moving by the same collision-limited displacement. Once the
-approach position is clear, it targets the stain again. Visible cleaning and
-its statistic are not implemented yet.
+approach position is clear, it targets the stain again. The gameplay scene
+draws a game-owned marker at the exact contact point only while its owning wall
+belongs to the active map. Exact task completion removes that marker and
+records one cleaned stain. Cleaning animation is not implemented yet.
 
 ### Levels
 

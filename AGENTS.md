@@ -337,6 +337,8 @@ Implemented game foundations:
 - a game-owned Caretaker controller that retains one side, uses an outer player
   corner only when necessary, aligns along the wall, and pushes the player with
   elapsed-time collision-limited coupled movement.
+- a map-aware wall-stain marker and session-local cleaned-stain counter whose
+  completed-session total is persisted through profile schema version 2.
 
 Reserved but not implemented:
 

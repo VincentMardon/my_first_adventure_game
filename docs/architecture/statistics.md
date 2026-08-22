@@ -9,7 +9,8 @@ It currently provides `SessionStatistics`, which counts:
 
 - collected items;
 - destroyed obstacles;
-- defeated enemies.
+- defeated enemies;
+- wall stains cleaned by the Caretaker.
 
 It does not calculate score, decide when events occur, persist records, or
 aggregate values across sessions. A completed session is instead supplied to
@@ -26,11 +27,11 @@ aggregation after a session finishes.
 
 ### [`SessionStatistics`](../api/game-statistics.md#my_first_adventure_game.game.statistics.SessionStatistics)
 
-Stores the current session's collected-item, destroyed-obstacle, and
-defeated-enemy counts.
+Stores the current session's collected-item, destroyed-obstacle,
+defeated-enemy, and cleaned-wall-stain counts.
 
 A new instance starts every counter at zero. Its public counters are read-only,
-and the three explicit `record_*()` methods increment one corresponding fact at
+and the four explicit `record_*()` methods increment one corresponding fact at
 a time.
 
 ## Ownership
@@ -50,6 +51,7 @@ flowchart LR
     ItemCollected["ItemCollected"]
     ObstacleDestroyed["ObstacleDestroyed"]
     EnemyDefeated["EnemyDefeated"]
+    NPCTargetReached["NPCTargetReached"]
     GameMain["game.main"]
     SessionStatistics["SessionStatistics"]
     DefeatScene["DefeatScene"]
@@ -59,9 +61,11 @@ flowchart LR
     GameplayScene --> ItemCollected
     GameplayScene --> ObstacleDestroyed
     GameplayScene --> EnemyDefeated
+    GameplayScene --> NPCTargetReached
     ItemCollected --> GameMain
     ObstacleDestroyed --> GameMain
     EnemyDefeated --> GameMain
+    NPCTargetReached --> GameMain
     GameMain -->|"records facts"| SessionStatistics
     SessionStatistics -->|"provides summary"| DefeatScene
     SessionStatistics -->|"provides summary"| VictoryScene
@@ -70,9 +74,10 @@ flowchart LR
 
 `game.main` creates one `SessionStatistics` instance for each new game. Its
 existing event handlers increment the matching counter, then preserve their
-other concrete consequences. The same instance is injected into both result
-scenes so victory and defeat display the facts accumulated before either
-transition.
+other concrete consequences. A Caretaker arrival at the current stain records
+one cleaning only after exact task completion. The same instance is injected
+into both result scenes so victory and defeat display the facts accumulated
+before either transition.
 
 ## Invariants
 
@@ -108,9 +113,10 @@ schemas, aggregation rules, records, and migrations remain in `game`.
 
 Current tests verify:
 
-- all three counters start at zero;
+- all four counters start at zero;
 - each recording method increments its corresponding counter;
 - `game.main` creates fresh statistics for consecutive sessions;
 - item collection, obstacle destruction, and enemy defeat handlers record the
   matching facts;
+- exact Caretaker task completion records one cleaned wall stain;
 - victory and defeat render the accumulated counters.

@@ -20,6 +20,7 @@ def test_player_profile_starts_empty() -> None:
     assert profile.items_collected == 0
     assert profile.obstacles_destroyed == 0
     assert profile.enemies_defeated == 0
+    assert profile.wall_stains_cleaned == 0
 
 
 def test_record_game_started_increments_count() -> None:
@@ -37,6 +38,8 @@ def test_record_defeat_accumulates_finished_session() -> None:
     statistics.record_item_collected()
     statistics.record_obstacle_destroyed()
     statistics.record_enemy_defeated()
+    statistics.record_wall_stain_cleaned()
+    statistics.record_wall_stain_cleaned()
 
     profile.record_game_finished(
         score=300,
@@ -51,6 +54,7 @@ def test_record_defeat_accumulates_finished_session() -> None:
     assert profile.items_collected == 2
     assert profile.obstacles_destroyed == 1
     assert profile.enemies_defeated == 1
+    assert profile.wall_stains_cleaned == 2
 
 
 def test_record_victory_preserves_highest_score_across_sessions() -> None:
@@ -81,6 +85,8 @@ def test_record_victory_preserves_highest_score_across_sessions() -> None:
 
 
 def test_profile_to_data_includes_version_and_statistics() -> None:
+    assert PROFILE_VERSION == 2
+
     profile = PlayerProfile(
         games_started=4,
         games_finished=3,
@@ -90,6 +96,7 @@ def test_profile_to_data_includes_version_and_statistics() -> None:
         items_collected=8,
         obstacles_destroyed=3,
         enemies_defeated=5,
+        wall_stains_cleaned=6,
     )
 
     data = profile_to_data(profile)
@@ -104,6 +111,7 @@ def test_profile_to_data_includes_version_and_statistics() -> None:
         "items_collected": 8,
         "obstacles_destroyed": 3,
         "enemies_defeated": 5,
+        "wall_stains_cleaned": 6,
     }
 
 
@@ -118,6 +126,7 @@ def test_profile_from_data_restores_profile() -> None:
         "items_collected": 8,
         "obstacles_destroyed": 3,
         "enemies_defeated": 5,
+        "wall_stains_cleaned": 6,
     }
 
     profile = profile_from_data(data)
@@ -131,6 +140,7 @@ def test_profile_from_data_restores_profile() -> None:
         items_collected=8,
         obstacles_destroyed=3,
         enemies_defeated=5,
+        wall_stains_cleaned=6,
     )
 
 
@@ -190,3 +200,31 @@ def test_profile_from_data_returns_empty_profile_for_inconsistent_counts(
     profile = profile_from_data(data)
 
     assert profile == PlayerProfile()
+
+
+def test_profile_from_data_migrates_version_one_profile() -> None:
+    data = {
+        "version": 1,
+        "games_started": 4,
+        "games_finished": 3,
+        "victories": 2,
+        "best_score": 1400,
+        "total_score": 2900,
+        "items_collected": 8,
+        "obstacles_destroyed": 3,
+        "enemies_defeated": 5,
+    }
+
+    profile = profile_from_data(data)
+
+    assert profile == PlayerProfile(
+        games_started=4,
+        games_finished=3,
+        victories=2,
+        best_score=1400,
+        total_score=2900,
+        items_collected=8,
+        obstacles_destroyed=3,
+        enemies_defeated=5,
+        wall_stains_cleaned=0,
+    )

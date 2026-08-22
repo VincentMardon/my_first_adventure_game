@@ -92,6 +92,7 @@ def test_profile_scene_draws_persisted_statistics(monkeypatch) -> None:
         items_collected=12,
         obstacles_destroyed=4,
         enemies_defeated=5,
+        wall_stains_cleaned=9,
     )
     input_state = Mock(spec=InputState)
     return_to_title = Mock()
@@ -124,6 +125,7 @@ def test_profile_scene_draws_persisted_statistics(monkeypatch) -> None:
         "Items collected: 12",
         "Obstacles destroyed: 4",
         "Enemies defeated: 5",
+        "Wall stains cleaned: 9",
     )
 
     assert draw_text.call_args_list == [

@@ -159,8 +159,8 @@ The project now provides a minimal playable top-down loop:
    objective to be completed, in either order.
 30. the demo map and clearing use distinct game-owned background colors that
    change with their spatial content.
-31. victory and defeat display collected-item, destroyed-obstacle, and
-   defeated-enemy totals from the current session.
+31. victory and defeat display collected-item, destroyed-obstacle,
+   defeated-enemy, and cleaned-wall-stain totals from the current session.
 32. session starts and completed results are saved to a persistent player
    profile in the platform-specific application data directory.
 33. pressing P on the title opens the accumulated profile statistics, and
@@ -178,6 +178,10 @@ The project now provides a minimal playable top-down loop:
    moves around the player only when necessary, and aligns against the wall.
 39. the Caretaker then pushes the player continuously along the wall, moves
    with the applied displacement, and returns to the stain when access is free.
+40. a visible wall-stain marker persists across map changes, appears only beside
+   its owning wall, and disappears after the Caretaker reaches it.
+41. completed cleanings appear in session summaries and are aggregated into the
+   persistent profile only when the session ends in victory or defeat.
 
 Implemented foundations include:
 
@@ -240,6 +244,8 @@ Implemented foundations include:
 - a game-owned Caretaker controller that retains a chosen player side, uses an
   outer corner only when necessary, aligns against the wall, and continuously
   pushes the player with collision-limited coupled movement;
+- a map-aware wall-stain marker and factual cleaned-stain statistics for the
+  current session and completed-session profile totals;
 - a game-owned dialogue panel with a distinct background, border, and balanced
   spacing around the speaker, current line, and continuation instruction;
 - word-boundary wrapping based on the selected font's measured width, with a

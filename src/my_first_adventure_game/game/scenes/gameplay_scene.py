@@ -11,6 +11,7 @@ from my_first_adventure_game.engine.world import Entity, move_entity
 from my_first_adventure_game.game.entities import (
     NPC,
     CaretakerBehavior,
+    WallStain,
     move_npc_towards,
 )
 from my_first_adventure_game.game.events import (
@@ -48,6 +49,8 @@ SCORE_CENTER = (80, 24)
 SCORE_FONT_PATH = pygame.font.get_default_font()
 SCORE_FONT_SIZE = 24
 WALL_COLOR = (84, 104, 92)
+WALL_STAIN_COLOR = (96, 64, 48)
+WALL_STAIN_RADIUS = 6
 
 
 class GameplayScene(Scene):
@@ -97,6 +100,7 @@ class GameplayScene(Scene):
         self._guide_objective = guide_objective
         self._on_map_exit_reached = on_map_exit_reached
         self._caretaker_behavior = caretaker_behavior
+        self._wall_stain: WallStain | None = None
         self.change_map(game_map)
 
     def handle_event(self, event: pygame.event.Event) -> None:
@@ -115,6 +119,10 @@ class GameplayScene(Scene):
         self._enemy_hit_time_remaining = {
             enemy.entity.entity_id: 0.0 for enemy in game_map.enemies
         }
+
+    def set_wall_stain(self, wall_stain: WallStain | None) -> None:
+        """Replace the wall stain displayed by the gameplay scene."""
+        self._wall_stain = wall_stain
 
     def update(self, delta_time: float) -> None:
         if self._input_state.is_pressed(GameAction.PAUSE):
@@ -353,6 +361,17 @@ class GameplayScene(Scene):
                     WALL_COLOR,
                     _entity_rect(wall),
                 )
+
+        if self._wall_stain is not None and any(
+            wall.active and wall.entity_id == self._wall_stain.wall_id
+            for wall in self._walls
+        ):
+            pygame.draw.circle(
+                surface,
+                WALL_STAIN_COLOR,
+                tuple(round(value) for value in self._wall_stain.contact_position),
+                WALL_STAIN_RADIUS,
+            )
 
         for enemy in self._enemies:
             if enemy.entity.active:

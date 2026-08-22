@@ -16,6 +16,7 @@ class PlayerProfile:
         items_collected: Items collected across finished sessions.
         obstacles_destroyed: Obstacles destroyed across finished sessions.
         enemies_defeated: Enemies defeated across finished sessions.
+        wall_stains_cleaned: Wall stains cleaned across finished sessions.
     """
 
     games_started: int = 0
@@ -26,6 +27,7 @@ class PlayerProfile:
     items_collected: int = 0
     obstacles_destroyed: int = 0
     enemies_defeated: int = 0
+    wall_stains_cleaned: int = 0
 
     def record_game_started(self) -> None:
         """Record the start of one game session."""
@@ -49,3 +51,4 @@ class PlayerProfile:
         self.items_collected += statistics.items_collected
         self.obstacles_destroyed += statistics.obstacles_destroyed
         self.enemies_defeated += statistics.enemies_defeated
+        self.wall_stains_cleaned += statistics.wall_stains_cleaned

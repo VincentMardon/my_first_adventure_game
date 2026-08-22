@@ -1,6 +1,7 @@
 from my_first_adventure_game.game.profile.player_profile import PlayerProfile
 
-PROFILE_VERSION = 1
+_LEGACY_PROFILE_VERSION = 1
+PROFILE_VERSION = 2
 
 
 def _read_counter(data: dict[object, object], name: str) -> int:
@@ -24,6 +25,7 @@ def profile_to_data(profile: PlayerProfile) -> dict[str, int]:
         "items_collected": profile.items_collected,
         "obstacles_destroyed": profile.obstacles_destroyed,
         "enemies_defeated": profile.enemies_defeated,
+        "wall_stains_cleaned": profile.wall_stains_cleaned,
     }
 
 
@@ -32,7 +34,7 @@ def profile_from_data(data: object) -> PlayerProfile:
     if not isinstance(data, dict):
         return PlayerProfile()
 
-    if data.get("version") != PROFILE_VERSION:
+    if data.get("version") not in (_LEGACY_PROFILE_VERSION, PROFILE_VERSION):
         return PlayerProfile()
 
     try:
@@ -44,6 +46,16 @@ def profile_from_data(data: object) -> PlayerProfile:
         items_collected = _read_counter(data, "items_collected")
         obstacles_destroyed = _read_counter(data, "obstacles_destroyed")
         enemies_defeated = _read_counter(data, "enemies_defeated")
+
+        version = data.get("version")
+
+        if version == _LEGACY_PROFILE_VERSION:
+            wall_stains_cleaned = 0
+        else:
+            wall_stains_cleaned = _read_counter(
+                data,
+                "wall_stains_cleaned",
+            )
     except ValueError:
         return PlayerProfile()
 
@@ -65,4 +77,5 @@ def profile_from_data(data: object) -> PlayerProfile:
         items_collected=items_collected,
         obstacles_destroyed=obstacles_destroyed,
         enemies_defeated=enemies_defeated,
+        wall_stains_cleaned=wall_stains_cleaned,
     )

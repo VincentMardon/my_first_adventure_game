@@ -21,6 +21,7 @@ from my_first_adventure_game.game.scenes.victory_scene import (
     VICTORY_FONT_PATH,
     VICTORY_FONT_SIZE,
     VICTORY_TEXT,
+    WALL_STAINS_CLEANED_CENTER_Y,
     VictoryScene,
 )
 from my_first_adventure_game.game.scoring import SessionScore
@@ -57,6 +58,7 @@ def test_victory_scene_draws_session_summary(monkeypatch) -> None:
     session_statistics.items_collected = 3
     session_statistics.obstacles_destroyed = 1
     session_statistics.enemies_defeated = 2
+    session_statistics.wall_stains_cleaned = 4
     session_score.value = 500
     input_state = Mock(spec=InputState)
     return_to_title = Mock()
@@ -115,6 +117,13 @@ def test_victory_scene_draws_session_summary(monkeypatch) -> None:
             font,
             SCORE_COLOR,
             center=(640, ENEMIES_DEFEATED_CENTER_Y),
+        ),
+        call(
+            surface,
+            "Wall stains cleaned: 4",
+            font,
+            SCORE_COLOR,
+            center=(640, WALL_STAINS_CLEANED_CENTER_Y),
         ),
         call(
             surface,

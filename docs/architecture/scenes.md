@@ -228,7 +228,8 @@ It also provides
 - receives the shared font cache, loaded player profile, action input state,
   and an explicit return callback;
 - displays games started, games finished, victories, best score, cumulative
-  score, collected items, destroyed obstacles, and defeated enemies;
+  score, collected items, destroyed obstacles, defeated enemies, and cleaned
+  wall stains;
 - reads the existing mutable profile without loading, saving, or changing it;
 - requests a return to the title when `CONFIRM` is pressed;
 - ignores raw events.
@@ -305,6 +306,8 @@ It also provides
 - draws active walls, enemies, NPCs, collectibles, and map exits as game-owned
   rectangles, blits the current player animation frame, and draws the current
   session score, player health, and Guide objective status;
+- draws the current game-owned wall-stain marker only when its active owning
+  wall belongs to the current map;
 - rounds floating-point geometry only at rendering time.
 
 `DefeatScene`:
@@ -312,7 +315,8 @@ It also provides
 - receives the shared font cache, session score, session statistics, action
   input state, and an explicit return callback;
 - draws a game-owned defeat message, final score, collected-item,
-  destroyed-obstacle, and defeated-enemy counts, and a return instruction;
+  destroyed-obstacle, defeated-enemy, and cleaned-wall-stain counts, and a
+  return instruction;
 - requests a return to the title when `CONFIRM` is pressed;
 - ignores raw events.
 
@@ -347,7 +351,8 @@ It also provides
 
 - receives the same collaborators as `DefeatScene`;
 - draws a game-owned victory message, final score, collected-item,
-  destroyed-obstacle, and defeated-enemy counts, and a return instruction;
+  destroyed-obstacle, defeated-enemy, and cleaned-wall-stain counts, and a
+  return instruction;
 - requests a return to the title when `CONFIRM` is pressed;
 - ignores raw events.
 
@@ -394,8 +399,10 @@ pathfinding. Reaching that corner selects the named side-step target. Reaching
 the side starts a continuous push along the wall: the gameplay scene supplies
 active wall bounds each frame, and the Caretaker follows the player's actual
 collision-limited displacement. Freeing the stain approach position restores
-the direct return target. Visible cleaning and its statistic are not
-implemented yet.
+the direct return target. Exact arrival clears the marker and records one
+cleaned wall stain in the session statistics. Victory and defeat display that
+counter, while profile aggregation remains limited to completed sessions.
+Cleaning animation is not implemented yet.
 
 When interaction validates a ready Guide objective, `game.main` also applies
 the game-owned 500-point completion rule to the shared session score. Later
@@ -560,6 +567,10 @@ Current tests verify:
   Caretaker by the same wall-limited displacement;
 - freeing the approach during rounding, side-stepping, or pushing immediately
   restores the stain approach target;
+- the stain marker appears at the exact contact point, remains hidden on maps
+  without its owning wall, and disappears after exact cleaning completion;
+- victory, defeat, and profile scenes display the matching session or
+  completed-session cleaned-stain counter;
 - wall contact reports the matching surface point and outward normal on all
   four axis-aligned wall faces;
 - later Guide interactions pass a reminder while the objective remains active,

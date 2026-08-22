@@ -10,8 +10,8 @@ It records:
 - games started and finished;
 - victories;
 - best and cumulative scores;
-- collected items, destroyed obstacles, and defeated enemies from finished
-  sessions.
+- collected items, destroyed obstacles, defeated enemies, and cleaned wall
+  stains from finished sessions.
 
 ## Why this domain exists
 
@@ -26,7 +26,7 @@ the session-local objects or introducing profile concepts into the engine.
 Stores mutable nonnegative counters across sessions. Starting a game increments
 only `games_started`. Finishing one increments the completion counters,
 optionally records a victory, updates the best score, and aggregates the final
-score and activity statistics.
+score and activity statistics. Abandoned sessions are not aggregated.
 
 ### [`profile_to_data`](../api/game-profile.md#my_first_adventure_game.game.profile.profile_to_data)
 
@@ -36,6 +36,9 @@ Converts a profile to the current versioned, JSON-compatible representation.
 
 Builds a profile from supported and internally consistent data. Unsupported,
 missing, negative, Boolean, or inconsistent counters produce an empty profile.
+
+The current schema version is 2. Version 1 data is migrated in memory with a
+zero cleaned-wall-stain total; unknown versions remain unsupported.
 
 ### [`get_profile_path`](../api/game-profile.md#my_first_adventure_game.game.profile.get_profile_path)
 
@@ -89,6 +92,8 @@ changing them.
 - Victories cannot exceed finished games.
 - Best score cannot exceed cumulative score.
 - Only finished sessions contribute score and activity totals.
+- Cleanings from an abandoned session remain session-local and are not added to
+  the profile.
 - One session is recorded as finished at most once.
 - Unsupported or invalid persisted data falls back to an empty profile.
 - A write failure does not terminate the game.
@@ -116,9 +121,10 @@ consumes them.
 ## Verification
 
 Current tests verify defaults, session-start and completion aggregation,
-victories, best and cumulative scores, serialization, strict validation,
-fallback loading, platform-specific path construction, atomic-save delegation,
-write-error propagation, single application startup loading, per-session saves,
+victories, best and cumulative scores, cleaned-stain totals, version 1
+migration, version 2 serialization, strict validation, fallback loading,
+platform-specific path construction, atomic-save delegation, write-error
+propagation, single application startup loading, per-session saves,
 duplicate-completion protection, and nonfatal save logging.
 Scene tests also verify that every persisted counter is displayed and that
 confirmation explicitly returns to the title.
